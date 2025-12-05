@@ -1,0 +1,304 @@
+# ValidaRFC.mx
+
+Sistema de validación de RFC construido con Next.js 14, TypeScript, Tailwind CSS y Supabase.
+
+## 🚀 Inicio Rápido
+
+### Prerrequisitos
+
+- Node.js 18+ y npm
+- Cuenta en [Supabase](https://supabase.com)
+- Cuenta en [Stripe](https://stripe.com) (para pagos)
+- Cuenta en [Vercel](https://vercel.com) (para deploy)
+
+### 1. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 2. Configurar variables de entorno
+
+Copia el archivo `env.template` a `.env.local` y completa las variables:
+
+```bash
+cp env.template .env.local
+```
+
+Luego edita `.env.local` con tus credenciales:
+
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=tu_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
+
+# Stripe
+STRIPE_SECRET_KEY=tu_stripe_secret_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=tu_stripe_publishable_key
+STRIPE_WEBHOOK_SECRET=tu_webhook_secret
+STRIPE_PRICE_ID_PRO=tu_price_id_pro
+STRIPE_PRICE_ID_ENTERPRISE=tu_price_id_enterprise
+
+# App
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+**Nota**: Consulta `SUPABASE_SETUP.md` y `STRIPE_SETUP.md` para instrucciones detalladas.
+
+### 3. Configurar Supabase
+
+1. Crea una cuenta en [supabase.com](https://supabase.com)
+2. Crea un nuevo proyecto llamado `validarfcmx`
+3. Ve a SQL Editor en el dashboard de Supabase
+4. Ejecuta los archivos de migración en orden:
+   - `supabase/migrations/001_initial_schema.sql`
+   - `supabase/migrations/002_api_keys.sql`
+
+### 4. Ejecutar localmente
+
+#### Desarrollo
+
+```bash
+npm run dev
+```
+
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
+
+#### Producción local
+
+```bash
+npm run build
+npm start
+```
+
+## 📦 Comandos Útiles
+
+```bash
+# Desarrollo
+npm run dev          # Inicia servidor de desarrollo
+
+# Producción
+npm run build        # Construye la aplicación para producción
+npm start            # Inicia servidor de producción local
+
+# Linting
+npm run lint         # Ejecuta ESLint
+```
+
+## 🌐 Deploy en Vercel
+
+### Opción 1: Deploy desde GitHub
+
+1. Haz push de tu código a un repositorio de GitHub
+2. Ve a [vercel.com](https://vercel.com) e inicia sesión
+3. Click en "New Project"
+4. Importa tu repositorio de GitHub
+5. Vercel detectará automáticamente Next.js y configurará el proyecto
+
+### Opción 2: Deploy con Vercel CLI
+
+```bash
+# Instalar Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Deploy
+vercel
+```
+
+### Configurar Variables de Entorno en Vercel
+
+1. Ve a tu proyecto en Vercel Dashboard
+2. Settings → Environment Variables
+3. Agrega todas las variables de `.env.local`:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `STRIPE_SECRET_KEY`
+   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+   - `STRIPE_WEBHOOK_SECRET`
+   - `STRIPE_PRICE_ID_PRO`
+   - `STRIPE_PRICE_ID_ENTERPRISE`
+   - `NEXT_PUBLIC_SITE_URL` (tu dominio de Vercel)
+
+### Configurar Webhook de Stripe
+
+1. En Stripe Dashboard → Webhooks
+2. Agrega endpoint: `https://tu-dominio.vercel.app/api/stripe/webhook`
+3. Selecciona eventos: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+4. Copia el signing secret y agrégalo a Vercel como `STRIPE_WEBHOOK_SECRET`
+
+## 📁 Estructura del Proyecto
+
+```
+validarFC.MX/
+├── app/                          # App Router de Next.js
+│   ├── api/                      # API Routes
+│   │   ├── api-keys/            # Gestión de API Keys
+│   │   ├── public/              # API pública
+│   │   ├── stripe/              # Integración Stripe
+│   │   └── validate/            # Validación interna
+│   ├── auth/                    # Páginas de autenticación
+│   │   ├── login/
+│   │   ├── register/
+│   │   ├── forgot-password/
+│   │   └── callback/
+│   ├── dashboard/               # Dashboard de usuario
+│   │   ├── billing/
+│   │   ├── cuenta/
+│   │   ├── historial/
+│   │   └── api-keys/
+│   ├── developers/              # Documentación API
+│   ├── pricing/                 # Página de precios
+│   ├── layout.tsx               # Layout principal
+│   ├── page.tsx                 # Landing page
+│   └── globals.css              # Estilos globales
+├── components/                   # Componentes React
+│   └── dashboard/               # Componentes del dashboard
+├── lib/                          # Utilidades y helpers
+│   ├── supabase/                # Clientes de Supabase
+│   │   ├── client.ts
+│   │   └── server.ts
+│   ├── api-keys.ts              # Utilidades para API Keys
+│   ├── stripe.ts                # Cliente de Stripe
+│   └── utils.ts                 # Funciones helper
+├── types/                        # Tipos TypeScript
+│   ├── database.ts              # Tipos de Supabase
+│   └── index.ts                 # Tipos generales
+├── supabase/
+│   └── migrations/              # Migraciones SQL
+│       ├── 001_initial_schema.sql
+│       └── 002_api_keys.sql
+├── middleware.ts                # Middleware para rutas protegidas
+├── next.config.js               # Configuración de Next.js
+├── vercel.json                  # Configuración de Vercel
+├── package.json                 # Dependencias y scripts
+├── tsconfig.json                # Configuración TypeScript
+├── tailwind.config.ts           # Configuración Tailwind
+├── postcss.config.mjs           # Configuración PostCSS
+├── env.template                 # Template de variables de entorno
+└── README.md                    # Este archivo
+```
+
+## 🗄️ Base de Datos
+
+### Tablas
+
+- **users**: Información de usuarios y suscripciones
+- **validations**: Historial de validaciones de RFC
+- **subscriptions**: Suscripciones de Stripe
+- **api_keys**: API Keys para acceso a la API pública
+- **api_usage_logs**: Logs de uso de la API
+
+### Row Level Security (RLS)
+
+Todas las tablas tienen RLS habilitado con políticas que permiten:
+- Los usuarios solo pueden leer/escribir sus propios datos
+- Las validaciones solo son visibles para el usuario que las creó
+- Las API Keys solo son accesibles por su propietario
+
+## 🛠️ Tecnologías
+
+- **Next.js 14**: Framework React con App Router
+- **TypeScript**: Tipado estático estricto
+- **Tailwind CSS**: Estilos utility-first
+- **Supabase**: Backend como servicio (BaaS)
+- **Stripe**: Procesamiento de pagos
+- **Vercel**: Hosting y deployment
+
+## 📚 Documentación Adicional
+
+- `SUPABASE_SETUP.md`: Guía detallada para configurar Supabase
+- `STRIPE_SETUP.md`: Guía para configurar Stripe
+- `env.template`: Template de variables de entorno
+- `supabase/migrations/`: Migraciones SQL de la base de datos
+
+## ⚙️ Variables de Entorno
+
+### Requeridas
+
+| Variable | Descripción | Dónde obtener |
+|----------|-------------|---------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase | Supabase Dashboard → Settings → API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key de Supabase | Supabase Dashboard → Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (server-side) | Supabase Dashboard → Settings → API |
+| `STRIPE_SECRET_KEY` | Secret key de Stripe | Stripe Dashboard → Developers → API keys |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Publishable key de Stripe | Stripe Dashboard → Developers → API keys |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret | Stripe Dashboard → Webhooks |
+| `STRIPE_PRICE_ID_PRO` | Price ID del plan Pro | Stripe Dashboard → Products |
+| `STRIPE_PRICE_ID_ENTERPRISE` | Price ID del plan Enterprise | Stripe Dashboard → Products |
+| `NEXT_PUBLIC_SITE_URL` | URL del sitio (producción) | Tu dominio de Vercel |
+
+### Opcionales
+
+- `NODE_ENV`: Entorno (development/production)
+
+## 🔧 Configuración de Supabase para Producción
+
+### 1. Habilitar Servicios
+
+- ✅ Authentication (Email)
+- ✅ Database (PostgreSQL)
+- ✅ Storage (si necesitas archivos)
+- ✅ Edge Functions (si planeas usarlas)
+
+### 2. Configurar Email Templates
+
+1. Ve a **Authentication** → **Email Templates**
+2. Personaliza los templates:
+   - Confirm signup
+   - Magic Link
+   - Change Email Address
+   - Reset Password
+
+### 3. Setup Backups Automáticos
+
+1. Ve a **Settings** → **Database**
+2. Habilita **Point-in-time Recovery (PITR)**
+3. Configura backups diarios automáticos
+
+### 4. Configurar URLs de Redirección
+
+1. Ve a **Authentication** → **URL Configuration**
+2. Agrega tus URLs:
+   - Site URL: `https://tu-dominio.vercel.app`
+   - Redirect URLs: 
+     - `https://tu-dominio.vercel.app/auth/callback`
+     - `https://tu-dominio.vercel.app/**`
+
+## 🚨 Troubleshooting
+
+### Error: "Module not found"
+
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Error: "Environment variables not found"
+
+- Verifica que `.env.local` existe y tiene todas las variables
+- En Vercel, verifica que las variables estén configuradas en Settings → Environment Variables
+
+### Error: "Supabase connection failed"
+
+- Verifica que las URLs y keys sean correctas
+- Asegúrate de que el proyecto de Supabase esté activo
+- Verifica que las políticas RLS estén configuradas correctamente
+
+### Error: "Stripe webhook verification failed"
+
+- Verifica que `STRIPE_WEBHOOK_SECRET` sea correcto
+- Asegúrate de que la URL del webhook en Stripe coincida con tu dominio de Vercel
+
+## 📝 Licencia
+
+Este proyecto es privado y propietario.
+
+## 🤝 Soporte
+
+Para soporte, contacta: hola@validarfcmx.mx
+
