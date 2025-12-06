@@ -17,7 +17,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadData = async () => {
       console.log("🔵 Dashboard: Cargando datos...");
-      const supabase = createClient();
+      const supabase = createClient() as any;
       
       // Obtener sesión
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -45,12 +45,14 @@ export default function DashboardPage() {
         // Crear usuario si no existe
         const { data: newUser } = await supabase
           .from("users")
-          .insert({
-            id: session.user.id,
-            email: session.user.email || "",
-            subscription_status: "free",
-            rfc_queries_this_month: 0,
-          })
+          .insert([
+            {
+              id: session.user.id,
+              email: session.user.email || "",
+              subscription_status: "free",
+              rfc_queries_this_month: 0,
+            },
+          ])
           .select()
           .single();
         
