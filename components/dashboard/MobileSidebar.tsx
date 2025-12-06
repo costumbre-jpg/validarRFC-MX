@@ -5,14 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { User } from "@supabase/supabase-js";
 
 interface MobileSidebarProps {
-  user: User;
   userData: any;
 }
 
-export default function MobileSidebar({ user, userData }: MobileSidebarProps) {
+export default function MobileSidebar({ userData }: MobileSidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
