@@ -19,7 +19,7 @@ export default function DashboardLayout({
   useEffect(() => {
     const checkAuth = async () => {
       console.log("🔵 Layout: Verificando auth...");
-      const supabase = createClient();
+      const supabase = createClient() as any;
       
       // Verificar sesión
       const { data: { session }, error } = await supabase.auth.getSession();
