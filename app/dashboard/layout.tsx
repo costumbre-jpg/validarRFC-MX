@@ -90,7 +90,7 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Sidebar user={user} userData={userData} />
+      <Sidebar userData={userData} />
       <MobileSidebar userData={userData} />
       <div className="lg:pl-64">
         <main className="py-6">
