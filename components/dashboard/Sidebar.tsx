@@ -4,14 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
-import { User } from "@supabase/supabase-js";
 
 interface SidebarProps {
-  user: User;
   userData: any;
 }
 
-export default function Sidebar({ user, userData }: SidebarProps) {
+export default function Sidebar({ userData }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
