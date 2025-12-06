@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { User } from "@supabase/supabase-js";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getSubscriptionPlanName } from "@/lib/utils";
 
 export default function BillingPage() {
-  const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -27,8 +25,6 @@ export default function BillingPage() {
         router.push("/auth/login");
         return;
       }
-
-      setUser(currentUser);
 
       // Obtener datos del usuario
       const { data: userData } = await supabase
