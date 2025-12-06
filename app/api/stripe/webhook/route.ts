@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        const subscription = await stripe.subscriptions.retrieve(
+        const subscription = (await stripe.subscriptions.retrieve(
           subscriptionId as string
-        );
+        )) as any;
 
         // Actualizar subscription_status en users
         await supabase
