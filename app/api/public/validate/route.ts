@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
     const apiKeyHash = hashApiKey(apiKey);
     const { data: apiKeyData, error: keyError } = await supabase
       .from("api_keys")
-      .select("id, user_id, balance, is_active, expires_at")
+      .select("id, user_id, balance, is_active, expires_at, total_used")
       .eq("key_hash", apiKeyHash)
       .single();
 
