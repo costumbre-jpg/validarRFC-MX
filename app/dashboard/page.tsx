@@ -114,7 +114,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Validador Principal */}
         <div className="lg:col-span-2">
-          <RFCValidator user={user} userData={userData} />
+          <RFCValidator userData={userData} />
         </div>
 
         {/* Estadísticas */}
