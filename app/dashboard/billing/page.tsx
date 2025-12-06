@@ -53,7 +53,6 @@ export default function BillingPage() {
 
     // Verificar parámetros de URL para mensajes
     const success = searchParams.get("success");
-    const canceled = searchParams.get("canceled");
 
     if (success) {
       // Recargar datos después de éxito
