@@ -265,8 +265,8 @@ export default function BillingPage() {
             Historial de Pagos
           </h2>
           <p className="text-sm text-gray-600">
-            Para ver tu historial completo de pagos, usa el botón "Gestionar
-            Suscripción" arriba para acceder al portal de Stripe.
+            Para ver tu historial completo de pagos, usa el botón &quot;Gestionar
+            Suscripción&quot; arriba para acceder al portal de Stripe.
           </p>
         </div>
       )}

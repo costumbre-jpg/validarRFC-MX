@@ -117,7 +117,7 @@ export default function TerminosPage() {
                 8. Limitación de Responsabilidad
               </h2>
               <p>
-                ValidaRFC.mx proporciona el servicio "tal cual" sin garantías expresas o implícitas. No garantizamos que el servicio sea ininterrumpido, seguro o libre de errores. No seremos responsables por daños indirectos, incidentales o consecuentes.
+                ValidaRFC.mx proporciona el servicio &quot;tal cual&quot; sin garantías expresas o implícitas. No garantizamos que el servicio sea ininterrumpido, seguro o libre de errores. No seremos responsables por daños indirectos, incidentales o consecuentes.
               </p>
             </section>
 

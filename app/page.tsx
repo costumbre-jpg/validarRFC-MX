@@ -282,7 +282,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-700 text-lg mb-6 italic">
-                "Como contador, valido 50+ RFCs al mes. ValidaRFC me ahorra horas."
+                &quot;Como contador, valido 50+ RFCs al mes. ValidaRFC me ahorra horas.&quot;
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-[#10B981] rounded-full flex items-center justify-center text-white font-semibold mr-4">
@@ -306,7 +306,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-700 text-lg mb-6 italic">
-                "Implementamos en nuestra fintech para validar clientes automáticamente."
+                &quot;Implementamos en nuestra fintech para validar clientes automáticamente.&quot;
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-[#10B981] rounded-full flex items-center justify-center text-white font-semibold mr-4">
