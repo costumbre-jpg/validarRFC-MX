@@ -5,11 +5,10 @@ import { User } from "@supabase/supabase-js";
 import { formatRFC, isValidRFCFormat } from "@/lib/utils";
 
 interface RFCValidatorProps {
-  user: User;
   userData: any;
 }
 
-export default function RFCValidator({ user, userData }: RFCValidatorProps) {
+export default function RFCValidator({ userData }: RFCValidatorProps) {
   const [rfc, setRfc] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
