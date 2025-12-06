@@ -80,7 +80,9 @@ export default function DashboardPage() {
         .eq("user_id", session.user.id);
 
       const total = allValidations?.length || 0;
-      const valid = allValidations?.filter((v) => v.is_valid).length || 0;
+      const valid =
+        allValidations?.filter((v: { is_valid: boolean }) => v.is_valid)
+          .length || 0;
       setStats({ total, valid, invalid: total - valid });
 
       setLoading(false);
