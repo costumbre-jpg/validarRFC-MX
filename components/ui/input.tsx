@@ -44,8 +44,8 @@ export default function Input({
             error
               ? "border-red-300 focus:border-red-500 focus:ring-red-500"
               : "border-gray-300 focus:border-[#10B981] focus:ring-[#10B981]",
-            leftIcon && "pl-10",
-            rightIcon && "pr-10",
+            leftIcon ? "pl-10" : undefined,
+            rightIcon ? "pr-10" : undefined,
             className
           )}
           {...props}

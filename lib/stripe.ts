@@ -1,6 +1,19 @@
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-});
+let stripeClient: Stripe | null = null;
+
+export function getStripe() {
+  if (stripeClient) return stripeClient;
+
+  const apiKey = process.env.STRIPE_SECRET_KEY;
+  if (!apiKey) {
+    throw new Error("STRIPE_SECRET_KEY no está configurada");
+  }
+
+  stripeClient = new Stripe(apiKey, {
+    apiVersion: "2025-11-17.clover",
+  });
+
+  return stripeClient;
+}
 

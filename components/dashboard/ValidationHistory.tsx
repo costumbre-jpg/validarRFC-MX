@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { formatDate, formatRFCForDisplay } from "@/lib/utils";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 
 interface Validation {
   id: string;
