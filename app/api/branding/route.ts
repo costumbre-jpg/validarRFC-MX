@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPlan, type PlanId } from "@/lib/plans";
 
 // GET: obtener settings de white label
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const supabase = await createClient();
     const {
