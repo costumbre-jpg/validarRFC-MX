@@ -6,9 +6,32 @@ import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Validación de email en tiempo real
+  const validateEmail = (emailValue: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailValue && !emailRegex.test(emailValue)) {
+      setEmailError("Por favor ingresa un email válido");
+      return false;
+    } else {
+      setEmailError(null);
+      return true;
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (value) {
+      validateEmail(value);
+    } else {
+      setEmailError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,12 +66,7 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <Link href="/" className="flex justify-center">
-            <span className="text-3xl font-bold text-[#10B981]">
-              ValidaRFC.mx
-            </span>
-          </Link>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Recuperar contraseña
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
@@ -117,17 +135,23 @@ export default function ForgotPasswordPage() {
                 autoComplete="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-[#10B981] focus:border-[#10B981] focus:z-10 sm:text-sm"
+                onChange={handleEmailChange}
+                onBlur={() => validateEmail(email)}
+                className={`appearance-none relative block w-full px-3 py-3 border ${
+                  emailError ? "border-red-300" : "border-gray-300"
+                } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-0 focus:border-gray-300 focus:z-10 sm:text-sm`}
                 placeholder="Email"
               />
+              {emailError && (
+                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+              )}
             </div>
 
             <div>
               <button
                 type="submit"
                 disabled={loading}
-                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#10B981] hover:bg-[#059669] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10B981] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#2F7E7A] hover:bg-[#1F5D59] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2F7E7A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg hover:shadow-xl"
               >
                 {loading ? "Enviando..." : "Enviar link de recuperación"}
               </button>
@@ -136,7 +160,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center">
               <Link
                 href="/auth/login"
-                className="font-medium text-[#10B981] hover:text-[#059669]"
+                className="font-medium text-[#2F7E7A] hover:text-[#1F5D59]"
               >
                 Volver a iniciar sesión
               </Link>

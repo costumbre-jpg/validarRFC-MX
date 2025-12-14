@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     const isPro =
       userData?.subscription_status === "pro" ||
-      userData?.subscription_status === "enterprise";
+      userData?.subscription_status === "business";
 
     if (!isPro) {
       return NextResponse.json(

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/layout/Logo";
 
 export default function Footer() {
   return (
@@ -7,11 +8,9 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <h3 className="text-2xl font-bold text-[#10B981] mb-4">
-              ValidaRFC.mx
-            </h3>
+            <Logo size="lg" className="mb-4" showText={true} />
             <p className="text-gray-400 text-sm">
-              Valida RFCs contra el SAT en tiempo real
+              Plataforma profesional de validación de RFCs contra el SAT
             </p>
           </div>
 
@@ -22,7 +21,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/pricing"
-                  className="hover:text-[#10B981] transition-colors text-sm"
+                  className="hover:text-[#2F7E7A] transition-colors text-sm"
                 >
                   Precios
                 </Link>
@@ -30,15 +29,15 @@ export default function Footer() {
               <li>
                 <Link
                   href="/developers"
-                  className="hover:text-[#10B981] transition-colors text-sm"
+                  className="hover:text-[#2F7E7A] transition-colors text-sm"
                 >
-                  API
+                  Documentación API
                 </Link>
               </li>
               <li>
                 <Link
                   href="/dashboard"
-                  className="hover:text-[#10B981] transition-colors text-sm"
+                  className="hover:text-[#2F7E7A] transition-colors text-sm"
                 >
                   Dashboard
                 </Link>
@@ -53,7 +52,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/terminos"
-                  className="hover:text-[#10B981] transition-colors text-sm"
+                  className="hover:text-[#2F7E7A] transition-colors text-sm"
                 >
                   Términos y Condiciones
                 </Link>
@@ -61,7 +60,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/privacidad"
-                  className="hover:text-[#10B981] transition-colors text-sm"
+                  className="hover:text-[#2F7E7A] transition-colors text-sm"
                 >
                   Política de Privacidad
                 </Link>
@@ -74,10 +73,10 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-4">Contacto</h4>
             <p className="text-gray-400 text-sm mb-2">
               <a
-                href="mailto:hola@validarfcmx.mx"
-                className="hover:text-[#10B981] transition-colors"
+                href="mailto:hola@maflipp.com"
+                className="hover:text-[#2F7E7A] transition-colors"
               >
-                hola@validarfcmx.mx
+                hola@maflipp.com
               </a>
             </p>
             <div className="flex space-x-4 mt-4">
@@ -88,7 +87,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-          <p>© 2024 ValidaRFC.mx. Todos los derechos reservados.</p>
+          <p>© 2024 Maflipp. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 
 // Rate limiting: Map simple en memoria
 // En producción, usar Redis o similar
@@ -50,7 +51,7 @@ async function validateRFCWithSAT(rfc: string): Promise<{
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 ValidaRFC.mx",
+        "User-Agent": "Mozilla/5.0 Maflipp",
       },
       // Timeout de 10 segundos
       signal: AbortSignal.timeout(10000),
@@ -206,12 +207,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const plan = userData?.subscription_status || "free";
-      const planLimit =
-        plan === "free" ? 5 : plan === "pro" ? 100 : 1000;
+      const plan = (userData?.subscription_status || "free") as PlanId;
+      const planLimit = getPlanValidationLimit(plan);
       const queriesThisMonth = userData?.rfc_queries_this_month || 0;
 
-      if (queriesThisMonth >= planLimit) {
+      // Si planLimit es -1, es ilimitado
+      if (planLimit !== -1 && queriesThisMonth >= planLimit) {
         return NextResponse.json(
           {
             success: false,
@@ -277,11 +278,12 @@ export async function POST(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
-      const plan = updatedUserData?.subscription_status || "free";
-      const planLimit =
-        plan === "free" ? 5 : plan === "pro" ? 100 : 1000;
-      const remaining =
-        planLimit - (updatedUserData?.rfc_queries_this_month || 0);
+      const plan = (updatedUserData?.subscription_status || "free") as PlanId;
+      const planLimit = getPlanValidationLimit(plan);
+      // Si planLimit es -1, es ilimitado
+      const remaining = planLimit === -1 
+        ? -1 // Ilimitado
+        : planLimit - (updatedUserData?.rfc_queries_this_month || 0);
 
       // Obtener rate limit remaining
       const rateLimit = checkRateLimit(user.id);
@@ -355,7 +357,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json(
     {
-      message: "ValidaRFC.mx API",
+      message: "Maflipp API",
       version: "1.0.0",
       endpoint: "/api/validate",
       method: "POST",

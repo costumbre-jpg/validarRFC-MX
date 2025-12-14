@@ -23,9 +23,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { plan } = body;
 
-    if (!plan || (plan !== "pro" && plan !== "enterprise")) {
+    // Validar plan (soporta pro, business, y planes futuros)
+    const validPlans = ["pro", "business", "basic", "enterprise", "api_premium"];
+    if (!plan || !validPlans.includes(plan)) {
       return NextResponse.json(
-        { error: "Plan inválido. Debe ser 'pro' o 'enterprise'" },
+        { error: `Plan inválido. Debe ser uno de: ${validPlans.join(", ")}` },
         { status: 400 }
       );
     }
@@ -34,7 +36,11 @@ export async function POST(request: NextRequest) {
     // En producción, estos deberían ser los Price IDs de tus productos en Stripe
     const priceIds: Record<string, string> = {
       pro: process.env.STRIPE_PRICE_ID_PRO || "",
+      business: process.env.STRIPE_PRICE_ID_BUSINESS || process.env.STRIPE_PRICE_ID_ENTERPRISE || "",
+      // Planes futuros (preparados)
+      basic: process.env.STRIPE_PRICE_ID_BASIC || "",
       enterprise: process.env.STRIPE_PRICE_ID_ENTERPRISE || "",
+      api_premium: process.env.STRIPE_PRICE_ID_API_PREMIUM || "",
     };
 
     const priceId = priceIds[plan];

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { hashApiKey, isValidApiKeyFormat } from "@/lib/api-keys";
+import { getPlanApiLimit, type PlanId } from "@/lib/plans";
 
-const PRICE_PER_QUERY = 0.10; // $0.10 MXN por consulta
 const RATE_LIMIT_PER_MINUTE = 60; // 60 requests por minuto
 
 // Rate limiting: Map simple en memoria
@@ -55,7 +55,7 @@ async function validateRFCWithSAT(rfc: string): Promise<{
   try {
     const response = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 ValidaRFC.mx",
+        "User-Agent": "Mozilla/5.0 Maflipp",
       },
       signal: AbortSignal.timeout(10000),
     });
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
     const apiKeyHash = hashApiKey(apiKey);
     const { data: apiKeyData, error: keyError } = await supabase
       .from("api_keys")
-      .select("id, user_id, balance, is_active, expires_at, total_used")
+      .select("id, user_id, is_active, expires_at, total_used, api_calls_this_month")
       .eq("key_hash", apiKeyHash)
       .single();
 
@@ -171,17 +171,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6. Verificar saldo
-    if (apiKeyData.balance < PRICE_PER_QUERY) {
+    // 6. Obtener plan del usuario y verificar límite mensual
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("subscription_status")
+      .eq("id", apiKeyData.user_id)
+      .single();
+
+    if (userError || !userData) {
       return NextResponse.json(
         {
           success: false,
           valid: false,
           rfc: "",
           remaining: 0,
-          message: `Saldo insuficiente. Se requiere $${PRICE_PER_QUERY} MXN por consulta. Saldo actual: $${apiKeyData.balance} MXN`,
+          message: "Error al verificar plan del usuario",
         },
-        { status: 402 }
+        { status: 500 }
+      );
+    }
+
+    const planId = (userData.subscription_status || "free") as PlanId;
+    const planApiLimit = getPlanApiLimit(planId);
+    const apiCallsThisMonth = apiKeyData.api_calls_this_month || 0;
+
+    // Verificar límite mensual (si planApiLimit es -1, es ilimitado)
+    if (planApiLimit !== -1 && apiCallsThisMonth >= planApiLimit) {
+      return NextResponse.json(
+        {
+          success: false,
+          valid: false,
+          rfc: "",
+          remaining: 0,
+          message: `Has alcanzado el límite de ${planApiLimit.toLocaleString()} llamadas API este mes. El límite se reinicia el primer día de cada mes.`,
+        },
+        { status: 403 }
       );
     }
 
@@ -262,25 +286,44 @@ export async function POST(request: NextRequest) {
 
     const isValid = satResult.valid === true;
 
-    // 11. Descontar saldo y registrar uso
-    const newBalance = apiKeyData.balance - PRICE_PER_QUERY;
+    // 11. Actualizar contador mensual y registrar uso
+    const newApiCallsThisMonth = (apiCallsThisMonth || 0) + 1;
+    const remainingCalls = planApiLimit === -1 
+      ? -1 // Ilimitado
+      : Math.max(0, planApiLimit - newApiCallsThisMonth);
 
+    // Actualizar contador en api_keys
     await supabase
       .from("api_keys")
       .update({
-        balance: newBalance,
+        api_calls_this_month: newApiCallsThisMonth,
         total_used: (apiKeyData.total_used || 0) + 1,
         last_used_at: new Date().toISOString(),
       })
       .eq("id", apiKeyData.id);
 
-    // Registrar en logs
+    // Actualizar contador en users (para estadísticas)
+    const { data: currentUserData } = await supabase
+      .from("users")
+      .select("api_calls_this_month")
+      .eq("id", apiKeyData.user_id)
+      .single();
+
+    const newUserApiCalls = (currentUserData?.api_calls_this_month || 0) + 1;
+    await supabase
+      .from("users")
+      .update({
+        api_calls_this_month: newUserApiCalls,
+      })
+      .eq("id", apiKeyData.user_id);
+
+    // Registrar en logs (sin costo, ya que usa límite mensual)
     await supabase.from("api_usage_logs").insert({
       api_key_id: apiKeyData.id,
       rfc: formattedRFC,
       is_valid: isValid,
       response_time: responseTime,
-      cost: PRICE_PER_QUERY,
+      cost: 0.0, // Sin costo, usa límite mensual del plan
     });
 
     return NextResponse.json(
@@ -288,7 +331,7 @@ export async function POST(request: NextRequest) {
         success: true,
         valid: isValid,
         rfc: formattedRFC,
-        remaining: Math.max(0, Math.floor(newBalance / PRICE_PER_QUERY)),
+        remaining: remainingCalls,
         message: isValid
           ? "RFC válido"
           : satResult.error
@@ -296,7 +339,6 @@ export async function POST(request: NextRequest) {
           : "RFC no existe en el SAT",
         source: satResult.source,
         responseTime: Math.round(responseTime),
-        balance: parseFloat(newBalance.toFixed(2)),
       },
       {
         status: 200,
@@ -326,14 +368,14 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json(
     {
-      message: "ValidaRFC.mx Public API",
+      message: "Maflipp Public API",
       version: "1.0.0",
       endpoint: "/api/public/validate",
       method: "POST",
       authentication: "X-API-Key header",
       pricing: {
-        pricePerQuery: PRICE_PER_QUERY,
-        currency: "MXN",
+        model: "monthly_limit",
+        description: "Las llamadas API están incluidas en tu plan mensual. Los límites se reinician el primer día de cada mes.",
       },
       rateLimit: {
         limit: RATE_LIMIT_PER_MINUTE,

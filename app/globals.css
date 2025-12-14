@@ -24,5 +24,44 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Eliminar todos los bordes de focus en inputs, textareas y selects */
+@layer base {
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none !important;
+    ring: 0 !important;
+    box-shadow: none !important;
+  }
+  
+  input,
+  textarea,
+  select {
+    outline: none !important;
+  }
+  
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none !important;
+    ring: 0 !important;
+    box-shadow: none !important;
+  }
+}
+
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-33.333%);
+  }
 }
 

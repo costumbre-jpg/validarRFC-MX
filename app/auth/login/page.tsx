@@ -9,8 +9,32 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Validación de email en tiempo real
+  const validateEmail = (emailValue: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (emailValue && !emailRegex.test(emailValue)) {
+      setEmailError("Por favor ingresa un email válido");
+      return false;
+    } else {
+      setEmailError(null);
+      return true;
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (value) {
+      validateEmail(value);
+    } else {
+      setEmailError(null);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +63,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleOAuthSignIn = async (provider: "google" | "facebook") => {
+  const handleOAuthSignIn = async (provider: "google") => {
     setError(null);
     setLoading(true);
 
@@ -70,19 +94,14 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <Link href="/" className="flex justify-center">
-            <span className="text-3xl font-bold text-[#10B981]">
-              ValidaRFC.mx
-            </span>
-          </Link>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Inicia sesión en tu cuenta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             ¿No tienes una cuenta?{" "}
             <Link
               href="/auth/register"
-              className="font-medium text-[#10B981] hover:text-[#059669]"
+              className="font-medium text-[#2F7E7A] hover:text-[#1F5D59]"
             >
               Crear cuenta
             </Link>
@@ -131,28 +150,50 @@ export default function LoginPage() {
                 autoCorrect="off"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-[#10B981] focus:border-[#10B981] focus:z-10 sm:text-sm"
+                onChange={handleEmailChange}
+                onBlur={() => validateEmail(email)}
+                className={`appearance-none rounded-none relative block w-full px-3 py-3 border ${
+                  emailError ? "border-red-300" : "border-gray-300"
+                } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-0 focus:border-gray-300 focus:z-10 sm:text-sm`}
                 placeholder="Email"
               />
+              {emailError && (
+                <p className="mt-1 text-sm text-red-600">{emailError}</p>
+              )}
             </div>
-            <div>
+            <div className="relative">
               <label htmlFor="password" className="sr-only">
                 Contraseña
               </label>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 autoCapitalize="none"
                 autoCorrect="off"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-[#10B981] focus:border-[#10B981] focus:z-10 sm:text-sm"
+                className="appearance-none rounded-none relative block w-full px-3 py-3 pr-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-0 focus:border-gray-300 focus:z-10 sm:text-sm"
                 placeholder="Contraseña"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? (
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
             </div>
           </div>
 
@@ -160,7 +201,7 @@ export default function LoginPage() {
             <div className="text-sm">
               <Link
                 href="/auth/forgot-password"
-                className="font-medium text-[#10B981] hover:text-[#059669]"
+                className="font-medium text-[#2F7E7A] hover:text-[#1F5D59]"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
@@ -171,7 +212,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#10B981] hover:bg-[#059669] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#10B981] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#2F7E7A] hover:bg-[#1F5D59] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2F7E7A] disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg hover:shadow-xl"
             >
               {loading ? "Iniciando sesión..." : "Iniciar sesión"}
             </button>
@@ -220,17 +261,6 @@ export default function LoginPage() {
               <span className="ml-2">Google</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleOAuthSignIn("facebook")}
-              disabled={loading}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-              <span className="ml-2">Facebook</span>
-            </button>
           </div>
         </div>
 
@@ -240,7 +270,7 @@ export default function LoginPage() {
             ¿Aún no tienes cuenta?{" "}
             <Link
               href="/auth/register"
-              className="font-medium text-[#10B981] hover:text-[#059669]"
+              className="font-medium text-[#2F7E7A] hover:text-[#1F5D59]"
             >
               Regístrate
             </Link>

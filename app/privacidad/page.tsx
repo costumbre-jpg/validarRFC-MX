@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/layout/Logo";
 
 export default function PrivacidadPage() {
   return (
@@ -7,14 +8,10 @@ export default function PrivacidadPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-[#10B981]">
-                ValidaRFC.mx
-              </span>
-            </Link>
+            <Logo size="md" />
             <Link
               href="/"
-              className="text-gray-700 hover:text-[#10B981] transition-colors"
+              className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium"
             >
               Volver al inicio
             </Link>
@@ -39,7 +36,7 @@ export default function PrivacidadPage() {
                 1. Información que Recopilamos
               </h2>
               <p>
-                ValidaRFC.mx recopila la siguiente información cuando utilizas nuestro servicio:
+                Maflipp recopila la siguiente información cuando utilizas nuestro servicio:
               </p>
               <ul className="list-disc pl-6 space-y-2 mt-4">
                 <li>
@@ -137,10 +134,10 @@ export default function PrivacidadPage() {
               </p>
               <ul className="list-none pl-0 space-y-2 mt-4">
                 <li>
-                  <strong>Email:</strong> soporte@validarfcmx.com
+                  <strong>Email:</strong> soporte@maflipp.com
                 </li>
                 <li>
-                  <strong>Sitio web:</strong> <Link href="/" className="text-[#10B981] hover:underline">ValidaRFC.mx</Link>
+                  <strong>Sitio web:</strong> <Link href="/" className="text-[#2F7E7A] hover:underline">Maflipp</Link>
                 </li>
               </ul>
             </section>

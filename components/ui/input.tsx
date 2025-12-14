@@ -40,10 +40,10 @@ export default function Input({
         <input
           id={inputId}
           className={cn(
-            "w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-0 transition-colors",
+            "w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-colors",
             error
-              ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-              : "border-gray-300 focus:border-[#10B981] focus:ring-[#10B981]",
+              ? "border-red-300 focus:border-red-300"
+              : "border-gray-300 focus:border-gray-300",
             leftIcon ? "pl-10" : undefined,
             rightIcon ? "pr-10" : undefined,
             className

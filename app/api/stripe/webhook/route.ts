@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
           await supabase
             .from("subscriptions")
             .update({
-              plan: plan as "pro" | "enterprise",
+              plan: plan as "pro" | "business" | "basic" | "enterprise" | "api_premium",
               status: subscription.status === "active" ? "active" : "canceled",
               current_period_end: new Date(
                 subscription.current_period_end * 1000
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
           await supabase.from("subscriptions").insert({
             user_id: userId,
             stripe_subscription_id: subscriptionId as string,
-            plan: plan as "pro" | "enterprise",
+            plan: plan as "pro" | "business" | "basic" | "enterprise" | "api_premium",
             status: subscription.status === "active" ? "active" : "canceled",
             current_period_end: new Date(
               subscription.current_period_end * 1000

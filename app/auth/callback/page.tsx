@@ -117,7 +117,7 @@ export default function AuthCallbackPage() {
           <p className="text-gray-600 mb-4">{error}</p>
           <a
             href="/auth/login"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#10B981] hover:bg-[#059669]"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#2F7E7A] hover:bg-[#1F5D59] shadow-lg hover:shadow-xl"
           >
             Volver a Iniciar Sesión
           </a>
@@ -129,7 +129,7 @@ export default function AuthCallbackPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981] mx-auto"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7E7A] mx-auto"></div>
         <p className="mt-4 text-gray-600">{status}</p>
       </div>
     </div>

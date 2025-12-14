@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "@/components/layout/Logo";
 
 export default function TerminosPage() {
   return (
@@ -7,14 +8,10 @@ export default function TerminosPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-[#10B981]">
-                ValidaRFC.mx
-              </span>
-            </Link>
+            <Logo size="md" />
             <Link
               href="/"
-              className="text-gray-700 hover:text-[#10B981] transition-colors"
+              className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium"
             >
               Volver al inicio
             </Link>
@@ -39,7 +36,7 @@ export default function TerminosPage() {
                 1. Aceptación de los Términos
               </h2>
               <p>
-                Al acceder y utilizar ValidaRFC.mx, aceptas estar sujeto a estos Términos de Servicio y a todas las leyes y regulaciones aplicables. Si no estás de acuerdo con alguno de estos términos, no debes utilizar nuestro servicio.
+                Al acceder y utilizar Maflipp, aceptas estar sujeto a estos Términos de Servicio y a todas las leyes y regulaciones aplicables. Si no estás de acuerdo con alguno de estos términos, no debes utilizar nuestro servicio.
               </p>
             </section>
 
@@ -48,7 +45,7 @@ export default function TerminosPage() {
                 2. Descripción del Servicio
               </h2>
               <p>
-                ValidaRFC.mx es una plataforma SaaS que proporciona servicios de validación de RFC (Registro Federal de Contribuyentes) para empresas y profesionales en México. Ofrecemos validaciones individuales y acceso mediante API.
+                Maflipp es una plataforma SaaS que proporciona servicios de validación de RFC (Registro Federal de Contribuyentes) para empresas y profesionales en México. Ofrecemos validaciones individuales y acceso mediante API.
               </p>
             </section>
 
@@ -108,7 +105,7 @@ export default function TerminosPage() {
                 7. Propiedad Intelectual
               </h2>
               <p>
-                Todo el contenido, diseño, código y funcionalidades de ValidaRFC.mx son propiedad de ValidaRFC.mx y están protegidos por leyes de propiedad intelectual. No puedes copiar, modificar o distribuir nuestro contenido sin autorización.
+                Todo el contenido, diseño, código y funcionalidades de Maflipp son propiedad de Maflipp y están protegidos por leyes de propiedad intelectual. No puedes copiar, modificar o distribuir nuestro contenido sin autorización.
               </p>
             </section>
 
@@ -117,7 +114,7 @@ export default function TerminosPage() {
                 8. Limitación de Responsabilidad
               </h2>
               <p>
-                ValidaRFC.mx proporciona el servicio &quot;tal cual&quot; sin garantías expresas o implícitas. No garantizamos que el servicio sea ininterrumpido, seguro o libre de errores. No seremos responsables por daños indirectos, incidentales o consecuentes.
+                Maflipp proporciona el servicio &quot;tal cual&quot; sin garantías expresas o implícitas. No garantizamos que el servicio sea ininterrumpido, seguro o libre de errores. No seremos responsables por daños indirectos, incidentales o consecuentes.
               </p>
             </section>
 
@@ -157,10 +154,10 @@ export default function TerminosPage() {
               </p>
               <ul className="list-none pl-0 space-y-2 mt-4">
                 <li>
-                  <strong>Email:</strong> soporte@validarfcmx.com
+                  <strong>Email:</strong> soporte@maflipp.com
                 </li>
                 <li>
-                  <strong>Sitio web:</strong> <Link href="/" className="text-[#10B981] hover:underline">ValidaRFC.mx</Link>
+                  <strong>Sitio web:</strong> <Link href="/" className="text-[#2F7E7A] hover:underline">Maflipp</Link>
                 </li>
               </ul>
             </section>

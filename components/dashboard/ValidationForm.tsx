@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { formatRFC, isValidRFCFormat } from "@/lib/utils";
@@ -18,6 +19,10 @@ export default function ValidationForm({
   remainingQueries = 0,
   planLimit = 5,
 }: ValidationFormProps) {
+  const searchParams = useSearchParams();
+  const planParam = searchParams.get("plan");
+  const urlSuffix = planParam && ["pro", "business"].includes(planParam) ? `?plan=${planParam}` : "";
+  
   const [rfc, setRfc] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -92,7 +97,7 @@ export default function ValidationForm({
           <p className="text-sm text-yellow-800">
             Has alcanzado el límite de validaciones.{" "}
             <a
-              href="/dashboard/billing"
+              href={`/dashboard/billing${urlSuffix}`}
               className="font-medium text-yellow-900 underline hover:text-yellow-700"
             >
               Mejora tu plan

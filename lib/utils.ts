@@ -141,13 +141,16 @@ export function formatResponseTime(ms: number): string {
  * @param plan - Plan de suscripción
  * @returns Nombre del plan en español
  */
-export function getSubscriptionPlanName(plan: 'free' | 'pro' | 'enterprise'): string {
-  const planNames = {
+export function getSubscriptionPlanName(plan: string): string {
+  const planNames: Record<string, string> = {
     free: 'Gratis',
     pro: 'Pro',
-    enterprise: 'Empresarial',
+    business: 'Business',
+    basic: 'Basic',
+    enterprise: 'Enterprise',
+    api_premium: 'API Premium',
   };
-  return planNames[plan];
+  return planNames[plan] || plan;
 }
 
 /**

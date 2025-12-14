@@ -2,77 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Logo from "@/components/layout/Logo";
+import { getActivePlans, getPlan, type PlanId } from "@/lib/plans";
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [calculatorHours, setCalculatorHours] = useState(2);
   const [calculatorRate, setCalculatorRate] = useState(500);
 
-  const plans = {
-    free: {
-      name: "FREE",
-      monthlyPrice: 0,
-      annualPrice: 0,
-      validations: 5,
-      history: false,
-      export: false,
-      api: false,
-      support: "Comunidad",
-      whiteLabel: false,
-      features: [
-        "5 validaciones/mes",
-        "Resultados básicos",
-        "Sin historial",
-        "Sin exportación",
-        "Sin API",
-      ],
-    },
-    pro: {
-      name: "PRO",
-      monthlyPrice: 99,
-      annualPrice: 950, // 20% off: 99 * 12 * 0.8 = 950.4
-      validations: 100,
-      history: true,
-      export: true,
-      api: "Básica",
-      support: "Prioritario",
-      whiteLabel: false,
-      features: [
-        "100 validaciones/mes",
-        "Historial completo",
-        "Exportar a CSV",
-        "API básica",
-        "Soporte prioritario",
-        "Prueba gratis 7 días",
-      ],
-      popular: true,
-    },
-    enterprise: {
-      name: "EMPRESA",
-      monthlyPrice: 499,
-      annualPrice: 4788, // 20% off: 499 * 12 * 0.8 = 4790.4
-      validations: 1000,
-      history: true,
-      export: true,
-      api: "Completa",
-      support: "24/7",
-      whiteLabel: true,
-      features: [
-        "1,000 validaciones/mes",
-        "Historial completo",
-        "Exportar a CSV/Excel",
-        "API completa",
-        "Dashboard avanzado",
-        "White-label",
-        "Soporte 24/7",
-        "Facturación CFDI",
-      ],
-    },
-  };
+  // Obtener solo los planes activos para MVP
+  const activePlans = getActivePlans();
+  
+  // Plan PRO para el calculador de ahorros
+  const proPlan = getPlan("pro");
 
   const calculateSavings = () => {
     const manualCost = calculatorHours * calculatorRate;
-    const proCost = billingCycle === "monthly" ? 99 : 950 / 12;
+    const proCost = billingCycle === "monthly" ? proPlan.monthlyPrice : proPlan.annualPrice / 12;
     const savings = manualCost - proCost;
     return {
       manualCost,
@@ -83,27 +29,109 @@ export default function PricingPage() {
 
   const savings = calculateSavings();
 
+  // Función helper para generar features list
+  const getPlanFeatures = (plan: typeof activePlans[0]) => {
+    const features: string[] = [];
+    
+    // Validaciones
+    if (plan.validationsPerMonth === -1) {
+      features.push("Validaciones ilimitadas");
+    } else {
+      features.push(`${plan.validationsPerMonth.toLocaleString()} validaciones/mes`);
+    }
+    
+    // Historial
+    if (plan.features.history) {
+      if (plan.features.historyDays) {
+        features.push(`Historial ${plan.features.historyDays} días`);
+      } else {
+        features.push("Historial ilimitado");
+      }
+    } else {
+      features.push("Sin historial");
+    }
+    
+    // Exportación
+    if (plan.features.export) {
+      if (plan.features.exportFormats) {
+        features.push(`Exportar a ${plan.features.exportFormats.join(", ")}`);
+      } else {
+        features.push("Exportar datos");
+      }
+    } else {
+      features.push("Sin exportación");
+    }
+    
+    // API
+    if (plan.features.api) {
+      if (typeof plan.features.api === "string") {
+        const apiType = plan.features.api;
+        if (plan.features.apiCallsPerMonth) {
+          if (plan.features.apiCallsPerMonth === -1) {
+            features.push(`API ${apiType}: Ilimitadas`);
+          } else {
+            features.push(`API ${apiType}: ${plan.features.apiCallsPerMonth.toLocaleString()} llamadas/mes`);
+          }
+        } else {
+          features.push(`API ${apiType}`);
+        }
+      } else {
+        features.push("Acceso API");
+      }
+    } else {
+      features.push("Sin API");
+    }
+    
+    // Usuarios
+    if (plan.features.users === -1) {
+      features.push("Usuarios ilimitados");
+    } else {
+      features.push(`${plan.features.users} usuario${plan.features.users > 1 ? "s" : ""}`);
+    }
+    
+    // White-label
+    if (plan.features.whiteLabel) {
+      features.push("White-label");
+    }
+    
+    // SSO
+    if (plan.features.sso) {
+      features.push("SSO (Single Sign-On)");
+    }
+    
+    // SLA
+    if (plan.features.sla) {
+      features.push(`SLA ${plan.features.sla}`);
+    }
+    
+    // Soporte
+    features.push(`Soporte: ${plan.features.support}`);
+    
+    // Features adicionales
+    if (plan.features.other && plan.features.other.length > 0) {
+      features.push(...plan.features.other);
+    }
+    
+    return features;
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-[#10B981]">
-                ValidaRFC.mx
-              </span>
-            </Link>
+            <Logo size="md" />
             <div className="flex items-center space-x-4">
               <Link
                 href="/auth/login"
-                className="text-gray-700 hover:text-[#10B981] transition-colors font-medium"
+                className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium"
               >
                 Iniciar Sesión
               </Link>
               <Link
                 href="/auth/register"
-                className="bg-[#10B981] text-white px-4 py-2 rounded-lg hover:bg-[#059669] transition-colors font-medium"
+                className="bg-[#2F7E7A] text-white px-4 py-2 rounded-lg hover:bg-[#1F5D59] transition-colors font-medium"
               >
                 Registrarse
               </Link>
@@ -138,7 +166,7 @@ export default function PricingPage() {
               onClick={() =>
                 setBillingCycle(billingCycle === "monthly" ? "annual" : "monthly")
               }
-              className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#10B981] transition-colors focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2"
+              className="relative inline-flex h-6 w-11 items-center rounded-full bg-[#2F7E7A] transition-colors focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:ring-offset-2"
             >
               <span
                 className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -162,124 +190,97 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          {/* FREE Plan */}
-          <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">FREE</h3>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-gray-900">$0</span>
-              <span className="text-gray-600"> MXN/mes</span>
-            </div>
-            <ul className="space-y-3 mb-8">
-              {plans.free.features.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <svg
-                    className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="text-gray-600">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/auth/register"
-              className="block w-full text-center bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-            >
-              Comenzar Gratis
-            </Link>
-          </div>
+        <div className={`grid gap-8 mb-16 ${activePlans.length === 3 ? "md:grid-cols-3" : activePlans.length === 2 ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
+          {activePlans.map((plan, index) => {
+            const isPopular = plan.popular;
+            const isFree = plan.monthlyPrice === 0;
+            const monthlyPrice = billingCycle === "monthly" 
+              ? plan.monthlyPrice 
+              : Math.round(plan.annualPrice / 12);
+            const features = getPlanFeatures(plan);
 
-          {/* PRO Plan */}
-          <div className="bg-white border-2 border-[#10B981] rounded-2xl p-8 shadow-xl relative transform scale-105">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <span className="bg-[#10B981] text-white px-4 py-1 rounded-full text-sm font-semibold">
-                MÁS POPULAR
-              </span>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">PRO</h3>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-gray-900">
-                ${billingCycle === "monthly" ? plans.pro.monthlyPrice : Math.round(plans.pro.annualPrice / 12)}
-              </span>
-              <span className="text-gray-600"> MXN/mes</span>
-              {billingCycle === "annual" && (
-                <div className="text-sm text-gray-500 mt-1">
-                  ${plans.pro.annualPrice.toLocaleString()} MXN facturado anualmente
+            return (
+              <div
+                key={plan.id}
+                className={`bg-white border-2 rounded-2xl p-8 shadow-sm relative ${
+                  isPopular
+                    ? "border-[#10B981] shadow-xl transform scale-105"
+                    : "border-gray-200"
+                }`}
+              >
+                {isPopular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-[#2F7E7A] text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+                    MÁS POPULAR
+                  </span>
+                  </div>
+                )}
+                
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-gray-900">
+                    ${monthlyPrice.toLocaleString()}
+                  </span>
+                  <span className="text-gray-600"> MXN/mes</span>
+                  {billingCycle === "annual" && plan.annualPrice > 0 && (
+                    <div className="text-sm text-gray-500 mt-1">
+                      ${plan.annualPrice.toLocaleString()} MXN facturado anualmente
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <ul className="space-y-3 mb-8">
-              {plans.pro.features.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <svg
-                    className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                
+                <ul className="space-y-3 mb-8">
+                  {features.map((feature, idx) => {
+                    const isSoon = feature.toLowerCase().includes("próximamente");
+                    return (
+                      <li key={idx} className="flex items-start">
+                        <svg
+                          className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3.25-3.25a1 1 0 111.414-1.414L8.5 11.086l6.543-6.543a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <div className="text-gray-700">
+                          <span className={isSoon ? "text-gray-500 line-through" : undefined}>{feature}</span>
+                          {isSoon && (
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                              Próximamente
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+                
+                {isFree ? (
+                  <Link
+                    href="/auth/register"
+                    className="block w-full text-center bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="text-gray-600">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/auth/register?plan=pro"
-              className="block w-full text-center bg-[#10B981] text-white py-3 rounded-lg font-semibold hover:bg-[#059669] transition-colors"
-            >
-              Comprar Pro
-            </Link>
-          </div>
-
-          {/* ENTERPRISE Plan */}
-          <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm">
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">EMPRESA</h3>
-            <div className="mb-6">
-              <span className="text-4xl font-bold text-gray-900">
-                ${billingCycle === "monthly" ? plans.enterprise.monthlyPrice : Math.round(plans.enterprise.annualPrice / 12)}
-              </span>
-              <span className="text-gray-600"> MXN/mes</span>
-              {billingCycle === "annual" && (
-                <div className="text-sm text-gray-500 mt-1">
-                  ${plans.enterprise.annualPrice.toLocaleString()} MXN facturado anualmente
-                </div>
-              )}
-            </div>
-            <ul className="space-y-3 mb-8">
-              {plans.enterprise.features.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <svg
-                    className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
+                    Comenzar Gratis
+                  </Link>
+                ) : (
+                  <Link
+                    href={`/auth/register?plan=${plan.id}`}
+                    className={`block w-full text-center py-3 rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl ${
+                      isPopular
+                        ? "bg-[#2F7E7A] text-white hover:bg-[#1F5D59]"
+                        : "bg-gray-900 text-white hover:bg-gray-800"
+                    }`}
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="text-gray-600">{feature}</span>
-                </li>
-              ))}
-            </ul>
-            <Link
-              href="/auth/register?plan=enterprise"
-              className="block w-full text-center bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-            >
-              Contactar Ventas
-            </Link>
-          </div>
+                    {plan.id === "business" ? "Contactar Ventas" : `Comprar ${plan.name}`}
+                  </Link>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Comparison Table */}
@@ -293,15 +294,16 @@ export default function PricingPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Característica
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  FREE
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider bg-[#10B981] bg-opacity-10">
-                  PRO
-                </th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  EMPRESA
-                </th>
+                {activePlans.map((plan) => (
+                  <th
+                    key={plan.id}
+                    className={`px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                      plan.popular ? "bg-[#2F7E7A] bg-opacity-10" : ""
+                    }`}
+                  >
+                    {plan.name}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -309,99 +311,140 @@ export default function PricingPage() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   Precio
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  $0 MXN/mes
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-[#10B981] bg-opacity-5">
-                  ${billingCycle === "monthly" ? "99" : "79"} MXN/mes
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ${billingCycle === "monthly" ? "499" : "399"} MXN/mes
-                </td>
+                {activePlans.map((plan) => {
+                  const monthlyPrice = billingCycle === "monthly" 
+                    ? plan.monthlyPrice 
+                    : Math.round(plan.annualPrice / 12);
+                  return (
+                    <td
+                      key={plan.id}
+                      className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                        plan.popular ? "bg-[#2F7E7A] bg-opacity-5" : ""
+                      }`}
+                    >
+                      ${monthlyPrice.toLocaleString()} MXN/mes
+                    </td>
+                  );
+                })}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   Validaciones por mes
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {plans.free.validations}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-[#10B981] bg-opacity-5">
-                  {plans.pro.validations}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  {plans.enterprise.validations}
-                </td>
+                {activePlans.map((plan) => (
+                  <td
+                    key={plan.id}
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                      plan.popular ? "bg-[#10B981] bg-opacity-5" : ""
+                    }`}
+                  >
+                    {plan.validationsPerMonth === -1
+                      ? "Ilimitadas"
+                      : plan.validationsPerMonth.toLocaleString()}
+                  </td>
+                ))}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   Historial
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ❌
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-[#10B981] bg-opacity-5">
-                  ✅
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ✅
-                </td>
+                {activePlans.map((plan) => (
+                  <td
+                    key={plan.id}
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                      plan.popular ? "bg-[#10B981] bg-opacity-5" : ""
+                    }`}
+                  >
+                    {plan.features.history
+                      ? plan.features.historyDays
+                        ? `${plan.features.historyDays} días`
+                        : "✅ Ilimitado"
+                      : "❌"}
+                  </td>
+                ))}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   Exportar datos
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ❌
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-[#10B981] bg-opacity-5">
-                  ✅ CSV
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ✅ CSV/Excel
-                </td>
+                {activePlans.map((plan) => (
+                  <td
+                    key={plan.id}
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                      plan.popular ? "bg-[#10B981] bg-opacity-5" : ""
+                    }`}
+                  >
+                    {plan.features.export
+                      ? plan.features.exportFormats
+                        ? `✅ ${plan.features.exportFormats.join(", ")}`
+                        : "✅"
+                      : "❌"}
+                  </td>
+                ))}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   Acceso API
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ❌
+                {activePlans.map((plan) => (
+                  <td
+                    key={plan.id}
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                      plan.popular ? "bg-[#10B981] bg-opacity-5" : ""
+                    }`}
+                  >
+                    {plan.features.api
+                      ? typeof plan.features.api === "string"
+                        ? `✅ ${plan.features.api}`
+                        : "✅"
+                      : "❌"}
+                  </td>
+                ))}
+              </tr>
+              <tr>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  Usuarios
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-[#10B981] bg-opacity-5">
-                  ✅ Básica
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ✅ Completa
-                </td>
+                {activePlans.map((plan) => (
+                  <td
+                    key={plan.id}
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                      plan.popular ? "bg-[#10B981] bg-opacity-5" : ""
+                    }`}
+                  >
+                    {plan.features.users === -1 ? "Ilimitados" : plan.features.users}
+                  </td>
+                ))}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   Soporte
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  Comunidad
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-[#10B981] bg-opacity-5">
-                  Prioritario
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  24/7
-                </td>
+                {activePlans.map((plan) => (
+                  <td
+                    key={plan.id}
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                      plan.popular ? "bg-[#10B981] bg-opacity-5" : ""
+                    }`}
+                  >
+                    {plan.features.support}
+                  </td>
+                ))}
               </tr>
               <tr>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   White-label
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ❌
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center bg-[#10B981] bg-opacity-5">
-                  ❌
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                  ✅
-                </td>
+                {activePlans.map((plan) => (
+                  <td
+                    key={plan.id}
+                    className={`px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center ${
+                      plan.popular ? "bg-[#10B981] bg-opacity-5" : ""
+                    }`}
+                  >
+                    {plan.features.whiteLabel ? "✅" : "❌"}
+                  </td>
+                ))}
               </tr>
             </tbody>
           </table>
@@ -450,7 +493,7 @@ export default function PricingPage() {
                   <p className="text-xs opacity-75">por mes</p>
                 </div>
                 <div>
-                  <p className="text-sm opacity-90 mb-1">Con ValidaRFC Pro</p>
+                  <p className="text-sm opacity-90 mb-1">Con Maflipp Pro</p>
                   <p className="text-2xl font-bold">
                     ${savings.proCost.toLocaleString()} MXN
                   </p>
@@ -471,7 +514,7 @@ export default function PricingPage() {
         </div>
 
         {/* FAQ */}
-        <div className="mb-16">
+        <div id="faq" className="mb-16 scroll-mt-20">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Preguntas Frecuentes
           </h2>
@@ -505,10 +548,9 @@ export default function PricingPage() {
                 ¿Facturan con CFDI?
               </h3>
               <p className="text-gray-600">
-                Sí, para planes Pro y Empresa emitimos facturas CFDI
+                Sí, para planes Pro y Business emitimos facturas CFDI
                 electrónicas válidas ante el SAT. Recibirás tu factura por
-                email después de cada pago. Los planes Enterprise incluyen
-                facturación CFDI automática.
+                email después de cada pago.
               </p>
             </div>
 
@@ -532,18 +574,18 @@ export default function PricingPage() {
             ¿Listo para comenzar?
           </h2>
           <p className="text-xl text-gray-300 mb-8">
-            Únete a cientos de empresas que confían en ValidaRFC.mx
+            Únete a cientos de empresas que confían en Maflipp
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/auth/register"
-              className="px-8 py-3 bg-[#10B981] text-white rounded-lg hover:bg-[#059669] transition-colors font-semibold text-lg"
+              className="px-8 py-3 bg-[#2F7E7A] text-white rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
             >
               Comenzar Gratis
             </Link>
             <Link
               href="/auth/register?plan=pro"
-              className="px-8 py-3 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg"
+              className="px-8 py-3 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition-colors font-semibold text-lg shadow-lg hover:shadow-xl"
             >
               Probar Pro 7 Días
             </Link>
@@ -555,28 +597,26 @@ export default function PricingPage() {
       <footer className="bg-gray-900 text-gray-300 py-12 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <p className="text-2xl font-bold text-[#10B981] mb-4">
-              ValidaRFC.mx
-            </p>
+            <Logo size="lg" className="mb-4 justify-center" />
             <p className="text-gray-400 mb-4">
-              © 2024 ValidaRFC.mx. Todos los derechos reservados.
+              © 2024 Maflipp. Todos los derechos reservados.
             </p>
             <div className="flex justify-center gap-6">
               <Link
                 href="/terminos"
-                className="hover:text-[#10B981] transition-colors"
+                className="hover:text-[#2F7E7A] transition-colors"
               >
                 Términos
               </Link>
               <Link
                 href="/privacidad"
-                className="hover:text-[#10B981] transition-colors"
+                className="hover:text-[#2F7E7A] transition-colors"
               >
                 Privacidad
               </Link>
               <a
-                href="mailto:hola@validarfcmx.mx"
-                className="hover:text-[#10B981] transition-colors"
+                href="mailto:hola@maflipp.com"
+                className="hover:text-[#2F7E7A] transition-colors"
               >
                 Contacto
               </a>
@@ -587,4 +627,3 @@ export default function PricingPage() {
     </div>
   );
 }
-

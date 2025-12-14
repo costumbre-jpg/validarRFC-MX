@@ -1,166 +1,611 @@
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import Logo from "@/components/layout/Logo";
+import Hero from "@/components/home/Hero";
+import ScrollReveal from "@/components/ui/ScrollReveal";
+import StatsSlider from "@/components/home/StatsSlider";
+import AuthModal from "@/components/auth/AuthModal";
 
 export default function Home() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Si está en la parte superior, siempre mostrar
+      if (currentScrollY < 50) {
+        setIsScrolled(false);
+      } else {
+        // Si hace scroll hacia abajo, ocultar
+        if (currentScrollY > lastScrollY) {
+          setIsScrolled(true);
+        } else {
+          // Si hace scroll hacia arriba, mostrar
+          setIsScrolled(false);
+        }
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   return (
     <div className="min-h-screen bg-white">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+      {/* LOGO GRANDE - Sobre el header, independiente */}
+      <div className={`absolute top-1 sm:-top-1 left-8 sm:left-12 z-50 transition-transform duration-300 ${isScrolled ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}>
+        <Logo size="2xl" showText={false} />
+      </div>
+
+      {/* HEADER - Arriba */}
+      <header className={`sticky top-0 z-40 bg-white pt-2 transition-transform duration-300 ${isScrolled ? "-translate-y-full" : "translate-y-0"}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link href="/" className="flex items-center">
-              <span className="text-2xl font-bold text-[#10B981]">
-                ValidaRFC.mx
-              </span>
-            </Link>
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 text-gray-700 hover:text-[#2F7E7A] transition-colors"
+              onClick={() => {
+                const mobileMenu = document.getElementById("mobile-menu");
+                if (mobileMenu) {
+                  mobileMenu.classList.toggle("hidden");
+                }
+              }}
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex space-x-8">
-              <Link href="#inicio" className="text-gray-700 hover:text-[#10B981] transition-colors">
+            {/* Navigation Desktop */}
+            <nav className="hidden md:flex space-x-8 items-center flex-1 justify-center ml-56">
+              <Link href="#inicio" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium">
                 Inicio
               </Link>
-              <Link href="/pricing" className="text-gray-700 hover:text-[#10B981] transition-colors">
+              <Link href="#caracteristicas" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium">
+                Características
+              </Link>
+              <Link href="/pricing" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium">
                 Precios
               </Link>
-              <Link href="#api" className="text-gray-700 hover:text-[#10B981] transition-colors">
+              <Link href="#api" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium">
                 API
               </Link>
-              <Link href="#contacto" className="text-gray-700 hover:text-[#10B981] transition-colors">
+              <Link href="#contacto" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium">
                 Contacto
               </Link>
             </nav>
 
             {/* Auth Buttons */}
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/auth/login"
-                className="text-gray-700 hover:text-[#10B981] transition-colors font-medium"
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+              <button
+                onClick={() => {
+                  setAuthModalMode("login");
+                  setAuthModalOpen(true);
+                }}
+                className="text-sm sm:text-base text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium px-2 sm:px-0"
               >
-                Iniciar Sesión
-              </Link>
-              <Link
-                href="/auth/register"
-                className="bg-[#10B981] text-white px-4 py-2 rounded-lg hover:bg-[#059669] transition-colors font-medium"
+                <span className="hidden sm:inline">Iniciar Sesión</span>
+                <span className="sm:hidden">Entrar</span>
+              </button>
+              <button
+                onClick={() => {
+                  setAuthModalMode("register");
+                  setAuthModalOpen(true);
+                }}
+                className="bg-[#2F7E7A] text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-[#1F5D59] transition-colors font-medium text-sm sm:text-base"
               >
-                Registrarse
-              </Link>
+                <span className="hidden sm:inline">Registrarse</span>
+                <span className="sm:hidden">Registro</span>
+              </button>
             </div>
+          </div>
+
+          {/* Mobile Menu */}
+          <div id="mobile-menu" className="hidden md:hidden pb-4 border-t border-gray-200 mt-2">
+            <nav className="flex flex-col space-y-2 pt-4">
+              <Link href="#inicio" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium py-2">
+                Inicio
+              </Link>
+              <Link href="#caracteristicas" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium py-2">
+                Características
+              </Link>
+              <Link href="/pricing" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium py-2">
+                Precios
+              </Link>
+              <Link href="#api" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium py-2">
+                API
+              </Link>
+              <Link href="#contacto" className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium py-2">
+                Contacto
+              </Link>
+            </nav>
           </div>
         </div>
       </header>
 
       {/* HERO SECTION */}
-      <section id="inicio" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
-        <div className="text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-            Valida RFCs contra el SAT en{" "}
-            <span className="text-[#10B981]">2 segundos</span>
-          </h1>
-          <p className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto">
-            Verifica que tus proveedores existan realmente en el padrón del SAT
-          </p>
+      <ScrollReveal direction="up" delay={0} duration={1.2}>
+        <Hero />
+      </ScrollReveal>
 
-          {/* RFC Input */}
-          <div className="max-w-2xl mx-auto mb-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <input
-                type="text"
-                placeholder="Ej: ABC123456XYZ"
-                className="flex-1 px-6 py-4 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#10B981] transition-colors"
-              />
-              <button className="bg-[#10B981] text-white px-8 py-4 rounded-lg hover:bg-[#059669] transition-colors font-semibold text-lg whitespace-nowrap">
-                Validar Gratis
-              </button>
+      {/* ESTADÍSTICAS CON SCROLL INFINITO */}
+      <StatsSlider />
+
+      {/* TRUST BADGES */}
+      <ScrollReveal direction="up">
+        <section className="py-12 bg-gray-50 border-y border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8">
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">Conectado directamente con el SAT</span>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">Datos en tiempo real</span>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">Cumplimiento fiscal mexicano</span>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
+                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">99.9% Uptime garantizado</span>
+              </div>
             </div>
           </div>
+        </section>
+      </ScrollReveal>
 
-          <p className="text-sm text-gray-500">
-            5 validaciones gratis/mes • Más rápido que el SAT oficial
-          </p>
+      {/* PARA QUIÉN ES */}
+      <ScrollReveal direction="up">
+        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+              Para Quién Es Maflipp
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full"></span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
+              Plataforma diseñada para profesionales y empresas que necesitan validar documentos fiscales y legales de forma confiable
+            </p>
+            <p className="text-lg text-gray-500 max-w-3xl mx-auto">
+              Maflipp es la solución ideal para contadores, empresas, fintechs y desarrolladores que buscan automatizar y optimizar sus procesos de validación fiscal. Nuestra plataforma se integra perfectamente con tus flujos de trabajo existentes, ahorrando tiempo y reduciendo errores humanos.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <ScrollReveal direction="left" delay={0.1}>
+              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Contadores Públicos</h3>
+                <p className="text-gray-600 mb-3">
+                  Valida RFCs de clientes y proveedores antes de emitir facturas. Ahorra horas de trabajo manual y reduce errores en tu contabilidad.
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Ideal para despachos contables que manejan múltiples clientes. Valida cientos de RFCs en minutos, genera reportes automáticos y mantén un historial completo de todas tus validaciones para auditorías.
+                </p>
+                <Link
+                  href="/auth/register"
+                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                >
+                  Comenzar Gratis →
+                </Link>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal direction="left" delay={0.2}>
+              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Empresas</h3>
+                <p className="text-gray-600 mb-3">
+                  Verifica que tus proveedores existan realmente antes de hacer negocios. Reduce riesgos fiscales y protege tu empresa de fraudes.
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Perfecto para departamentos de compras y finanzas. Valida proveedores antes de realizar pagos, cumple con requisitos de compliance y mantén registros detallados para auditorías internas y externas.
+                </p>
+                <Link
+                  href="/auth/register"
+                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                >
+                  Comenzar Gratis →
+                </Link>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal direction="right" delay={0.1}>
+              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Fintechs</h3>
+                <p className="text-gray-600 mb-3">
+                  Integra validación automática en tu onboarding. Cumple con KYC y reduce fraude en tus procesos de verificación de clientes.
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Solución perfecta para plataformas financieras que necesitan validar la identidad fiscal de sus usuarios. Integra nuestra API en tu flujo de onboarding para validaciones automáticas en tiempo real y cumplimiento regulatorio.
+                </p>
+                <Link
+                  href="/auth/register"
+                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                >
+                  Comenzar Gratis →
+                </Link>
+              </div>
+            </ScrollReveal>
+            <ScrollReveal direction="right" delay={0.2}>
+              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">Desarrolladores</h3>
+                <p className="text-gray-600 mb-3">
+                  API RESTful para integrar validación de RFCs en tus aplicaciones. Documentación completa con ejemplos de código en múltiples lenguajes.
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  API moderna y fácil de usar con endpoints bien documentados. Incluye SDKs, ejemplos de integración, webhooks para notificaciones y soporte técnico dedicado para ayudarte a implementar rápidamente.
+                </p>
+                <Link
+                  href="/auth/register"
+                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                >
+                  Comenzar Gratis →
+                </Link>
+              </div>
+            </ScrollReveal>
+          </div>
         </div>
       </section>
+      </ScrollReveal>
+
+      {/* BENEFICIOS */}
+      <ScrollReveal direction="up">
+        <section id="caracteristicas" className="py-20 relative overflow-hidden">
+          {/* Video de fondo */}
+          <div className="absolute inset-0 z-0">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            >
+              <source src="/anakitica2000.mp4" type="video/mp4" />
+            </video>
+            {/* Overlay oscuro para legibilidad - Reducido para ver mejor el video */}
+            <div className="absolute inset-0 bg-black/30"></div>
+          </div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 relative inline-block drop-shadow-lg">
+              ¿Por Qué Elegir Maflipp?
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full"></span>
+            </h2>
+            <p className="text-xl text-white max-w-3xl mx-auto mb-4 drop-shadow-md">
+              La plataforma más confiable para validación y auditoría de documentos fiscales en México
+            </p>
+            <p className="text-lg text-gray-100 max-w-3xl mx-auto drop-shadow-sm">
+              Con Maflipp obtienes acceso directo al padrón del SAT, resultados instantáneos y un sistema robusto diseñado para empresas que requieren precisión y confiabilidad en sus operaciones fiscales diarias.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Validación Instantánea</h3>
+              <p className="text-gray-600 mb-2">
+                Consulta directa al padrón del SAT en menos de 2 segundos. Sin esperas, sin demoras.
+              </p>
+              <p className="text-sm text-gray-500">
+                Nuestra infraestructura optimizada garantiza respuestas rápidas incluso durante horas pico. Procesa cientos de validaciones simultáneas sin comprometer la velocidad.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">100% Precisión</h3>
+              <p className="text-gray-600 mb-2">
+                Datos directamente del SAT. Elimina errores humanos y garantiza información confiable.
+              </p>
+              <p className="text-sm text-gray-500">
+                Consultamos directamente el padrón oficial del SAT, asegurando que cada validación refleje el estado actual del contribuyente. Sin intermediarios, sin interpretaciones.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Ahorra Tiempo</h3>
+              <p className="text-gray-600 mb-2">
+                Reduce de horas a segundos. Valida cientos de RFCs en minutos, no en días.
+              </p>
+              <p className="text-sm text-gray-500">
+                Automatiza tus procesos de validación y libera tiempo para tareas de mayor valor. Un contador puede validar 50 RFCs en menos de 2 minutos, lo que antes tomaba horas.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Seguro y Confiable</h3>
+              <p className="text-gray-600 mb-2">
+                Encriptación SSL, cumplimiento con normativas fiscales mexicanas y protección de datos.
+              </p>
+              <p className="text-sm text-gray-500">
+                Cumplimos con los más altos estándares de seguridad. Todas las comunicaciones están encriptadas y seguimos las mejores prácticas de protección de datos personales.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Historial Completo</h3>
+              <p className="text-gray-600 mb-2">
+                Guarda y exporta todas tus validaciones. Genera reportes para auditorías y compliance.
+              </p>
+              <p className="text-sm text-gray-500">
+                Mantén un registro completo de todas tus validaciones con timestamps, resultados y detalles. Exporta a CSV o Excel para análisis y presentaciones profesionales.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">API Completa</h3>
+              <p className="text-gray-600 mb-2">
+                Integra validación de RFCs en tus sistemas. RESTful API con documentación completa.
+              </p>
+              <p className="text-sm text-gray-500">
+                API RESTful moderna con autenticación por API keys, rate limiting configurable, webhooks para notificaciones y soporte para múltiples lenguajes de programación.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      </ScrollReveal>
 
       {/* CÓMO FUNCIONA */}
-      <section className="bg-gray-50 py-20">
+      <ScrollReveal direction="up">
+        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16">
-            Cómo Funciona
-          </h2>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+              Cómo Funciona
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+            </h2>
+          </div>
           <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
             {/* Paso 1 */}
-            <div className="text-center">
-              <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <span className="text-4xl">⚡</span>
+            <ScrollReveal direction="left" delay={0.1}>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-[#2F7E7A] text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold">
+                  1
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  Ingresa el RFC
+                </h3>
+                <p className="text-gray-600 mb-2">
+                  Escribe o pega el RFC que deseas validar en nuestro sistema. Acepta RFCs de personas físicas y morales en cualquier formato.
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Nuestro sistema valida automáticamente el formato del RFC y te indica si es válido antes de realizar la consulta al SAT.
+                </p>
+                <Link
+                  href="/auth/register"
+                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                >
+                  Probar Ahora →
+                </Link>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                1. Ingresa el RFC
-              </h3>
-              <p className="text-gray-600">
-                Escribe o pega el RFC que deseas validar en nuestro sistema
-              </p>
-            </div>
+            </ScrollReveal>
 
             {/* Paso 2 */}
-            <div className="text-center">
-              <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <span className="text-4xl">🤖</span>
+            <ScrollReveal direction="up" delay={0.2}>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-[#2F7E7A] text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold">
+                  2
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  Consultamos el SAT en tiempo real
+                </h3>
+                <p className="text-gray-600 mb-2">
+                  Nuestro sistema consulta directamente el padrón del SAT para obtener la información más actualizada disponible.
+                </p>
+                <p className="text-sm text-gray-500">
+                  Utilizamos conexiones optimizadas y caché inteligente para garantizar respuestas rápidas sin comprometer la precisión de los datos.
+                </p>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                2. Consultamos el SAT en tiempo real
-              </h3>
-              <p className="text-gray-600">
-                Nuestro sistema consulta directamente el padrón del SAT
-              </p>
-            </div>
+            </ScrollReveal>
 
             {/* Paso 3 */}
-            <div className="text-center">
-              <div className="bg-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <span className="text-4xl">✅</span>
+            <ScrollReveal direction="right" delay={0.3}>
+              <div className="text-center">
+                <div className="w-12 h-12 bg-[#2F7E7A] text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold">
+                  3
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  Recibe resultado instantáneo
+                </h3>
+                <p className="text-gray-600 mb-2">
+                  Obtén la respuesta en menos de 2 segundos con todos los detalles del contribuyente: nombre, régimen fiscal, estado y fecha de alta.
+                </p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Cada resultado incluye información completa y verificada que puedes guardar, exportar o usar directamente en tus procesos de negocio.
+                </p>
+                <div className="text-center mt-6">
+                  <Link
+                    href="/auth/register"
+                    className="inline-block bg-[#2F7E7A] text-white px-6 py-3 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold"
+                  >
+                    Comenzar Gratis Ahora
+                  </Link>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                3. Recibe resultado instantáneo
-              </h3>
-              <p className="text-gray-600">
-                Obtén la respuesta en menos de 2 segundos con todos los detalles
-              </p>
-            </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
+      </ScrollReveal>
+
+      {/* VISTA PREVIA DEL DASHBOARD */}
+      <ScrollReveal direction="up">
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
+          {/* Imagen de fondo muy sutil */}
+          <div className="absolute inset-0 z-0 opacity-5">
+            <Image
+              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&q=80"
+              alt="Background"
+              fill
+              className="object-cover"
+              sizes="100vw"
+            />
+          </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+                Dashboard Intuitivo y Potente
+                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
+                Gestiona todas tus validaciones desde un panel de control moderno y fácil de usar
+              </p>
+              <p className="text-lg text-gray-500 max-w-3xl mx-auto">
+                Visualiza estadísticas en tiempo real, accede a tu historial completo, exporta reportes y gestiona tu cuenta desde un solo lugar.
+              </p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+              <div className="relative w-full h-[600px] md:h-[700px]">
+                <Image
+                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=800&fit=crop&q=80"
+                  alt="Dashboard Maflipp"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-white/95 backdrop-blur-sm rounded-xl p-8 md:p-12 max-w-2xl mx-4 shadow-2xl">
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-[#2F7E7A] rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-lg">M</span>
+                        </div>
+                        <div>
+                          <div className="h-4 bg-gray-800 rounded w-32 mb-2"></div>
+                          <div className="h-3 bg-gray-300 rounded w-24"></div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="w-8 h-8 bg-[#2F7E7A] rounded"></div>
+                        <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+                      </div>
+                    </div>
+                    
+                    {/* Stats cards */}
+                    <div className="grid grid-cols-3 gap-4 mb-6">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                          <div className="h-3 bg-gray-400 rounded w-20 mb-2"></div>
+                          <div className="h-6 bg-[#2F7E7A] rounded w-16"></div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Table preview */}
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <div className="bg-gray-50 p-3 border-b border-gray-200">
+                        <div className="h-4 bg-gray-400 rounded w-40"></div>
+                      </div>
+                      <div className="p-4 space-y-3">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="flex items-center gap-4">
+                            <div className="h-8 bg-gray-200 rounded w-32"></div>
+                            <div className="h-8 bg-gray-200 rounded flex-1"></div>
+                            <div className="h-8 bg-green-500 rounded w-20"></div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="text-center mt-8">
+              <Link
+                href="/auth/register"
+                className="inline-flex items-center text-[#2F7E7A] font-semibold hover:text-[#1F5D59] transition-colors"
+              >
+                Prueba el dashboard gratis
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </section>
+      </ScrollReveal>
 
       {/* PLANES DE PRECIOS */}
-      <section id="precios" className="py-20">
+      <ScrollReveal direction="up">
+        <section id="precios" className="py-20 bg-gradient-to-br from-white to-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16">
-            Planes de Precios
-          </h2>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+              Planes de Precios
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+            </h2>
+          </div>
           <div className="grid md:grid-cols-3 gap-8 lg:gap-6">
             {/* Plan FREE */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:-translate-y-3 active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation">
               <h3 className="text-2xl font-bold text-gray-900 mb-2">FREE</h3>
               <div className="mb-6">
                 <span className="text-4xl font-bold text-gray-900">$0</span>
                 <span className="text-gray-600"> MXN/mes</span>
               </div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 mb-8">
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600">5 validaciones/mes</span>
+                  <span className="text-gray-700 font-medium">10 validaciones/mes</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600">Resultados básicos</span>
+                  <span className="text-gray-700 font-medium">Resultados básicos (válido/inválido)</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600">Sin historial</span>
+                  <span className="text-gray-700 font-medium">Estadísticas básicas de uso</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 font-medium">1 usuario</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 font-medium">Soporte: FAQs</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 font-medium">Límite: 10 validaciones/mes</span>
+                </li>
+                <li className="flex items-start pt-2 border-t border-gray-200">
+                  <svg className="w-5 h-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-500">Sin historial de validaciones</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-500">Sin exportación de datos</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-gray-400 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-500">Sin acceso a API</span>
                 </li>
               </ul>
               <button className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
@@ -169,91 +614,166 @@ export default function Home() {
             </div>
 
             {/* Plan PRO - DESTACADO */}
-            <div className="bg-white border-2 border-[#10B981] rounded-2xl p-8 shadow-xl relative transform scale-105">
+            <div className="bg-white border-2 border-[#2F7E7A] rounded-2xl p-8 shadow-xl relative transform scale-105 hover:scale-110 hover:-translate-y-3 active:scale-105 transition-all duration-300 cursor-pointer touch-manipulation">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-[#10B981] text-white px-4 py-1 rounded-full text-sm font-semibold">
+                <span className="bg-[#2F7E7A] text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
                   MÁS POPULAR
                 </span>
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">PRO</h3>
               <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$99</span>
+                <span className="text-4xl font-bold text-gray-900">$299</span>
                 <span className="text-gray-600"> MXN/mes</span>
               </div>
               <ul className="space-y-4 mb-8">
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-600">100 validaciones/mes</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-600">Historial completo</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-600">Exportar a CSV</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-600">API básica</span>
-                </li>
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span className="text-gray-600">Soporte prioritario</span>
-                </li>
-              </ul>
-              <button className="w-full bg-[#10B981] text-white py-3 rounded-lg font-semibold hover:bg-[#059669] transition-colors">
-                Comenzar Ahora
-              </button>
-            </div>
-
-            {/* Plan EMPRESA */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">EMPRESA</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$499</span>
-                <span className="text-gray-600"> MXN/mes</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-600">1,000 validaciones/mes</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600">API completa</span>
+                  <span className="text-gray-600">Historial ilimitado</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600">Dashboard avanzado</span>
+                  <span className="text-gray-600">Exportar a CSV/Excel</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">API Básica: 2,000 llamadas/mes</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">3 usuarios en equipo</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Dashboard avanzado con gráficos y estadísticas detalladas</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Alertas por email</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Soporte email (24h)</span>
+                </li>
+              </ul>
+              <button className="w-full bg-[#2F7E7A] text-white py-3 rounded-lg font-semibold hover:bg-[#1F5D59] transition-colors shadow-lg hover:shadow-xl">
+                Comenzar Ahora
+              </button>
+            </div>
+
+            {/* Plan BUSINESS */}
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:-translate-y-3 active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">BUSINESS</h3>
+              <div className="mb-6">
+                <span className="text-4xl font-bold text-gray-900">$999</span>
+                <span className="text-gray-600"> MXN/mes</span>
+              </div>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">5,000 validaciones/mes</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Historial ilimitado</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Exportar a CSV/Excel/PDF</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">API Completa: 10,000 llamadas/mes</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Usuarios ilimitados</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   <span className="text-gray-600">White-label</span>
                 </li>
                 <li className="flex items-start">
-                  <svg className="w-5 h-5 text-[#10B981] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-gray-600">Soporte 24/7</span>
+                  <span className="text-gray-600">SSO (Single Sign-On)</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="flex items-center flex-wrap gap-2">
+                    <span className="text-gray-500 line-through">SLA 99.9%</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                      Próximamente
+                    </span>
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Dashboard Analytics completo: análisis por hora, comparación año anterior, predicciones y reportes PDF</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="flex items-center flex-wrap gap-2">
+                    <span className="text-gray-500 line-through">Validación CFDI</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                      Próximamente
+                    </span>
+                  </span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-600">Onboarding personalizado</span>
+                </li>
+                <li className="flex items-start">
+                  <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="flex items-center flex-wrap gap-2">
+                    <span className="text-gray-500 line-through">Soporte prioritario</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                      Próximamente
+                    </span>
+                  </span>
                 </li>
               </ul>
               <button className="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
@@ -263,73 +783,343 @@ export default function Home() {
           </div>
         </div>
       </section>
+      </ScrollReveal>
 
-      {/* TESTIMONIOS */}
-      <section className="bg-gray-50 py-20">
+      {/* CASOS DE USO DETALLADOS */}
+      <ScrollReveal direction="up">
+        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16">
-            Lo que dicen nuestros clientes
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-700 text-lg mb-6 italic">
-                &quot;Como contador, valido 50+ RFCs al mes. ValidaRFC me ahorra horas.&quot;
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-[#10B981] rounded-full flex items-center justify-center text-white font-semibold mr-4">
-                  C
-                </div>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+              Casos de Uso Reales
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Descubre cómo empresas y profesionales pueden optimizar sus procesos con Maflipp
+            </p>
+          </div>
+          <div className="space-y-8">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 md:p-12 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
                 <div>
-                  <p className="font-semibold text-gray-900">Carlos</p>
-                  <p className="text-gray-600 text-sm">Contador</p>
+                  <div className="inline-block bg-[#2F7E7A] text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    CASO DE USO #1
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                    Contador Valida 50+ RFCs Mensuales
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    Un contador público valida RFCs de clientes y proveedores antes de emitir facturas. 
+                    Antes usaba el portal del SAT manualmente, tardando 5 minutos por RFC.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>Ahorra 4 horas/semana en validaciones</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>Reduce errores en facturación a cero</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>ROI de 500% en el primer mes</span>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Link
+                      href="/auth/register"
+                      className="inline-block bg-[#2F7E7A] text-white px-6 py-3 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold"
+                    >
+                      Comenzar Gratis
+                    </Link>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                  <div className="text-center">
+                    <div className="text-5xl font-bold text-[#2F7E7A] mb-2">4h</div>
+                    <div className="text-gray-600 mb-4">Ahorradas por semana</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-2">$2,000</div>
+                    <div className="text-gray-600">Valor del tiempo ahorrado/mes</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 md:p-12 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div className="order-2 md:order-1">
+                  <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                    <div className="text-center">
+                      <div className="text-5xl font-bold text-green-600 mb-2">100%</div>
+                      <div className="text-gray-600 mb-4">Precisión en validaciones</div>
+                      <div className="text-3xl font-bold text-gray-900 mb-2">0</div>
+                      <div className="text-gray-600">Errores desde implementación</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <p className="text-gray-700 text-lg mb-6 italic">
-                &quot;Implementamos en nuestra fintech para validar clientes automáticamente.&quot;
-              </p>
-              <div className="flex items-center">
-                <div className="w-12 h-12 bg-[#10B981] rounded-full flex items-center justify-center text-white font-semibold mr-4">
-                  S
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">Sofía</p>
-                  <p className="text-gray-600 text-sm">Fintech</p>
+                <div className="order-1 md:order-2">
+                  <div className="inline-block bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    CASO DE USO #2
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                    Fintech Valida Clientes en Onboarding
+                  </h3>
+                  <p className="text-gray-700 mb-4">
+                    Una fintech integra nuestra API para validar RFCs automáticamente durante el proceso 
+                    de onboarding de nuevos clientes empresariales.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>Validación automática en 2 segundos</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>Cumple con requisitos KYC y compliance</span>
+                    </div>
+                    <div className="flex items-center text-gray-700">
+                      <svg className="w-5 h-5 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>Reduce fraude y mejora conversión</span>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Link
+                      href="/auth/register"
+                      className="inline-block bg-[#2F7E7A] text-white px-6 py-3 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold"
+                    >
+                      Comenzar Gratis
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </section>
+      </ScrollReveal>
+
+      {/* API E INTEGRACIONES */}
+      <ScrollReveal direction="up">
+        <section id="api" className="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+              API e Integraciones
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Integra validación de RFCs en tus sistemas con nuestra API RESTful completa
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="bg-white rounded-xl p-8 shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-[#2F7E7A] rounded-lg flex items-center justify-center mr-4">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900">API RESTful</h3>
+                </div>
+                <ul className="space-y-4 mb-6">
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Respuesta en menos de 2 segundos</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Autenticación con API Keys</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Documentación completa con ejemplos</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Soporte para webhooks</span>
+                  </li>
+                  <li className="flex items-start">
+                    <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-gray-700">Rate limiting configurable</span>
+                  </li>
+                </ul>
+                <Link
+                  href="/developers"
+                  className="inline-flex items-center text-[#2F7E7A] font-semibold hover:text-[#1F5D59] transition-colors"
+                >
+                  Ver Documentación Completa
+                  <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+            <div>
+              <div className="bg-gray-900 rounded-xl p-6 overflow-hidden">
+                <div className="flex items-center mb-4">
+                  <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <pre className="text-green-400 text-sm font-mono">
+                  <code>{`// Ejemplo de uso de la API
+POST /api/public/validate
+Content-Type: application/json
+Authorization: Bearer YOUR_API_KEY
+
+{
+  "rfc": "ABC123456XYZ"
+}
+
+// Respuesta
+{
+  "valid": true,
+  "name": "EMPRESA S.A. DE C.V.",
+  "status": "ACTIVO",
+  "regime": "General de Ley",
+  "start_date": "2020-01-15"
+}`}</code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      </ScrollReveal>
+
+      {/* SEGURIDAD Y COMPLIANCE */}
+      <ScrollReveal direction="up">
+        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+              Seguridad y Compliance
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Cumplimos con los más altos estándares de seguridad y normativas fiscales mexicanas
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Encriptación SSL/TLS</h3>
+              <p className="text-gray-600">
+                Todas las comunicaciones están encriptadas. Tus datos están protegidos en tránsito y en reposo.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Cumplimiento Legal</h3>
+              <p className="text-gray-600">
+                Consultamos únicamente información pública del SAT. Totalmente legal y conforme a normativas mexicanas.
+              </p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Privacidad de Datos</h3>
+              <p className="text-gray-600">
+                No almacenamos información sensible. Solo procesamos RFCs para validación y generamos reportes anónimos.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      </ScrollReveal>
+
+      {/* COMPARACIÓN */}
+      <ScrollReveal direction="up">
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+              Maflipp vs Métodos Tradicionales
+              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Compara cómo Maflipp supera a los métodos manuales de validación
+            </p>
+          </div>
+                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Característica</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Método Manual</th>
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-[#2F7E7A] bg-blue-50">Maflipp</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Tiempo por validación</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">3-5 minutos</td>
+                    <td className="px-6 py-4 text-sm text-[#2F7E7A] font-semibold text-center">2 segundos</td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Precisión</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">Riesgo de error humano</td>
+                    <td className="px-6 py-4 text-sm text-[#2F7E7A] font-semibold text-center">100% preciso</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Historial</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">Manual, propenso a pérdidas</td>
+                    <td className="px-6 py-4 text-sm text-[#2F7E7A] font-semibold text-center">Automático e ilimitado</td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Exportación</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">Copiar/pegar manual</td>
+                    <td className="px-6 py-4 text-sm text-[#2F7E7A] font-semibold text-center">CSV/Excel con un click</td>
+                  </tr>
+                  <tr>
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Integración</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">No disponible</td>
+                    <td className="px-6 py-4 text-sm text-[#2F7E7A] font-semibold text-center">API RESTful completa</td>
+                  </tr>
+                  <tr className="bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">Costo por 100 validaciones</td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">$2,000 - $5,000 MXN (tiempo)</td>
+                    <td className="px-6 py-4 text-sm text-[#2F7E7A] font-semibold text-center">Desde $299 MXN/mes</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      </ScrollReveal>
+
 
       {/* FAQ */}
-      <section className="py-20">
+      <ScrollReveal direction="up">
+        <section className="py-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16">
             Preguntas Frecuentes
           </h2>
           <div className="space-y-6">
-            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
                 ¿Es legal consultar el SAT?
               </h3>
@@ -339,7 +1129,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
                 ¿Qué métodos de pago aceptan?
               </h3>
@@ -349,7 +1139,7 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
                 ¿Puedo cancelar cuando quiera?
               </h3>
@@ -359,46 +1149,95 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
               <h3 className="text-xl font-semibold text-gray-900 mb-3">
                 ¿Cómo funcionan las validaciones gratis?
               </h3>
               <p className="text-gray-600">
-                El plan gratuito incluye 5 validaciones por mes sin necesidad de tarjeta de crédito. 
+                El plan gratuito incluye 10 validaciones por mes sin necesidad de tarjeta de crédito. 
                 Las validaciones se renuevan cada mes. Si necesitas más, puedes actualizar a un plan de pago en cualquier momento.
               </p>
             </div>
           </div>
         </div>
       </section>
+      </ScrollReveal>
+
+      {/* CTA FINAL */}
+      <ScrollReveal direction="up">
+        <section className="py-20 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] relative overflow-hidden">
+          {/* Imagen de fondo muy sutil */}
+          <div className="absolute inset-0 z-0 opacity-10">
+            <Image
+              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&q=80"
+              alt="Background"
+              fill
+              className="object-cover"
+              sizes="100vw"
+            />
+          </div>
+          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+              ¿Listo para validar RFCs en 2 segundos?
+            </h2>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+              Empieza a ahorrar horas de trabajo manual con Maflipp
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link
+                href="/auth/register"
+                className="bg-white text-[#2F7E7A] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
+              >
+                Comenzar Gratis
+              </Link>
+              <Link
+                href="/pricing"
+                className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors"
+              >
+                Ver Planes y Precios
+              </Link>
+            </div>
+            <p className="text-blue-100 text-sm mt-6">
+              ✅ Sin tarjeta de crédito • ✅ 10 validaciones gratis • ✅ Cancela cuando quieras
+            </p>
+          </div>
+        </section>
+      </ScrollReveal>
 
       {/* FOOTER */}
       <footer id="contacto" className="bg-gray-900 text-gray-300 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-2xl font-bold text-[#10B981] mb-4">
-                ValidaRFC.mx
-              </h3>
-              <p className="text-gray-400">
-                Valida RFCs contra el SAT en tiempo real
+              <Link href="/" className="inline-block mb-4">
+                <Image
+                  src="/Maflipp-recortada.png"
+                  alt="Maflipp Logo"
+                  width={120}
+                  height={40}
+                  className="h-10 w-auto object-contain"
+                  quality={100}
+                />
+              </Link>
+              <p className="text-gray-400 text-sm">
+                Plataforma profesional de validación de RFCs contra el SAT
               </p>
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">Producto</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#precios" className="hover:text-[#10B981] transition-colors">
+                  <Link href="#precios" className="hover:text-[#2F7E7A] transition-colors">
                     Precios
                   </Link>
                 </li>
                 <li>
-                  <Link href="#api" className="hover:text-[#10B981] transition-colors">
+                  <Link href="#api" className="hover:text-[#2F7E7A] transition-colors">
                     API
                   </Link>
                 </li>
                 <li>
-                  <Link href="/dashboard" className="hover:text-[#10B981] transition-colors">
+                  <Link href="/dashboard" className="hover:text-[#2F7E7A] transition-colors">
                     Dashboard
                   </Link>
                 </li>
@@ -408,12 +1247,12 @@ export default function Home() {
               <h4 className="font-semibold text-white mb-4">Legal</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/terminos" className="hover:text-[#10B981] transition-colors">
+                  <Link href="/terminos" className="hover:text-[#2F7E7A] transition-colors">
                     Términos y Condiciones
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacidad" className="hover:text-[#10B981] transition-colors">
+                  <Link href="/privacidad" className="hover:text-[#2F7E7A] transition-colors">
                     Política de Privacidad
                   </Link>
                 </li>
@@ -421,21 +1260,91 @@ export default function Home() {
             </div>
             <div>
               <h4 className="font-semibold text-white mb-4">Contacto</h4>
-              <p className="text-gray-400">
-                <a
-                  href="mailto:hola@validarfcmx.mx"
-                  className="hover:text-[#10B981] transition-colors"
-                >
-                  hola@validarfcmx.mx
-                </a>
+              <p className="text-gray-400 text-sm mb-4">
+                ¿Tienes preguntas? Escríbenos y te responderemos pronto.
               </p>
+              <form 
+                id="contact-form"
+                className="space-y-3"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const formData = new FormData(form);
+                  const data = {
+                    name: formData.get("name"),
+                    email: formData.get("email"),
+                    company: formData.get("company") || "",
+                    message: formData.get("message"),
+                  };
+
+                  try {
+                    const response = await fetch("/api/contact", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(data),
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                      alert(result.message || "¡Mensaje enviado! Te responderemos pronto.");
+                      form.reset();
+                    } else {
+                      alert(result.error || "Error al enviar el mensaje. Por favor intenta de nuevo.");
+                    }
+                  } catch (error) {
+                    alert("Error al enviar el mensaje. Por favor intenta de nuevo.");
+                  }
+                }}
+              >
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Tu nombre"
+                  required
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-700 text-sm"
+                />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Tu email"
+                  required
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-700 text-sm"
+                />
+                <input
+                  type="text"
+                  name="company"
+                  placeholder="Empresa (opcional)"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-700 text-sm"
+                />
+                <textarea
+                  name="message"
+                  placeholder="Tu mensaje"
+                  required
+                  rows={3}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-700 text-sm resize-none"
+                />
+                <button
+                  type="submit"
+                  className="w-full bg-[#2F7E7A] text-white px-4 py-2 rounded-lg hover:bg-[#1F5D59] transition-colors font-medium text-sm"
+                >
+                  Enviar Mensaje
+                </button>
+              </form>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>© 2024 ValidaRFC.mx. Todos los derechos reservados.</p>
+            <p>© 2024 Maflipp. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        initialMode={authModalMode}
+      />
     </div>
   );
 }

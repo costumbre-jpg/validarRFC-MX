@@ -1,0 +1,31 @@
+{
+  "name": "Maflipp - Validación de RFCs contra el SAT",
+  "short_name": "Maflipp",
+  "description": "Plataforma profesional para validar RFCs contra el SAT en tiempo real",
+  "icons": [
+    {
+      "src": "/Maflipp512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Maflipp512.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/Maflipp512.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#2F7E7A",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/",
+  "scope": "/"
+}
+

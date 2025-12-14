@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Logo from "@/components/layout/Logo";
 import Button from "@/components/ui/button";
 
 interface HeaderProps {
@@ -17,36 +18,32 @@ export default function Header({ showAuth = true }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold text-[#10B981]">
-              ValidaRFC.mx
-            </span>
-          </Link>
+          <Logo size="md" />
 
           {/* Navigation */}
           {!isDashboard && (
             <nav className="hidden md:flex space-x-8">
               <Link
                 href="/"
-                className="text-gray-700 hover:text-[#10B981] transition-colors"
+                className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium"
               >
                 Inicio
               </Link>
               <Link
                 href="/pricing"
-                className="text-gray-700 hover:text-[#10B981] transition-colors"
+                className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium"
               >
                 Precios
               </Link>
               <Link
                 href="/developers"
-                className="text-gray-700 hover:text-[#10B981] transition-colors"
+                className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium"
               >
                 API
               </Link>
               <Link
                 href="#contacto"
-                className="text-gray-700 hover:text-[#10B981] transition-colors"
+                className="text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium"
               >
                 Contacto
               </Link>

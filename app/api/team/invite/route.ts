@@ -1,0 +1,139 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getPlan, type PlanId } from "@/lib/plans";
+import { sendEmail } from "@/lib/email";
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    // Verificar que el usuario tenga plan Pro o Business
+    const { data: userData } = await supabase
+      .from("users")
+      .select("subscription_status")
+      .eq("id", user.id)
+      .single();
+
+    const planId = (userData?.subscription_status || "free") as PlanId;
+    const plan = getPlan(planId);
+    const isPro = planId === "pro" || planId === "business";
+
+    if (!isPro) {
+      return NextResponse.json(
+        { error: "La gestión de equipo está disponible solo para planes Pro y Business" },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { email } = body;
+
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return NextResponse.json(
+        { error: "Email inválido" },
+        { status: 400 }
+      );
+    }
+
+    // Verificar límite de usuarios
+    const maxUsers = plan.features.users === -1 ? Infinity : plan.features.users;
+    const { count: currentMembersCount } = await supabase
+      .from("team_members")
+      .select("*", { count: "exact", head: true })
+      .eq("team_owner_id", user.id)
+      .in("status", ["pending", "active"]);
+
+    if (currentMembersCount !== null && currentMembersCount >= maxUsers) {
+      return NextResponse.json(
+        { error: `Has alcanzado el límite de ${maxUsers} usuarios para tu plan` },
+        { status: 403 }
+      );
+    }
+
+    // Verificar que el email no esté ya en el equipo
+    const { data: existingMember } = await supabase
+      .from("team_members")
+      .select("*")
+      .eq("team_owner_id", user.id)
+      .eq("email", email.toLowerCase())
+      .single();
+
+    if (existingMember) {
+      return NextResponse.json(
+        { error: "Este email ya está en tu equipo" },
+        { status: 400 }
+      );
+    }
+
+    // Generar token de invitación único
+    const invitationToken = crypto.randomUUID() + "-" + Date.now().toString(36);
+
+    // Crear invitación
+    const { data: invitation, error: inviteError } = await supabase
+      .from("team_members")
+      .insert({
+        team_owner_id: user.id,
+        email: email.toLowerCase(),
+        role: "member",
+        status: "pending",
+        invitation_token: invitationToken,
+        invited_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (inviteError) {
+      console.error("Error creando invitación:", inviteError);
+      return NextResponse.json(
+        { error: "Error al crear invitación" },
+        { status: 500 }
+      );
+    }
+
+    // Enviar email de invitación (opcional - puede fallar silenciosamente)
+    try {
+      const inviteUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/dashboard/equipo/accept?token=${invitationToken}`;
+      await sendEmail({
+        to: email,
+        subject: `Invitación a unirte al equipo de Maflipp`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #2F7E7A;">Invitación al Equipo</h2>
+            <p>Has sido invitado a unirte al equipo de Maflipp.</p>
+            <p>Haz clic en el siguiente enlace para aceptar la invitación:</p>
+            <a href="${inviteUrl}" style="display: inline-block; background-color: #2F7E7A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0;">
+              Aceptar Invitación
+            </a>
+            <p style="color: #666; font-size: 12px;">Si no solicitaste esta invitación, puedes ignorar este email.</p>
+          </div>
+        `,
+      });
+    } catch (emailError) {
+      console.error("Error enviando email de invitación:", emailError);
+      // Continuar aunque falle el email
+    }
+
+    return NextResponse.json({
+      success: true,
+      invitation: {
+        id: invitation.id,
+        email: invitation.email,
+        status: invitation.status,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error en invite route:", error);
+    return NextResponse.json(
+      { error: error?.message || "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}
+
