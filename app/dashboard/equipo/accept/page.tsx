@@ -46,29 +46,33 @@ export default function AcceptInvitationPage() {
           return;
         }
 
+        const inv = invitation as any;
+
         // Verificar que el email coincida
-        if (invitation.email.toLowerCase() !== user.email.toLowerCase()) {
+        const invitationEmail = inv.email;
+        const userEmail = user.email;
+        if (!userEmail || !invitationEmail || invitationEmail.toLowerCase() !== userEmail.toLowerCase()) {
           setStatus("error");
-          setMessage(`Esta invitación fue enviada a ${invitation.email}, pero estás logueado como ${user.email}`);
+          setMessage(`Esta invitación fue enviada a ${invitationEmail || "email desconocido"}, pero estás logueado como ${userEmail || "usuario sin email"}`);
           return;
         }
 
         // Verificar si ya fue aceptada
-        if (invitation.status === "active" && invitation.user_id) {
+        if (inv.status === "active" && inv.user_id) {
           setStatus("already-accepted");
           setMessage("Esta invitación ya fue aceptada anteriormente");
           return;
         }
 
         // Actualizar la invitación para marcarla como aceptada
-        const { error: updateError } = await supabase
-          .from("team_members")
+        const { error: updateError } = await (supabase
+          .from("team_members") as any)
           .update({
             user_id: user.id,
             status: "active",
             accepted_at: new Date().toISOString(),
           })
-          .eq("id", invitation.id);
+          .eq("id", inv.id);
 
         if (updateError) {
           console.error("Error aceptando invitación:", updateError);
@@ -78,15 +82,15 @@ export default function AcceptInvitationPage() {
         }
 
         // Obtener email del dueño del equipo
-        if (invitation.team_owner_id) {
+        if (inv.team_owner_id) {
           const { data: ownerData } = await supabase
             .from("users")
             .select("email")
-            .eq("id", invitation.team_owner_id)
+            .eq("id", inv.team_owner_id)
             .single();
           
           if (ownerData) {
-            setTeamOwnerEmail(ownerData.email);
+            setTeamOwnerEmail((ownerData as any).email);
           }
         }
 
@@ -110,7 +114,6 @@ export default function AcceptInvitationPage() {
   };
 
   const brandPrimary = getBrandColor('--brand-primary', '#2F7E7A');
-  const brandSecondary = getBrandColor('--brand-secondary', '#1F5D59');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">

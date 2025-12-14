@@ -88,10 +88,10 @@ export default function APIKeysPage() {
       
       if (dbUser && planFromUrl) {
         setUserData({
-          ...dbUser,
+          ...(dbUser as any),
           subscription_status: planFromUrl, // Sobrescribir con el plan de la URL
         });
-      } else {
+      } else if (dbUser) {
         setUserData(dbUser);
       }
 

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     // Subir a Supabase Storage
     // Nota: Necesitas crear el bucket "avatars" en Supabase Storage con políticas públicas
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { data: _uploadData, error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, buffer, {
         contentType: file.type,

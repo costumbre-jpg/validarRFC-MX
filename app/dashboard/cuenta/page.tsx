@@ -53,14 +53,14 @@ export default function CuentaPage() {
         .single();
       
       // Calcular total_validations si no está disponible
-      if (dbUser && (!dbUser.total_validations || dbUser.total_validations === 0)) {
+      if (dbUser && (!(dbUser as any).total_validations || (dbUser as any).total_validations === 0)) {
         const { count } = await supabase
           .from("validations")
           .select("*", { count: "exact", head: true })
           .eq("user_id", user.id);
         
         if (count !== null) {
-          dbUser.total_validations = count;
+          (dbUser as any).total_validations = count;
         }
       }
       
@@ -136,9 +136,17 @@ export default function CuentaPage() {
 
   const getInitials = (text: string) => {
     if (!text) return "U";
-    const parts = text.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    const parts = text.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "U";
+    const first = parts[0];
+    if (!first) return "U";
+    if (parts.length === 1) return first.slice(0, 2).toUpperCase();
+    const second = parts[1];
+    if (!second || !first[0] || !second[0]) {
+      const firstChar = first[0];
+      return firstChar ? firstChar.toUpperCase() : "U";
+    }
+    return (first[0] + second[0]).toUpperCase();
   };
 
   return (

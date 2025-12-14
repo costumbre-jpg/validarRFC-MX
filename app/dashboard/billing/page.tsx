@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getSubscriptionPlanName } from "@/lib/utils";
-import { getActivePlans, getPlan, PAID_PLANS, ACTIVE_PLANS, type PlanId } from "@/lib/plans";
+import { getPlan, ACTIVE_PLANS, type PlanId } from "@/lib/plans";
 
 export default function BillingPage() {
   const [userData, setUserData] = useState<any>(null);
@@ -49,10 +48,11 @@ export default function BillingPage() {
       const planParam = searchParams.get("plan");
       const planFromUrl = planParam && ["pro", "business"].includes(planParam) ? planParam : null;
       
-      setUserData(planFromUrl 
-        ? { ...userData, subscription_status: planFromUrl }
-        : userData
-      );
+      if (planFromUrl && userData) {
+        setUserData({ ...(userData as any), subscription_status: planFromUrl });
+      } else if (userData) {
+        setUserData(userData);
+      }
 
       // Obtener suscripción activa real
       const { data: subscriptionData } = await supabase

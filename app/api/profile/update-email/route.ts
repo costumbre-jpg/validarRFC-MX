@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
 
     // Actualizar email usando Supabase Auth
     // Esto enviará un email de confirmación al nuevo correo
-    const { data: updateData, error: updateError } = await supabase.auth.updateUser({
+    const { data: _updateData, error: updateError } = await supabase.auth.updateUser({
       email: newEmail,
     });
 

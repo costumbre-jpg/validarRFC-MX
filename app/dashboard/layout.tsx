@@ -13,7 +13,6 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [user, setUser] = useState<any>(null);
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [branding, setBranding] = useState<any>(null);
@@ -45,7 +44,6 @@ export default function DashboardLayout({
         const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
         
         // Crear datos de usuario mock para diseño
-        setUser({ email: "diseño@maflipp.com", id: "mock-user" } as any);
         setUserData({ 
           email: "diseño@maflipp.com", 
           subscription_status: designPlan, // Usar plan de la URL o 'free' por defecto
@@ -66,7 +64,6 @@ export default function DashboardLayout({
       }
 
       console.log("🟢 Layout: Usuario autenticado:", session.user.email);
-      setUser(session.user);
 
       // Obtener datos del usuario
       const { data: existingUser } = await supabase

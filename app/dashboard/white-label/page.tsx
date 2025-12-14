@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getPlan, type PlanId } from "@/lib/plans";
+import { type PlanId } from "@/lib/plans";
 
 interface WhiteLabelSettings {
   brand_name: string;
@@ -69,7 +69,6 @@ export default function WhiteLabelPage() {
   }, [searchParams]);
 
   const isBusiness = planId === "business";
-  const plan = getPlan(planId);
 
   const handleSave = async () => {
     if (!isBusiness) {
@@ -113,7 +112,6 @@ export default function WhiteLabelPage() {
   };
 
   const brandPrimary = getBrandColor('--brand-primary', '#2F7E7A');
-  const brandSecondary = getBrandColor('--brand-secondary', '#1F5D59');
 
   if (!isBusiness) {
     return (

@@ -1,6 +1,5 @@
 "use client";
 
-import CFDIValidator from "@/components/dashboard/CFDIValidator";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -11,7 +10,6 @@ export default function CFDIPage() {
 
   // Get brand colors
   const brandPrimary = "var(--brand-primary, #2F7E7A)";
-  const brandSecondary = "var(--brand-secondary, #1F5D59)";
 
   // Modo diseño: permitir ver si ?plan=business
   if (designPlan !== "business") {

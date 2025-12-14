@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import ValidationHistory from "@/components/dashboard/ValidationHistory";
-import { getPlan, planHasFeature, type PlanId } from "@/lib/plans";
+import { planHasFeature, type PlanId } from "@/lib/plans";
 
 export default function HistorialPage() {
   const [userData, setUserData] = useState<any>(null);
@@ -149,7 +149,6 @@ export default function HistorialPage() {
   }
 
   const planId = (userData?.subscription_status || "free") as PlanId;
-  const plan = getPlan(planId);
   
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {

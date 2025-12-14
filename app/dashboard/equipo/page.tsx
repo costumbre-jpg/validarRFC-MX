@@ -60,7 +60,7 @@ export default function EquipoPage() {
       setUserData(dbUser);
 
       // Get team members reales
-      if (dbUser && (dbUser.subscription_status === "pro" || dbUser.subscription_status === "business")) {
+      if (dbUser && ((dbUser as any).subscription_status === "pro" || (dbUser as any).subscription_status === "business")) {
         try {
           const response = await fetch("/api/team/members");
           if (response.ok) {
@@ -247,9 +247,13 @@ export default function EquipoPage() {
   };
 
   const getInitials = (email: string) => {
-    const parts = email.split("@")[0].split(/[._-]/);
+    const parts = email.split("@")[0]?.split(/[._-]/).filter(Boolean) || [];
     if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+      const first = parts[0];
+      const second = parts[1];
+      if (first && second && first[0] && second[0]) {
+        return (first[0] + second[0]).toUpperCase();
+      }
     }
     return email.slice(0, 2).toUpperCase();
   };

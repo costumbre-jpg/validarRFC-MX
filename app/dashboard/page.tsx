@@ -9,7 +9,6 @@ import RFCValidator from "@/components/dashboard/RFCValidator";
 import ValidationHistory from "@/components/dashboard/ValidationHistory";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import AdvancedDashboard from "@/components/dashboard/AdvancedDashboard";
-import CFDIValidator from "@/components/dashboard/CFDIValidator";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);

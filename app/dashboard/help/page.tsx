@@ -8,7 +8,6 @@ export default function HelpPage() {
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plan");
   const currentPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-  const urlSuffix = planParam && ["pro", "business"].includes(planParam) ? `?plan=${planParam}` : "";
   const [expandedFaqs, setExpandedFaqs] = useState<Record<string, boolean>>({});
 
   const toggleFaq = (categoryIndex: number, faqIndex: number) => {
