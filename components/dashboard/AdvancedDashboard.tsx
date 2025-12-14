@@ -28,11 +28,6 @@ export default function AdvancedDashboard({
   const planLimit = plan.validationsPerMonth;
   const isBusiness = planId === "business";
 
-  // Solo mostrar para Pro y Business
-  if (planId !== "pro" && planId !== "business") {
-    return null;
-  }
-
   useEffect(() => {
     const loadAdvancedData = async () => {
       // Resetear estados al cambiar datos
@@ -299,7 +294,7 @@ export default function AdvancedDashboard({
     if (userData) {
       loadAdvancedData();
     }
-  }, [userData?.id, queriesThisMonth, validations.length]); // Re-ejecutar cuando cambien las validaciones
+  }, [userData, isBusiness, queriesThisMonth, validations.length]); // Re-ejecutar cuando cambien las validaciones
 
   // Calcular máximos para escalar las barras
   // Datos de ejemplo para asegurar vista previa siempre visible
@@ -340,6 +335,11 @@ export default function AdvancedDashboard({
     monthlyToShow.length > 0
       ? Math.max(...monthlyToShow.map((m) => m.count), 1)
       : 1;
+
+  // Solo mostrar para Pro y Business
+  if (planId !== "pro" && planId !== "business") {
+    return null;
+  }
 
   return (
     <div className="space-y-8">

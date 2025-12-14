@@ -264,7 +264,7 @@ public class MaflippAPI {
         }
     }
 }`,
-  }), [baseUrlForExamples, mounted]);
+  }), [baseUrlForExamples]);
 
   const copyToClipboard = (code: string, lang: string) => {
     navigator.clipboard.writeText(code);
@@ -761,7 +761,7 @@ Content-Type: application/json`, 'curl')
                         <code className="text-sm font-mono text-gray-900 bg-gray-100 px-2 py-1 rounded">source</code>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">string</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">Fuente de la validación: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">"sat"</code> o <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">"error"</code></td>
+                      <td className="px-6 py-4 text-sm text-gray-600">Fuente de la validación: <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">&quot;sat&quot;</code> o <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">&quot;error&quot;</code></td>
                     </tr>
                     <tr className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
