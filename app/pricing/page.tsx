@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
-import { getActivePlans, getPlan, type PlanId } from "@/lib/plans";
+import { getActivePlans, getPlan } from "@/lib/plans";
 
 export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
