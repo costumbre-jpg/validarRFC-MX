@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { type PlanId } from "@/lib/plans";
 
@@ -20,7 +22,7 @@ const defaults: WhiteLabelSettings = {
   hide_maflipp_brand: true,
 };
 
-export default function WhiteLabelPage() {
+function WhiteLabelPage() {
   const [settings, setSettings] = useState<WhiteLabelSettings>(defaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -290,6 +292,14 @@ export default function WhiteLabelPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WhiteLabelPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <WhiteLabelPage />
+    </Suspense>
   );
 }
 

@@ -4,7 +4,6 @@ interface DashboardStatsProps {
   totalValidations: number;
   validCount: number;
   invalidCount: number;
-  userData: any;
   validations?: any[]; // Agregar validaciones para calcular uso semanal
   showDemo?: boolean;
 }
@@ -13,7 +12,6 @@ export default function DashboardStats({
   totalValidations,
   validCount,
   invalidCount,
-  userData,
   validations = [],
   showDemo = false,
 }: DashboardStatsProps) {

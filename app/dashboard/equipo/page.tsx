@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getPlan, type PlanId } from "@/lib/plans";
 
-export default function EquipoPage() {
+function EquipoPage() {
   const [userData, setUserData] = useState<any>(null);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -523,6 +525,14 @@ export default function EquipoPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function EquipoPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <EquipoPage />
+    </Suspense>
   );
 }
 

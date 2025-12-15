@@ -74,7 +74,7 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json().catch(() => null);
         alert("✅ Preferencias de alertas guardadas correctamente");
       } else {
         const error = await response.json();

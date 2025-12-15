@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { type PlanId } from "@/lib/plans";
 
@@ -34,7 +36,7 @@ const defaults: OnboardingRequest = {
   status: "pendiente",
 };
 
-export default function OnboardingPage() {
+function OnboardingPage() {
   const [form, setForm] = useState<OnboardingRequest>(defaults);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -353,6 +355,14 @@ export default function OnboardingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <OnboardingPage />
+    </Suspense>
   );
 }
 

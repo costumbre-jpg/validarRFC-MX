@@ -1,6 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
-import { useInView } from "framer-motion";
+import { motion, type Variants, useInView } from "framer-motion";
 import { useRef } from "react";
 
 interface ScrollRevealProps {
@@ -21,7 +20,7 @@ export default function ScrollReveal({
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const variants = {
+  const variants: Variants = {
     hidden: {
       opacity: 0,
       x: direction === "left" ? -50 : direction === "right" ? 50 : 0,
@@ -34,7 +33,7 @@ export default function ScrollReveal({
       transition: {
         duration,
         delay,
-        ease: [0.25, 0.25, 0, 1],
+        ease: [0.25, 0.25, 0, 1] as [number, number, number, number],
       },
     },
   };

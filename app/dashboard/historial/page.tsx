@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import ValidationHistory from "@/components/dashboard/ValidationHistory";
 import { planHasFeature, type PlanId } from "@/lib/plans";
 
-export default function HistorialPage() {
+function HistorialPage() {
   const [userData, setUserData] = useState<any>(null);
   const [validations, setValidations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -218,6 +220,14 @@ export default function HistorialPage() {
         showFullTable={true}
       />
     </div>
+  );
+}
+
+export default function HistorialPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <HistorialPage />
+    </Suspense>
   );
 }
 

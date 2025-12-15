@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -152,7 +154,8 @@ export default function DashboardPage() {
   // }
 
   return (
-    <div className="space-y-8">
+    <Suspense fallback={null}>
+      <div className="space-y-8">
       <DashboardHeader user={user} userData={userData} />
 
       <div className="space-y-8">
@@ -167,7 +170,6 @@ export default function DashboardPage() {
           totalValidations={stats.total}
           validCount={stats.valid}
           invalidCount={stats.invalid}
-          userData={userData}
           validations={allValidationsForStats}
           showDemo={searchParams.get("demoCharts") === "1"}
         />
@@ -369,7 +371,8 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : null}
-    </div>
+      </div>
+    </Suspense>
   );
 }
 

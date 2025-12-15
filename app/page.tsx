@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import Logo from "@/components/layout/Logo";
 import Hero from "@/components/home/Hero";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import StatsSlider from "@/components/home/StatsSlider";
@@ -13,6 +12,8 @@ export default function Home() {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
+  const [contactStatus, setContactStatus] = useState<"idle" | "success" | "error">("idle");
+  const [contactMessage, setContactMessage] = useState<string>("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,8 +42,19 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* LOGO GRANDE - Sobre el header, independiente */}
-      <div className={`absolute top-1 sm:-top-1 left-8 sm:left-12 z-50 transition-transform duration-300 ${isScrolled ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}>
-        <Logo size="2xl" showText={false} />
+      <div className={`absolute top-2 sm:top-4 md:top-6 left-8 sm:left-12 md:left-16 z-50 transition-transform duration-300 ${isScrolled ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"}`}>
+        <Link href="/" className="block">
+          <Image
+            src="/Maflipp-recortada.png"
+            alt="Maflipp Logo"
+            width={280}
+            height={280}
+            className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 object-contain"
+            quality={100}
+            priority
+            unoptimized
+          />
+        </Link>
       </div>
 
       {/* HEADER - Arriba */}
@@ -141,32 +153,32 @@ export default function Home() {
 
       {/* TRUST BADGES */}
       <ScrollReveal direction="up">
-        <section className="py-12 bg-gray-50 border-y border-gray-200">
+        <section className="py-16 bg-gradient-to-b from-gray-50 to-white border-y border-gray-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 md:gap-8">
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 md:gap-10">
+              <div className="bg-white border-2 border-gray-200 rounded-xl px-6 py-4 flex items-center gap-3 text-gray-800 hover:shadow-xl hover:-translate-y-2 hover:border-[#2F7E7A] transition-all duration-300 cursor-pointer group">
+                <svg className="w-6 h-6 text-[#2F7E7A] flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">Conectado directamente con el SAT</span>
+                <span className="font-bold text-sm sm:text-base whitespace-nowrap">Conectado directamente con el SAT</span>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white border-2 border-gray-200 rounded-xl px-6 py-4 flex items-center gap-3 text-gray-800 hover:shadow-xl hover:-translate-y-2 hover:border-[#2F7E7A] transition-all duration-300 cursor-pointer group">
+                <svg className="w-6 h-6 text-[#2F7E7A] flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">Datos en tiempo real</span>
+                <span className="font-bold text-sm sm:text-base whitespace-nowrap">Datos en tiempo real</span>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white border-2 border-gray-200 rounded-xl px-6 py-4 flex items-center gap-3 text-gray-800 hover:shadow-xl hover:-translate-y-2 hover:border-[#2F7E7A] transition-all duration-300 cursor-pointer group">
+                <svg className="w-6 h-6 text-[#2F7E7A] flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">Cumplimiento fiscal mexicano</span>
+                <span className="font-bold text-sm sm:text-base whitespace-nowrap">Cumplimiento fiscal mexicano</span>
               </div>
-              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 flex items-center gap-2 text-gray-700 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
-                <svg className="w-5 h-5 text-[#2F7E7A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white border-2 border-gray-200 rounded-xl px-6 py-4 flex items-center gap-3 text-gray-800 hover:shadow-xl hover:-translate-y-2 hover:border-[#2F7E7A] transition-all duration-300 cursor-pointer group">
+                <svg className="w-6 h-6 text-[#2F7E7A] flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="font-semibold text-xs sm:text-sm md:text-base whitespace-nowrap">99.9% Uptime garantizado</span>
+                <span className="font-bold text-sm sm:text-base whitespace-nowrap">99.9% Uptime garantizado</span>
               </div>
             </div>
           </div>
@@ -175,86 +187,110 @@ export default function Home() {
 
       {/* PARA QUIÉN ES */}
       <ScrollReveal direction="up">
-        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
+        <section className="py-24 bg-gradient-to-br from-white via-gray-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               Para Quién Es Maflipp
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
+            <p className="text-base sm:text-lg text-gray-700 max-w-4xl mx-auto mb-4 font-medium leading-relaxed">
               Plataforma diseñada para profesionales y empresas que necesitan validar documentos fiscales y legales de forma confiable
             </p>
-            <p className="text-lg text-gray-500 max-w-3xl mx-auto">
+            <p className="text-sm sm:text-base text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Maflipp es la solución ideal para contadores, empresas, fintechs y desarrolladores que buscan automatizar y optimizar sus procesos de validación fiscal. Nuestra plataforma se integra perfectamente con tus flujos de trabajo existentes, ahorrando tiempo y reduciendo errores humanos.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
             <ScrollReveal direction="left" delay={0.1}>
-              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Contadores Públicos</h3>
-                <p className="text-gray-600 mb-3">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+                <svg className="w-8 h-8 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Contadores Públicos</h3>
+                <p className="text-gray-700 mb-3 text-sm leading-relaxed font-normal">
                   Valida RFCs de clientes y proveedores antes de emitir facturas. Ahorra horas de trabajo manual y reduce errores en tu contabilidad.
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-xs text-gray-600 mb-5 leading-relaxed">
                   Ideal para despachos contables que manejan múltiples clientes. Valida cientos de RFCs en minutos, genera reportes automáticos y mantén un historial completo de todas tus validaciones para auditorías.
                 </p>
                 <Link
                   href="/auth/register"
-                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                  className="inline-flex items-center gap-2 text-[#2F7E7A] font-bold text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
-                  Comenzar Gratis →
+                  Comenzar Gratis
+                  <svg className="w-5 h-5 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </div>
             </ScrollReveal>
             <ScrollReveal direction="left" delay={0.2}>
-              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Empresas</h3>
-                <p className="text-gray-600 mb-3">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+                <svg className="w-8 h-8 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Empresas</h3>
+                <p className="text-gray-700 mb-3 text-sm leading-relaxed font-normal">
                   Verifica que tus proveedores existan realmente antes de hacer negocios. Reduce riesgos fiscales y protege tu empresa de fraudes.
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-xs text-gray-600 mb-5 leading-relaxed">
                   Perfecto para departamentos de compras y finanzas. Valida proveedores antes de realizar pagos, cumple con requisitos de compliance y mantén registros detallados para auditorías internas y externas.
                 </p>
                 <Link
                   href="/auth/register"
-                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                  className="inline-flex items-center gap-2 text-[#2F7E7A] font-bold text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
-                  Comenzar Gratis →
+                  Comenzar Gratis
+                  <svg className="w-5 h-5 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </div>
             </ScrollReveal>
             <ScrollReveal direction="right" delay={0.1}>
-              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Fintechs</h3>
-                <p className="text-gray-600 mb-3">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+                <svg className="w-8 h-8 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Fintechs</h3>
+                <p className="text-gray-700 mb-3 text-sm leading-relaxed font-normal">
                   Integra validación automática en tu onboarding. Cumple con KYC y reduce fraude en tus procesos de verificación de clientes.
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-xs text-gray-600 mb-5 leading-relaxed">
                   Solución perfecta para plataformas financieras que necesitan validar la identidad fiscal de sus usuarios. Integra nuestra API en tu flujo de onboarding para validaciones automáticas en tiempo real y cumplimiento regulatorio.
                 </p>
                 <Link
                   href="/auth/register"
-                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                  className="inline-flex items-center gap-2 text-[#2F7E7A] font-bold text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
-                  Comenzar Gratis →
+                  Comenzar Gratis
+                  <svg className="w-5 h-5 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </div>
             </ScrollReveal>
             <ScrollReveal direction="right" delay={0.2}>
-              <div className="bg-white border border-gray-200 rounded-xl p-8 hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Desarrolladores</h3>
-                <p className="text-gray-600 mb-3">
+              <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+                <svg className="w-8 h-8 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Desarrolladores</h3>
+                <p className="text-gray-700 mb-3 text-sm leading-relaxed font-normal">
                   API RESTful para integrar validación de RFCs en tus aplicaciones. Documentación completa con ejemplos de código en múltiples lenguajes.
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-xs text-gray-600 mb-5 leading-relaxed">
                   API moderna y fácil de usar con endpoints bien documentados. Incluye SDKs, ejemplos de integración, webhooks para notificaciones y soporte técnico dedicado para ayudarte a implementar rápidamente.
                 </p>
                 <Link
                   href="/auth/register"
-                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                  className="inline-flex items-center gap-2 text-[#2F7E7A] font-bold text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
-                  Comenzar Gratis →
+                  Comenzar Gratis
+                  <svg className="w-5 h-5 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </div>
             </ScrollReveal>
@@ -265,86 +301,90 @@ export default function Home() {
 
       {/* BENEFICIOS */}
       <ScrollReveal direction="up">
-        <section id="caracteristicas" className="py-20 relative overflow-hidden">
-          {/* Video de fondo */}
-          <div className="absolute inset-0 z-0">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-            >
-              <source src="/anakitica2000.mp4" type="video/mp4" />
-            </video>
-            {/* Overlay oscuro para legibilidad - Reducido para ver mejor el video */}
-            <div className="absolute inset-0 bg-black/30"></div>
-          </div>
+        <section id="caracteristicas" className="py-28 bg-gradient-to-br from-white via-gray-50/30 to-white relative overflow-hidden">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 relative inline-block drop-shadow-lg">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               ¿Por Qué Elegir Maflipp?
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
-            <p className="text-xl text-white max-w-3xl mx-auto mb-4 drop-shadow-md">
+            <p className="text-base sm:text-lg text-gray-700 max-w-4xl mx-auto mb-4 font-medium">
               La plataforma más confiable para validación y auditoría de documentos fiscales en México
             </p>
-            <p className="text-lg text-gray-100 max-w-3xl mx-auto drop-shadow-sm">
+            <p className="text-sm sm:text-base text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Con Maflipp obtienes acceso directo al padrón del SAT, resultados instantáneos y un sistema robusto diseñado para empresas que requieren precisión y confiabilidad en sus operaciones fiscales diarias.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Validación Instantánea</h3>
-              <p className="text-gray-600 mb-2">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 shadow-xl hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+              <svg className="w-10 h-10 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Validación Instantánea</h3>
+              <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                 Consulta directa al padrón del SAT en menos de 2 segundos. Sin esperas, sin demoras.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-600 leading-relaxed">
                 Nuestra infraestructura optimizada garantiza respuestas rápidas incluso durante horas pico. Procesa cientos de validaciones simultáneas sin comprometer la velocidad.
               </p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">100% Precisión</h3>
-              <p className="text-gray-600 mb-2">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 shadow-xl hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+              <svg className="w-10 h-10 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">100% Precisión</h3>
+              <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                 Datos directamente del SAT. Elimina errores humanos y garantiza información confiable.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-600 leading-relaxed">
                 Consultamos directamente el padrón oficial del SAT, asegurando que cada validación refleje el estado actual del contribuyente. Sin intermediarios, sin interpretaciones.
               </p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Ahorra Tiempo</h3>
-              <p className="text-gray-600 mb-2">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 shadow-xl hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+              <svg className="w-10 h-10 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Ahorra Tiempo</h3>
+              <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                 Reduce de horas a segundos. Valida cientos de RFCs en minutos, no en días.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-600 leading-relaxed">
                 Automatiza tus procesos de validación y libera tiempo para tareas de mayor valor. Un contador puede validar 50 RFCs en menos de 2 minutos, lo que antes tomaba horas.
               </p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Seguro y Confiable</h3>
-              <p className="text-gray-600 mb-2">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 shadow-xl hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+              <svg className="w-10 h-10 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Seguro y Confiable</h3>
+              <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                 Encriptación SSL, cumplimiento con normativas fiscales mexicanas y protección de datos.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-600 leading-relaxed">
                 Cumplimos con los más altos estándares de seguridad. Todas las comunicaciones están encriptadas y seguimos las mejores prácticas de protección de datos personales.
               </p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">Historial Completo</h3>
-              <p className="text-gray-600 mb-2">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 shadow-xl hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+              <svg className="w-10 h-10 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">Historial Completo</h3>
+              <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                 Guarda y exporta todas tus validaciones. Genera reportes para auditorías y compliance.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-600 leading-relaxed">
                 Mantén un registro completo de todas tus validaciones con timestamps, resultados y detalles. Exporta a CSV o Excel para análisis y presentaciones profesionales.
               </p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-lg hover:shadow-xl hover:-translate-y-2 active:scale-95 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">API Completa</h3>
-              <p className="text-gray-600 mb-2">
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 lg:p-7 shadow-xl hover:shadow-2xl hover:-translate-y-3 hover:border-[#2F7E7A] active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation group">
+              <svg className="w-10 h-10 text-[#2F7E7A] mb-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">API Completa</h3>
+              <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                 Integra validación de RFCs en tus sistemas. RESTful API con documentación completa.
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-600 leading-relaxed">
                 API RESTful moderna con autenticación por API keys, rate limiting configurable, webhooks para notificaciones y soporte para múltiples lenguajes de programación.
               </p>
             </div>
@@ -355,52 +395,52 @@ export default function Home() {
 
       {/* CÓMO FUNCIONA */}
       <ScrollReveal direction="up">
-        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
+        <section className="py-24 bg-gradient-to-br from-white via-gray-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               Cómo Funciona
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto font-normal">
+              Tres pasos simples para validar cualquier RFC en segundos
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid md:grid-cols-3 gap-10 lg:gap-12">
             {/* Paso 1 */}
             <ScrollReveal direction="left" delay={0.1}>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-[#2F7E7A] text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold">
-                  1
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <div className="text-center bg-white rounded-2xl p-6 lg:p-7 border-2 border-gray-200 hover:border-[#2F7E7A] hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 group">
+                <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">
                   Ingresa el RFC
                 </h3>
-                <p className="text-gray-600 mb-2">
+                <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                   Escribe o pega el RFC que deseas validar en nuestro sistema. Acepta RFCs de personas físicas y morales en cualquier formato.
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-xs text-gray-600 mb-5 leading-relaxed">
                   Nuestro sistema valida automáticamente el formato del RFC y te indica si es válido antes de realizar la consulta al SAT.
                 </p>
                 <Link
                   href="/auth/register"
-                  className="inline-block text-[#2F7E7A] font-semibold text-sm hover:text-[#1F5D59] transition-colors"
+                  className="inline-flex items-center gap-2 text-[#2F7E7A] font-bold text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
-                  Probar Ahora →
+                  Probar Ahora
+                  <svg className="w-5 h-5 group-hover/link:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               </div>
             </ScrollReveal>
 
             {/* Paso 2 */}
             <ScrollReveal direction="up" delay={0.2}>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-[#2F7E7A] text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold">
-                  2
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <div className="text-center bg-white rounded-2xl p-6 lg:p-7 border-2 border-gray-200 hover:border-[#2F7E7A] hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 group">
+                <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">
                   Consultamos el SAT en tiempo real
                 </h3>
-                <p className="text-gray-600 mb-2">
+                <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                   Nuestro sistema consulta directamente el padrón del SAT para obtener la información más actualizada disponible.
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-xs text-gray-600 leading-relaxed">
                   Utilizamos conexiones optimizadas y caché inteligente para garantizar respuestas rápidas sin comprometer la precisión de los datos.
                 </p>
               </div>
@@ -408,25 +448,25 @@ export default function Home() {
 
             {/* Paso 3 */}
             <ScrollReveal direction="right" delay={0.3}>
-              <div className="text-center">
-                <div className="w-12 h-12 bg-[#2F7E7A] text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-bold">
-                  3
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <div className="text-center bg-white rounded-2xl p-6 lg:p-7 border-2 border-gray-200 hover:border-[#2F7E7A] hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 group">
+                <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 group-hover:text-[#2F7E7A] transition-colors">
                   Recibe resultado instantáneo
                 </h3>
-                <p className="text-gray-600 mb-2">
+                <p className="text-gray-700 mb-2 text-sm leading-relaxed font-normal">
                   Obtén la respuesta en menos de 2 segundos con todos los detalles del contribuyente: nombre, régimen fiscal, estado y fecha de alta.
                 </p>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-xs text-gray-600 mb-5 leading-relaxed">
                   Cada resultado incluye información completa y verificada que puedes guardar, exportar o usar directamente en tus procesos de negocio.
                 </p>
                 <div className="text-center mt-6">
                   <Link
                     href="/auth/register"
-                    className="inline-block bg-[#2F7E7A] text-white px-6 py-3 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold"
+                    className="inline-flex items-center gap-2 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] text-white px-8 py-4 rounded-xl hover:from-[#1F5D59] hover:to-[#2F7E7A] transition-all font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 group/cta"
                   >
                     Comenzar Gratis Ahora
+                    <svg className="w-6 h-6 group-hover/cta:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </Link>
                 </div>
               </div>
@@ -438,94 +478,41 @@ export default function Home() {
 
       {/* VISTA PREVIA DEL DASHBOARD */}
       <ScrollReveal direction="up">
-        <section className="py-20 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-          {/* Imagen de fondo muy sutil */}
-          <div className="absolute inset-0 z-0 opacity-5">
-            <Image
-              src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1920&h=1080&fit=crop&q=80"
-              alt="Background"
-              fill
-              className="object-cover"
-              sizes="100vw"
-            />
-          </div>
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
-                Dashboard Intuitivo y Potente
-                <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+        <section className="py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-20">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
+                Dashboard Intuitivo
+                <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
               </h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-                Gestiona todas tus validaciones desde un panel de control moderno y fácil de usar
+              <p className="text-base sm:text-lg text-gray-700 max-w-4xl mx-auto mb-4 font-normal">
+                Gestiona todas tus validaciones desde un panel de control moderno, claro y fácil de usar.
               </p>
-              <p className="text-lg text-gray-500 max-w-3xl mx-auto">
-                Visualiza estadísticas en tiempo real, accede a tu historial completo, exporta reportes y gestiona tu cuenta desde un solo lugar.
+              <p className="text-sm sm:text-base text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                En el plan Free ves tus validaciones recientes y estadísticas básicas; en Pro accedes a gráficos avanzados de uso diario y tendencias mensuales; y en Business obtienes Analytics completos con análisis por hora del día, comparación con el año anterior, métricas de eficiencia y predicciones avanzadas.
               </p>
             </div>
             <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
-              <div className="relative w-full h-[600px] md:h-[700px]">
+              <div className="relative w-full h-[450px] md:h-[520px] bg-gray-100 flex items-center justify-center">
                 <Image
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&h=800&fit=crop&q=80"
-                  alt="Dashboard Maflipp"
+                  src="/dashboard-free.png.png"
+                  alt="Dashboard plan Free de Maflipp"
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   sizes="(max-width: 768px) 100vw, 1200px"
+                  quality={100}
+                  priority
+                  unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="bg-white/95 backdrop-blur-sm rounded-xl p-8 md:p-12 max-w-2xl mx-4 shadow-2xl">
-                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#2F7E7A] rounded-lg flex items-center justify-center">
-                          <span className="text-white font-bold text-lg">M</span>
-                        </div>
-                        <div>
-                          <div className="h-4 bg-gray-800 rounded w-32 mb-2"></div>
-                          <div className="h-3 bg-gray-300 rounded w-24"></div>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <div className="w-8 h-8 bg-[#2F7E7A] rounded"></div>
-                        <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
-                      </div>
-                    </div>
-                    
-                    {/* Stats cards */}
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      {[1, 2, 3].map((i) => (
-                        <div key={i} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                          <div className="h-3 bg-gray-400 rounded w-20 mb-2"></div>
-                          <div className="h-6 bg-[#2F7E7A] rounded w-16"></div>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* Table preview */}
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
-                      <div className="bg-gray-50 p-3 border-b border-gray-200">
-                        <div className="h-4 bg-gray-400 rounded w-40"></div>
-                      </div>
-                      <div className="p-4 space-y-3">
-                        {[1, 2, 3].map((i) => (
-                          <div key={i} className="flex items-center gap-4">
-                            <div className="h-8 bg-gray-200 rounded w-32"></div>
-                            <div className="h-8 bg-gray-200 rounded flex-1"></div>
-                            <div className="h-8 bg-green-500 rounded w-20"></div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
-            <div className="text-center mt-8">
+            <div className="text-center mt-10">
               <Link
                 href="/auth/register"
-                className="inline-flex items-center text-[#2F7E7A] font-semibold hover:text-[#1F5D59] transition-colors"
+                className="inline-flex items-center gap-3 text-[#2F7E7A] font-bold text-lg hover:text-[#1F5D59] hover:gap-4 transition-all group"
               >
                 Prueba el dashboard gratis
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </Link>
@@ -536,23 +523,26 @@ export default function Home() {
 
       {/* PLANES DE PRECIOS */}
       <ScrollReveal direction="up">
-        <section id="precios" className="py-20 bg-gradient-to-br from-white to-gray-50/50">
+        <section id="precios" className="py-24 bg-gradient-to-br from-white via-gray-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               Planes de Precios
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-3xl mx-auto font-normal">
+              Elige el plan perfecto para tu negocio
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 lg:gap-6">
             {/* Plan FREE */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:-translate-y-3 active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">FREE</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$0</span>
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-2xl hover:-translate-y-2 active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-xl font-semibold text-gray-900 mb-1">FREE</h3>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-gray-900">$0</span>
                 <span className="text-gray-600"> MXN/mes</span>
               </div>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-2 mb-6 text-sm">
                 <li className="flex items-start">
                   <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -608,24 +598,24 @@ export default function Home() {
                   <span className="text-gray-500">Sin acceso a API</span>
                 </li>
               </ul>
-              <button className="w-full bg-gray-100 text-gray-900 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors">
+              <button className="w-full bg-gray-100 text-gray-900 py-2.5 rounded-lg font-semibold hover:bg-gray-200 transition-colors text-sm">
                 Comenzar Gratis
               </button>
             </div>
 
             {/* Plan PRO - DESTACADO */}
-            <div className="bg-white border-2 border-[#2F7E7A] rounded-2xl p-8 shadow-xl relative transform scale-105 hover:scale-110 hover:-translate-y-3 active:scale-105 transition-all duration-300 cursor-pointer touch-manipulation">
+            <div className="bg-white border-2 border-[#2F7E7A] rounded-2xl p-6 shadow-lg relative transform scale-105 hover:scale-105 hover:-translate-y-2 active:scale-100 transition-all duration-300 cursor-pointer touch-manipulation">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-[#2F7E7A] text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
                   MÁS POPULAR
                 </span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">PRO</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$299</span>
+              <h3 className="text-xl font-semibold text-gray-900 mb-1">PRO</h3>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-gray-900">$299</span>
                 <span className="text-gray-600"> MXN/mes</span>
               </div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-2.5 mb-6 text-sm">
                 <li className="flex items-start">
                   <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -675,19 +665,19 @@ export default function Home() {
                   <span className="text-gray-600">Soporte email (24h)</span>
                 </li>
               </ul>
-              <button className="w-full bg-[#2F7E7A] text-white py-3 rounded-lg font-semibold hover:bg-[#1F5D59] transition-colors shadow-lg hover:shadow-xl">
+              <button className="w-full bg-[#2F7E7A] text-white py-2.5 rounded-lg font-semibold hover:bg-[#1F5D59] transition-colors shadow-lg hover:shadow-xl text-sm">
                 Comenzar Ahora
               </button>
             </div>
 
             {/* Plan BUSINESS */}
-            <div className="bg-white border-2 border-gray-200 rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:-translate-y-3 active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">BUSINESS</h3>
-              <div className="mb-6">
-                <span className="text-4xl font-bold text-gray-900">$999</span>
+            <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-2xl hover:-translate-y-2 active:scale-98 transition-all duration-300 cursor-pointer touch-manipulation">
+              <h3 className="text-xl font-semibold text-gray-900 mb-1">BUSINESS</h3>
+              <div className="mb-4">
+                <span className="text-3xl font-bold text-gray-900">$999</span>
                 <span className="text-gray-600"> MXN/mes</span>
               </div>
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-2.5 mb-6 text-sm">
                 <li className="flex items-start">
                   <svg className="w-5 h-5 text-[#2F7E7A] mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -776,7 +766,7 @@ export default function Home() {
                   </span>
                 </li>
               </ul>
-              <button className="w-full bg-gray-900 text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors">
+              <button className="w-full bg-gray-900 text-white py-2.5 rounded-lg font-semibold hover:bg-gray-800 transition-colors text-sm">
                 Contactar Ventas
               </button>
             </div>
@@ -787,14 +777,14 @@ export default function Home() {
 
       {/* CASOS DE USO DETALLADOS */}
       <ScrollReveal direction="up">
-        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
+        <section className="py-24 bg-gradient-to-br from-white via-gray-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               Casos de Uso Reales
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-4xl mx-auto font-normal">
               Descubre cómo empresas y profesionales pueden optimizar sus procesos con Maflipp
             </p>
           </div>
@@ -913,14 +903,14 @@ export default function Home() {
 
       {/* API E INTEGRACIONES */}
       <ScrollReveal direction="up">
-        <section id="api" className="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <section id="api" className="py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               API e Integraciones
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-4xl mx-auto font-normal">
               Integra validación de RFCs en tus sistemas con nuestra API RESTful completa
             </p>
           </div>
@@ -968,7 +958,7 @@ export default function Home() {
                   </li>
                 </ul>
                 <Link
-                  href="/developers"
+                  href="/developers?from=landing"
                   className="inline-flex items-center text-[#2F7E7A] font-semibold hover:text-[#1F5D59] transition-colors"
                 >
                   Ver Documentación Completa
@@ -1013,14 +1003,14 @@ Authorization: Bearer YOUR_API_KEY
 
       {/* SEGURIDAD Y COMPLIANCE */}
       <ScrollReveal direction="up">
-        <section className="py-20 bg-gradient-to-br from-white to-gray-50/50">
+        <section className="py-24 bg-gradient-to-br from-white via-gray-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               Seguridad y Compliance
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-4xl mx-auto font-normal">
               Cumplimos con los más altos estándares de seguridad y normativas fiscales mexicanas
             </p>
           </div>
@@ -1050,14 +1040,14 @@ Authorization: Bearer YOUR_API_KEY
 
       {/* COMPARACIÓN */}
       <ScrollReveal direction="up">
-        <section className="py-20 bg-gradient-to-br from-gray-50 to-white">
+        <section className="py-24 bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 relative inline-block">
+          <div className="text-center mb-20">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-5 relative inline-block tracking-tight">
               Maflipp vs Métodos Tradicionales
-              <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-[#2F7E7A] rounded-full -bottom-2"></span>
+              <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-4xl mx-auto font-normal">
               Compara cómo Maflipp supera a los métodos manuales de validación
             </p>
           </div>
@@ -1113,10 +1103,11 @@ Authorization: Bearer YOUR_API_KEY
 
       {/* FAQ */}
       <ScrollReveal direction="up">
-        <section className="py-20">
+        <section className="py-24 bg-gradient-to-br from-white via-gray-50/30 to-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-16">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-900 mb-16 tracking-tight relative inline-block w-full">
             Preguntas Frecuentes
+            <span className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] rounded-full"></span>
           </h2>
           <div className="space-y-6">
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer">
@@ -1165,7 +1156,7 @@ Authorization: Bearer YOUR_API_KEY
 
       {/* CTA FINAL */}
       <ScrollReveal direction="up">
-        <section className="py-20 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] relative overflow-hidden">
+        <section className="py-28 bg-gradient-to-r from-[#2F7E7A] via-[#1F5D59] to-[#2F7E7A] relative overflow-hidden">
           {/* Imagen de fondo muy sutil */}
           <div className="absolute inset-0 z-0 opacity-10">
             <Image
@@ -1176,28 +1167,35 @@ Authorization: Bearer YOUR_API_KEY
               sizes="100vw"
             />
           </div>
-          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/40 z-0"></div>
+          <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 tracking-tight drop-shadow-2xl">
               ¿Listo para validar RFCs en 2 segundos?
             </h2>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-blue-100 mb-8 max-w-3xl mx-auto font-normal drop-shadow-lg">
               Empieza a ahorrar horas de trabajo manual con Maflipp
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-8">
               <Link
                 href="/auth/register"
-                className="bg-white text-[#2F7E7A] px-8 py-4 rounded-lg font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl"
+                className="bg-white text-[#2F7E7A] px-10 py-5 rounded-xl font-bold text-lg hover:bg-gray-100 transition-all shadow-2xl hover:shadow-3xl hover:scale-105 inline-flex items-center gap-2 group/cta"
               >
                 Comenzar Gratis
+                <svg className="w-6 h-6 group-hover/cta:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
               <Link
                 href="/pricing"
-                className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-colors"
+                className="bg-transparent border-3 border-white text-white px-10 py-5 rounded-xl font-bold text-lg hover:bg-white/20 transition-all shadow-xl hover:shadow-2xl hover:scale-105 inline-flex items-center gap-2 group/cta"
               >
                 Ver Planes y Precios
+                <svg className="w-6 h-6 group-hover/cta:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             </div>
-            <p className="text-blue-100 text-sm mt-6">
+            <p className="text-blue-100 text-base sm:text-lg mt-8 font-medium">
               ✅ Sin tarjeta de crédito • ✅ 10 validaciones gratis • ✅ Cancela cuando quieras
             </p>
           </div>
@@ -1278,6 +1276,8 @@ Authorization: Bearer YOUR_API_KEY
                   };
 
                   try {
+                    setContactStatus("idle");
+                    setContactMessage("");
                     const response = await fetch("/api/contact", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
@@ -1285,15 +1285,18 @@ Authorization: Bearer YOUR_API_KEY
                     });
 
                     const result = await response.json();
-                    
+
                     if (response.ok) {
-                      alert(result.message || "¡Mensaje enviado! Te responderemos pronto.");
                       form.reset();
+                      setContactStatus("success");
+                      setContactMessage(result.message || "¡Mensaje enviado! Te responderemos pronto.");
                     } else {
-                      alert(result.error || "Error al enviar el mensaje. Por favor intenta de nuevo.");
+                      setContactStatus("error");
+                      setContactMessage(result.error || "Error al enviar el mensaje. Por favor intenta de nuevo.");
                     }
                   } catch (error) {
-                    alert("Error al enviar el mensaje. Por favor intenta de nuevo.");
+                    setContactStatus("error");
+                    setContactMessage("Error al enviar el mensaje. Por favor intenta de nuevo.");
                   }
                 }}
               >
@@ -1324,6 +1327,15 @@ Authorization: Bearer YOUR_API_KEY
                   rows={3}
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-0 focus:border-gray-700 text-sm resize-none"
                 />
+                {contactStatus !== "idle" && contactMessage && (
+                  <p
+                    className={`text-xs mt-1 ${
+                      contactStatus === "success" ? "text-green-400" : "text-red-400"
+                    }`}
+                  >
+                    {contactMessage}
+                  </p>
+                )}
                 <button
                   type="submit"
                   className="w-full bg-[#2F7E7A] text-white px-4 py-2 rounded-lg hover:bg-[#1F5D59] transition-colors font-medium text-sm"

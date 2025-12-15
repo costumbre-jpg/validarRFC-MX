@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getPlan, ACTIVE_PLANS, type PlanId } from "@/lib/plans";
 
-export default function BillingPage() {
+function BillingPage() {
   const [userData, setUserData] = useState<any>(null);
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -770,6 +772,14 @@ export default function BillingPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BillingPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <BillingPage />
+    </Suspense>
   );
 }
 

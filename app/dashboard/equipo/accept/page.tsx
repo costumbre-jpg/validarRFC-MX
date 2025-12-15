@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
-export default function AcceptInvitationPage() {
+function AcceptInvitationPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -204,6 +206,14 @@ export default function AcceptInvitationPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AcceptInvitationPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <AcceptInvitationPage />
+    </Suspense>
   );
 }
 

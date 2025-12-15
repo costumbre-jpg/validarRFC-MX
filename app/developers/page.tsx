@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 
-export default function DevelopersPage() {
+function DevelopersPageContent() {
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plan");
+  const fromParam = searchParams.get("from");
+  const isFromLanding = fromParam === "landing";
 
   // Plan que usaremos para construir los links (preserva business si viene de la URL o de localStorage)
   const [designPlan, setDesignPlan] = useState<"pro" | "business">("pro");
@@ -348,18 +352,29 @@ public class MaflippAPI {
               <Logo size="md" showText={false} />
             </div>
             <div className="flex items-center gap-3">
-              <Link
-                href={`/dashboard/api-keys${urlSuffix}`}
-                className="px-4 py-2 text-sm font-medium text-[#2F7E7A] border border-[#2F7E7A] rounded-xl hover:bg-[#2F7E7A] hover:text-white transition-all shadow-sm hover:shadow-md"
-              >
-                Gestionar API Keys
-              </Link>
-              <Link
-                href={`/dashboard${urlSuffix}`}
-                className="px-4 py-2 text-sm font-medium bg-[#2F7E7A] text-white rounded-xl hover:bg-[#1F5D59] transition-all shadow-md hover:shadow-lg"
-              >
-                Ir al Dashboard
-              </Link>
+              {isFromLanding ? (
+                <Link
+                  href="/"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-100 transition-all shadow-sm hover:shadow-md"
+                >
+                  Volver al inicio
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href={`/dashboard/api-keys${urlSuffix}`}
+                    className="px-4 py-2 text-sm font-medium text-[#2F7E7A] border border-[#2F7E7A] rounded-xl hover:bg-[#2F7E7A] hover:text-white transition-all shadow-sm hover:shadow-md"
+                  >
+                    Gestionar API Keys
+                  </Link>
+                  <Link
+                    href={`/dashboard${urlSuffix}`}
+                    className="px-4 py-2 text-sm font-medium bg-[#2F7E7A] text-white rounded-xl hover:bg-[#1F5D59] transition-all shadow-md hover:shadow-lg"
+                  >
+                    Ir al Dashboard
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -1164,5 +1179,13 @@ Content-Type: application/json`, 'curl')
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function DevelopersPage() {
+  return (
+    <Suspense fallback={null}>
+      <DevelopersPageContent />
+    </Suspense>
   );
 }

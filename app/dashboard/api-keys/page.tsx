@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
@@ -17,7 +19,7 @@ interface ApiKey {
   created_at: string;
 }
 
-export default function APIKeysPage() {
+function APIKeysPage() {
   const [userData, setUserData] = useState<any>(null);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [loading, setLoading] = useState(true);
@@ -613,6 +615,14 @@ export default function APIKeysPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function APIKeysPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <APIKeysPage />
+    </Suspense>
   );
 }
 

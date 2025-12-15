@@ -1,9 +1,12 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function CFDIPage() {
+function CFDIPage() {
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plan");
   const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
@@ -70,6 +73,14 @@ export default function CFDIPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CFDIPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <CFDIPage />
+    </Suspense>
   );
 }
 

@@ -108,12 +108,13 @@ export default function AdvancedDashboard({
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
         
-        const { data: recentValidations } = await supabase
+        const { data: recentValidationsData } = await supabase
           .from("validations")
           .select("created_at")
           .eq("user_id", userId)
           .gte("created_at", sevenDaysAgo.toISOString())
           .order("created_at", { ascending: true });
+        const recentValidations = (recentValidationsData ?? []) as { created_at: string }[];
 
         // Agrupar por día
         const dailyCounts: Record<string, number> = {};
@@ -121,14 +122,14 @@ export default function AdvancedDashboard({
           const date = new Date();
           date.setDate(date.getDate() - (6 - i));
           date.setHours(0, 0, 0, 0);
-          const key = date.toISOString().split("T")[0];
+          const key = date.toISOString().split("T")[0] ?? "";
           dailyCounts[key] = 0;
         });
 
-        recentValidations?.forEach((v) => {
+        recentValidations.forEach((v) => {
           const date = new Date(v.created_at);
           date.setHours(0, 0, 0, 0);
-          const key = date.toISOString().split("T")[0];
+          const key = date.toISOString().split("T")[0] ?? "";
           if (dailyCounts[key] !== undefined) {
             dailyCounts[key]++;
           }
@@ -137,7 +138,7 @@ export default function AdvancedDashboard({
         const last7Days = Array.from({ length: 7 }, (_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - (6 - i));
-          const key = date.toISOString().split("T")[0];
+          const key = date.toISOString().split("T")[0] ?? "";
           return {
             date: date.toLocaleDateString("es-MX", { weekday: "short", day: "numeric" }),
             count: dailyCounts[key] || 0,
@@ -148,12 +149,13 @@ export default function AdvancedDashboard({
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         
-        const { data: monthlyValidations } = await supabase
+        const { data: monthlyValidationsData } = await supabase
           .from("validations")
           .select("created_at")
           .eq("user_id", userId)
           .gte("created_at", sixMonthsAgo.toISOString())
           .order("created_at", { ascending: true });
+        const monthlyValidations = (monthlyValidationsData ?? []) as { created_at: string }[];
 
         // Agrupar por mes
         const monthlyCounts: Record<string, number> = {};
@@ -166,7 +168,7 @@ export default function AdvancedDashboard({
           monthlyCounts[key] = 0;
         });
 
-        monthlyValidations?.forEach((v) => {
+        monthlyValidations.forEach((v) => {
           const date = new Date(v.created_at);
           const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
           if (monthlyCounts[key] !== undefined) {
@@ -195,10 +197,14 @@ export default function AdvancedDashboard({
             hourlyCounts[i] = 0;
           }
           
-          recentValidations?.forEach((v) => {
+          recentValidations.forEach((v) => {
             const date = new Date(v.created_at);
             const hour = date.getHours();
-            hourlyCounts[hour]++;
+            if (hourlyCounts[hour] !== undefined) {
+              hourlyCounts[hour]++;
+            } else {
+              hourlyCounts[hour] = 1;
+            }
           });
 
           const hourlyData = Array.from({ length: 24 }, (_, i) => ({
@@ -241,12 +247,17 @@ export default function AdvancedDashboard({
           });
 
           // Métricas de eficiencia (tiempo promedio de respuesta, tasa de error)
-          const { data: allValidations } = await supabase
+          const { data: allValidationsData } = await supabase
             .from("validations")
             .select("is_valid, created_at, response_time")
             .eq("user_id", userId)
             .gte("created_at", sevenDaysAgo.toISOString())
             .limit(1000);
+          const allValidations = (allValidationsData ?? []) as {
+            is_valid: boolean;
+            created_at: string;
+            response_time?: number | null;
+          }[];
 
           const total = allValidations?.length || 0;
           const valid = allValidations?.filter(v => v.is_valid).length || 0;

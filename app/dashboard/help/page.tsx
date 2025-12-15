@@ -1,10 +1,12 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
 
-export default function HelpPage() {
+function HelpPage() {
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plan");
   const currentPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
@@ -346,6 +348,14 @@ export default function HelpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HelpPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <HelpPage />
+    </Suspense>
   );
 }
 

@@ -111,7 +111,7 @@ export default function ValidationHistory({
           '"': "&quot;",
           "'": "&#039;",
         };
-        return str.replace(/[&<>"']/g, (m) => map[m]);
+        return str.replace(/[&<>"']/g, (m) => map[m] ?? m);
       };
 
       // Crear contenido HTML para Excel (formato simple que Excel puede abrir)
@@ -189,7 +189,6 @@ export default function ValidationHistory({
       const margin = 15;
       const startY = 20;
       let currentY = startY;
-      const lineHeight = 7;
       const rowHeight = 8;
       const maxY = pageHeight - margin;
 
@@ -253,7 +252,7 @@ export default function ValidationHistory({
         
         // Resultado con color
         const resultText = validation.is_valid ? "Válido" : "Inválido";
-        const resultColor = validation.is_valid ? [34, 197, 94] : [239, 68, 68]; // Verde o rojo
+        const resultColor: [number, number, number] = validation.is_valid ? [34, 197, 94] : [239, 68, 68]; // Verde o rojo    
         doc.setTextColor(resultColor[0], resultColor[1], resultColor[2]);
         doc.text(resultText, margin + 60, currentY + 5);
         

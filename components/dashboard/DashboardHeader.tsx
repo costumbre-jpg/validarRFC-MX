@@ -40,9 +40,11 @@ export default function DashboardHeader({
 
   const getInitials = (text: string) => {
     if (!text) return "M";
-    const parts = text.trim().split(/\s+/);
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    const parts = text.trim().split(/\s+/).filter(Boolean);
+    const [first, second] = parts;
+    if (!first) return "M";
+    if (!second) return first.slice(0, 2).toUpperCase();
+    return `${first[0] ?? ""}${second[0] ?? ""}`.toUpperCase();
   };
 
   const remaining = planLimit === -1 ? Infinity : planLimit - queriesThisMonth;

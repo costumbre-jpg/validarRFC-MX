@@ -191,7 +191,7 @@ export default function PricingPage() {
 
         {/* Pricing Cards */}
         <div className={`grid gap-8 mb-16 ${activePlans.length === 3 ? "md:grid-cols-3" : activePlans.length === 2 ? "md:grid-cols-2" : "md:grid-cols-1"}`}>
-          {activePlans.map((plan, index) => {
+          {activePlans.map((plan) => {
             const isPopular = plan.popular;
             const isFree = plan.monthlyPrice === 0;
             const monthlyPrice = billingCycle === "monthly" 

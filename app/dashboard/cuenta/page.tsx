@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+export const dynamic = "force-dynamic";
+
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import DeleteAccountCard from "@/components/dashboard/DeleteAccountCard";
@@ -8,7 +10,7 @@ import EmailAlerts from "@/components/dashboard/EmailAlerts";
 import EditProfileModal from "@/components/dashboard/EditProfileModal";
 import { getPlan, type PlanId } from "@/lib/plans";
 
-export default function CuentaPage() {
+function CuentaPage() {
   const [userData, setUserData] = useState<any>(null);
   const [safeUser, setSafeUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -582,6 +584,14 @@ export default function CuentaPage() {
         onUpdate={handleProfileUpdate}
       />
     </div>
+  );
+}
+
+export default function CuentaPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <CuentaPage />
+    </Suspense>
   );
 }
 

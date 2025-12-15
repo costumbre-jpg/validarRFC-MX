@@ -256,8 +256,24 @@ export function planHasFeature(planId: PlanId, feature: keyof PlanConfig["featur
   if (typeof featureValue === "boolean") {
     return featureValue;
   }
-  
-  return featureValue !== false && featureValue !== "";
+
+  if (featureValue === undefined || featureValue === null) {
+    return false;
+  }
+
+  if (typeof featureValue === "number") {
+    return featureValue > 0;
+  }
+
+  if (typeof featureValue === "string") {
+    return featureValue.trim().length > 0;
+  }
+
+  if (Array.isArray(featureValue)) {
+    return featureValue.length > 0;
+  }
+
+  return Boolean(featureValue);
 }
 
 /**
