@@ -189,10 +189,10 @@ export default function EditProfileModal({
         />
 
         {/* Modal */}
-        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 max-md:p-4">
+          <div className="flex items-center justify-between mb-6 max-md:mb-4">
             <span
-              className="inline-flex items-center px-3 py-1.5 rounded-full text-base font-bold"
+              className="inline-flex items-center px-3 max-md:px-2.5 py-1.5 max-md:py-1 rounded-full text-base max-md:text-sm font-bold"
               style={{ backgroundColor: `${brandPrimary}15`, color: brandSecondary }}
             >
               Editar Perfil
@@ -201,29 +201,29 @@ export default function EditProfileModal({
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 max-md:w-5 max-md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 max-md:space-y-3">
             {/* Foto de Perfil */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm max-md:text-xs font-medium text-gray-700 mb-2 max-md:mb-1.5">
                 Foto de Perfil
               </label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 max-md:gap-3">
                 <div className="relative">
                   {avatarPreview ? (
                     <img
                       src={avatarPreview}
                       alt="Preview"
-                      className="h-20 w-20 rounded-full object-cover border-2 border-gray-200"
+                      className="h-20 w-20 max-md:h-16 max-md:w-16 rounded-full object-cover border-2 border-gray-200"
                     />
                   ) : (
                     <div 
-                      className="h-20 w-20 rounded-full flex items-center justify-center text-2xl font-bold text-white"
+                      className="h-20 w-20 max-md:h-16 max-md:w-16 rounded-full flex items-center justify-center text-2xl max-md:text-xl font-bold text-white"
                       style={{ backgroundColor: brandPrimary }}
                     >
                       {fullName ? fullName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() : "U"}
@@ -231,9 +231,9 @@ export default function EditProfileModal({
                   )}
                   <label
                     htmlFor="avatar-upload"
-                    className="absolute bottom-0 right-0 h-6 w-6 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="absolute bottom-0 right-0 h-6 w-6 max-md:h-5 max-md:w-5 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors"
                   >
-                    <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 max-md:w-2.5 max-md:h-2.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -247,7 +247,7 @@ export default function EditProfileModal({
                   </label>
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-gray-600 mb-1">
+                  <p className="text-xs max-md:text-[11px] text-gray-600 mb-1">
                     JPG, PNG o WebP. Máximo 5MB.
                   </p>
                   {avatarFile && (
@@ -255,7 +255,7 @@ export default function EditProfileModal({
                       type="button"
                       onClick={handleAvatarUpload}
                       disabled={uploadingAvatar}
-                      className="text-xs font-medium text-[#2F7E7A] hover:underline disabled:opacity-50"
+                      className="text-xs max-md:text-[11px] font-medium text-[#2F7E7A] hover:underline disabled:opacity-50"
                     >
                       {uploadingAvatar ? "Subiendo..." : "Subir ahora"}
                     </button>
@@ -265,7 +265,7 @@ export default function EditProfileModal({
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-2 max-md:mb-1.5">
                 Correo Electrónico <span className="text-red-500">*</span>
               </label>
               <input
@@ -275,15 +275,15 @@ export default function EditProfileModal({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@email.com"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all"
+                className="w-full px-4 max-md:px-3 py-2 max-md:py-2 text-sm max-md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all text-gray-900"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs max-md:text-[11px] text-gray-500 mt-1 max-md:mt-0.5">
                 Se enviará un email de confirmación al nuevo correo.
               </p>
             </div>
 
             <div>
-              <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="full_name" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-2 max-md:mb-1.5">
                 Nombre Completo
               </label>
               <input
@@ -293,15 +293,15 @@ export default function EditProfileModal({
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Ej: Juan Pérez"
                 maxLength={100}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all"
+                className="w-full px-4 max-md:px-3 py-2 max-md:py-2 text-sm max-md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all text-gray-900"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs max-md:text-[11px] text-gray-500 mt-1 max-md:mt-0.5">
                 Opcional. Este nombre aparecerá en tu perfil.
               </p>
             </div>
 
             <div>
-              <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="company_name" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-2 max-md:mb-1.5">
                 Nombre de Empresa
               </label>
               <input
@@ -311,15 +311,15 @@ export default function EditProfileModal({
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="Ej: Mi Empresa S.A. de C.V."
                 maxLength={100}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all"
+                className="w-full px-4 max-md:px-3 py-2 max-md:py-2 text-sm max-md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all text-gray-900"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs max-md:text-[11px] text-gray-500 mt-1 max-md:mt-0.5">
                 Opcional. Útil si eres parte de una organización.
               </p>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="phone" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-2 max-md:mb-1.5">
                 Teléfono
               </label>
               <input
@@ -329,23 +329,23 @@ export default function EditProfileModal({
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="Ej: +52 55 1234 5678"
                 maxLength={20}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all"
+                className="w-full px-4 max-md:px-3 py-2 max-md:py-2 text-sm max-md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-all text-gray-900"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs max-md:text-[11px] text-gray-500 mt-1 max-md:mt-0.5">
                 Opcional. Incluye código de país si es necesario.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm max-md:text-xs font-medium text-gray-700 mb-2 max-md:mb-1.5">
                 País
               </label>
-              <div className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg bg-gray-50">
+              <div className="flex items-center gap-2 px-4 max-md:px-3 py-2 max-md:py-2 border border-gray-300 rounded-lg bg-gray-50">
                 <img 
                   src="https://flagcdn.com/w80/mx.png" 
                   srcSet="https://flagcdn.com/w160/mx.png 2x"
                   alt="Bandera de México" 
-                  className="w-6 h-4 object-cover rounded-sm"
+                  className="w-6 h-4 max-md:w-5 max-md:h-3.5 object-cover rounded-sm"
                   style={{ imageRendering: 'crisp-edges' }}
                   onError={(e) => {
                     // Fallback a emoji si la imagen no carga
@@ -359,31 +359,34 @@ export default function EditProfileModal({
                     }
                   }}
                 />
-                <span className="text-sm font-medium text-gray-700">México</span>
+                <span className="text-sm max-md:text-xs font-medium text-gray-700">México</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs max-md:text-[11px] text-gray-500 mt-1 max-md:mt-0.5">
                 Maflipp está disponible actualmente en México.
               </p>
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-3 border border-red-200">
-                <p className="text-sm text-red-800">{error}</p>
+              <div className="rounded-md bg-red-50 p-3 max-md:p-2.5 border border-red-200">
+                <p className="text-sm max-md:text-xs text-red-800">{error}</p>
               </div>
             )}
 
             {emailVerificationSent && (
-              <div className="rounded-md bg-blue-50 p-4 border border-blue-200">
-                <div className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <div className="rounded-md bg-blue-50 p-4 max-md:p-3 border border-blue-200">
+                <div className="flex items-start gap-3 max-md:gap-2">
+                  <svg className="w-5 h-5 max-md:w-4 max-md:h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-blue-900 mb-1">
-                      Email de verificación enviado
+                    <p className="text-sm max-md:text-xs font-semibold text-blue-900 mb-1 max-md:mb-0.5">
+                      ✅ Cambios guardados correctamente
                     </p>
-                    <p className="text-xs text-blue-800">
+                    <p className="text-xs max-md:text-[11px] text-blue-800 mb-2 max-md:mb-1.5">
                       Hemos enviado un email de confirmación a <strong>{email}</strong>. Por favor revisa tu bandeja de entrada y haz clic en el enlace para confirmar el cambio de correo.
+                    </p>
+                    <p className="text-xs max-md:text-[11px] text-blue-700 italic">
+                      Nota: El resto de tus cambios ya se han guardado. Solo necesitas confirmar el nuevo email.
                     </p>
                   </div>
                 </div>
@@ -391,24 +394,36 @@ export default function EditProfileModal({
             )}
 
             {success && !emailVerificationSent && (
-              <div className="rounded-md bg-green-50 p-3 border border-green-200">
-                <p className="text-sm text-green-800">¡Perfil actualizado exitosamente!</p>
+              <div className="rounded-md bg-green-50 p-4 max-md:p-3 border border-green-200">
+                <div className="flex items-start gap-3 max-md:gap-2">
+                  <svg className="w-5 h-5 max-md:w-4 max-md:h-4 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm max-md:text-xs font-semibold text-green-900 mb-1 max-md:mb-0.5">
+                      ✅ Cambios guardados correctamente
+                    </p>
+                    <p className="text-xs max-md:text-[11px] text-green-700">
+                      Tu perfil ha sido actualizado exitosamente.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-3 pt-4">
+            <div className="flex items-center justify-end gap-3 max-md:gap-2 pt-4 max-md:pt-3">
               <button
                 type="button"
                 onClick={onClose}
                 disabled={loading}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="px-4 max-md:px-3 py-2 max-md:py-1.5 text-sm max-md:text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancelar
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 text-sm font-semibold text-white rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 max-md:px-4 py-2 max-md:py-1.5 text-sm max-md:text-xs font-semibold text-white rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: brandPrimary }}
               >
                 {loading ? "Guardando..." : "Guardar Cambios"}

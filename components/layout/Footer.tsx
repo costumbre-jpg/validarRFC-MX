@@ -73,10 +73,10 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-4">Contacto</h4>
             <p className="text-gray-400 text-sm mb-2">
               <a
-                href="mailto:hola@maflipp.com"
+                href="mailto:soporte@maflipp.com"
                 className="hover:text-[#2F7E7A] transition-colors"
               >
-                hola@maflipp.com
+                soporte@maflipp.com
               </a>
             </p>
             <div className="flex space-x-4 mt-4">
@@ -87,7 +87,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-          <p>© 2024 Maflipp. Todos los derechos reservados.</p>
+          <p>© 2025 Maflipp. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>

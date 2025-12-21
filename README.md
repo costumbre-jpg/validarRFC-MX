@@ -44,6 +44,10 @@ STRIPE_PRICE_ID_ENTERPRISE=tu_price_id_enterprise
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
+### 2.1 Migraciones recientes
+
+- Ejecuta todas las migraciones, incluyendo `supabase/migrations/014_update_subscription_status_business.sql`, que alinea el plan `business` en la base de datos.
+
 **Nota**: Consulta `SUPABASE_SETUP.md` y `STRIPE_SETUP.md` para instrucciones detalladas.
 
 ### 3. Configurar Supabase

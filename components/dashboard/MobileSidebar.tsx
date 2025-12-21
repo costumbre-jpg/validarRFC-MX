@@ -28,7 +28,7 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/?loggedOut=1");
     router.refresh();
   };
 
@@ -150,6 +150,8 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
 
+  const brandFallback = branding?.brand_name || "Tu Empresa";
+
   return (
     <>
       {/* Mobile menu button */}
@@ -174,15 +176,18 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
             />
           </svg>
         </button>
-            <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
+            <div className="flex-1 text-sm font-semibold leading-6 text-gray-900 flex items-center gap-2 min-w-0">
               {showCustomLogo ? (
                 <img
                   src={branding?.custom_logo_url || ""}
                   alt={branding?.brand_name || "Logo"}
-                  className="h-8 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                 />
               ) : hideMaflipp ? (
-                <span>{branding?.brand_name || "Tu Marca"}</span>
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
+                  aria-hidden
+                />
               ) : (
                 <Logo size="md" showText={false} />
               )}
@@ -190,50 +195,54 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
       </div>
 
       {/* Mobile sidebar overlay */}
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-gray-600 bg-opacity-75 lg:hidden"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="fixed inset-y-0 left-0 z-50 w-full overflow-y-auto bg-white px-6 pb-4 lg:hidden">
-                <div className="flex h-20 shrink-0 items-center">
-                  {showCustomLogo ? (
-                    <img
-                      src={branding?.custom_logo_url || ""}
-                      alt={branding?.brand_name || "Logo"}
-                      className="h-10 w-auto object-contain"
-                    />
-                  ) : hideMaflipp ? (
-                    <span className="text-lg font-semibold text-gray-900">
-                      {branding?.brand_name || "Tu Marca"}
-                    </span>
-                  ) : (
-                    <Logo size="lg" showText={false} />
-                  )}
-              <button
-                type="button"
-                className="ml-auto -m-2.5 rounded-md p-2.5 text-gray-700"
-                onClick={() => setIsOpen(false)}
-              >
-                <span className="sr-only">Cerrar menú</span>
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
+      <div
+        className={`md:hidden fixed inset-0 z-40 transition-opacity duration-200 ${isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
+      >
+        <div
+          className={`absolute inset-0 bg-black/30 transition-opacity duration-200 ${isOpen ? "opacity-100" : "opacity-0"}`}
+          onClick={() => setIsOpen(false)}
+        />
+        <div className={`fixed inset-y-0 left-0 z-50 w-1/2 max-w-xs overflow-y-auto bg-white shadow-2xl border-r border-gray-200 px-4 max-md:px-3 pb-4 transition-transform duration-200 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
+          <div className="flex justify-between items-center p-4 max-md:p-3">
+            <div>
+              {showCustomLogo ? (
+                <img
+                  src={branding?.custom_logo_url || ""}
+                  alt={branding?.brand_name || "Logo"}
+                  className="h-10 max-md:h-8 w-auto object-contain"
+                />
+              ) : hideMaflipp ? (
+                <div
+                  className="w-10 max-md:w-8 h-10 max-md:h-8 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
+                  aria-hidden
+                />
+              ) : (
+                <Logo size="md" showText={false} />
+              )}
             </div>
-            <nav className="mt-8">
-              <ul role="list" className="space-y-1">
+            <button
+              type="button"
+              className="p-2 text-gray-600 hover:text-[#2F7E7A]"
+              onClick={() => setIsOpen(false)}
+            >
+              <span className="sr-only">Cerrar menú</span>
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+          <nav className="flex flex-col space-y-2 px-4 max-md:px-3 pt-4 max-md:pt-6">
+            <ul role="list" className="space-y-1">
                 {navItems.map((item) => {
                   // Comparar solo la ruta sin query params
                   const itemPath = item.href.split('?')[0];
@@ -279,10 +288,9 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
                   </button>
                 </li>
               </ul>
-            </nav>
-          </div>
-        </>
-      )}
+          </nav>
+        </div>
+      </div>
 
       {/* Modal de Confirmación */}
       <ConfirmLogoutModal

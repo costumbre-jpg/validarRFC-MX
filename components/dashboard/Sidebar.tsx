@@ -27,7 +27,7 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/?loggedOut=1");
     router.refresh();
   };
 
@@ -159,20 +159,29 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
 
+  // Lógica: 
+  // 1. Si hay logo personalizado → mostrar logo personalizado
+  // 2. Si no hay logo personalizado pero hideMaflipp está activado → mostrar círculo
+  // 3. Si no hay logo personalizado y hideMaflipp está desactivado → mostrar logo Maflipp
+  // 4. Si no es Business → siempre mostrar logo Maflipp
+
+  const brandFallback = branding?.brand_name || "Tu Empresa";
+
   return (
     <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 px-6 pb-4">
-        <div className="flex h-20 shrink-0 items-center">
+        <div className="flex h-20 shrink-0 items-center gap-3">
           {showCustomLogo ? (
             <img
               src={branding?.custom_logo_url || ""}
               alt={branding?.brand_name || "Logo"}
-              className="h-10 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
           ) : hideMaflipp ? (
-            <div className="text-lg font-semibold text-gray-900">
-              {branding?.brand_name || "Tu Marca"}
-            </div>
+            <div
+              className="w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-transparent border-2 border-gray-300"
+              aria-hidden
+            />
           ) : (
             <Logo size="lg" showText={false} />
           )}

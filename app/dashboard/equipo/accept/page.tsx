@@ -118,38 +118,38 @@ function AcceptInvitationPage() {
   const brandPrimary = getBrandColor('--brand-primary', '#2F7E7A');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-8 max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4 max-md:p-3">
+      <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-8 max-md:p-4 max-w-md w-full">
         {status === "loading" && (
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: brandPrimary }}></div>
+            <div className="inline-flex items-center justify-center w-16 max-md:w-14 h-16 max-md:h-14 bg-gray-100 rounded-full mb-4 max-md:mb-3">
+              <div className="animate-spin rounded-full h-8 max-md:h-7 w-8 max-md:w-7 border-b-2" style={{ borderColor: brandPrimary }}></div>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Procesando invitación...</h2>
-            <p className="text-sm text-gray-600">Por favor espera un momento</p>
+            <h2 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-2 max-md:mb-1.5">Procesando invitación...</h2>
+            <p className="text-sm max-md:text-xs text-gray-600">Por favor espera un momento</p>
           </div>
         )}
 
         {status === "success" && (
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center justify-center w-16 max-md:w-14 h-16 max-md:h-14 bg-green-100 rounded-full mb-4 max-md:mb-3">
+              <svg className="w-8 h-8 max-md:w-7 max-md:h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">¡Invitación Aceptada!</h2>
-            <p className="text-sm text-gray-600 mb-6">
+            <h2 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-2 max-md:mb-1.5">¡Invitación Aceptada!</h2>
+            <p className="text-sm max-md:text-xs text-gray-600 mb-6 max-md:mb-4">
               {teamOwnerEmail 
                 ? `Ahora eres miembro del equipo de ${teamOwnerEmail}`
                 : "Ahora eres miembro del equipo"}
             </p>
             <Link
               href="/dashboard/equipo"
-              className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg hover:scale-105"
+              className="inline-flex items-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-sm max-md:text-xs text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg hover:scale-105 max-md:hover:scale-100"
               style={{ backgroundColor: brandPrimary }}
             >
               Ir al Equipo
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 max-md:w-4 max-md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
@@ -158,20 +158,20 @@ function AcceptInvitationPage() {
 
         {status === "already-accepted" && (
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center justify-center w-16 max-md:w-14 h-16 max-md:h-14 bg-blue-100 rounded-full mb-4 max-md:mb-3">
+              <svg className="w-8 h-8 max-md:w-7 max-md:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Invitación ya aceptada</h2>
-            <p className="text-sm text-gray-600 mb-6">{message}</p>
+            <h2 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-2 max-md:mb-1.5">Invitación ya aceptada</h2>
+            <p className="text-sm max-md:text-xs text-gray-600 mb-6 max-md:mb-4">{message}</p>
             <Link
               href="/dashboard/equipo"
-              className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg hover:scale-105"
+              className="inline-flex items-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-sm max-md:text-xs text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg hover:scale-105 max-md:hover:scale-100"
               style={{ backgroundColor: brandPrimary }}
             >
               Ir al Equipo
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 max-md:w-4 max-md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </Link>
@@ -180,23 +180,23 @@ function AcceptInvitationPage() {
 
         {status === "error" && (
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-              <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center justify-center w-16 max-md:w-14 h-16 max-md:h-14 bg-red-100 rounded-full mb-4 max-md:mb-3">
+              <svg className="w-8 h-8 max-md:w-7 max-md:h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Error al aceptar invitación</h2>
-            <p className="text-sm text-gray-600 mb-6">{message}</p>
-            <div className="flex gap-3 justify-center">
+            <h2 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-2 max-md:mb-1.5">Error al aceptar invitación</h2>
+            <p className="text-sm max-md:text-xs text-gray-600 mb-6 max-md:mb-4">{message}</p>
+            <div className="flex gap-3 max-md:gap-2 justify-center max-md:flex-col">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 px-6 py-3 text-gray-700 bg-gray-100 rounded-xl transition-all font-medium hover:bg-gray-200"
+                className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-sm max-md:text-xs text-gray-700 bg-gray-100 rounded-xl transition-all font-medium hover:bg-gray-200"
               >
                 Ir al Dashboard
               </Link>
               <Link
                 href="/dashboard/equipo"
-                className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg"
+                className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-sm max-md:text-xs text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg"
                 style={{ backgroundColor: brandPrimary }}
               >
                 Ver Equipo

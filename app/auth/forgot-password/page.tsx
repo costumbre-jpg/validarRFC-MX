@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function ForgotPasswordPage() {
@@ -66,6 +67,16 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
+          <Link href="/" className="mx-auto mb-6 flex items-center justify-center">
+            <Image
+              src="/Maflipp-recortada.png"
+              alt="Maflipp"
+              width={72}
+              height={72}
+              className="h-14 w-14 object-contain"
+              priority
+            />
+          </Link>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Recuperar contraseña
           </h2>

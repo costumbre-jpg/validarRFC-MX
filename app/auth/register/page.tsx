@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -14,6 +17,12 @@ export default function RegisterPage() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [needsEmailConfirm, setNeedsEmailConfirm] = useState(false);
+
+  const redirectTo = useMemo(() => {
+    const raw = searchParams.get("redirect");
+    return raw && raw.startsWith("/") ? raw : "/dashboard";
+  }, [searchParams]);
 
   // Validación de email en tiempo real
   const validateEmail = (emailValue: string) => {
@@ -40,6 +49,7 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNeedsEmailConfirm(false);
 
     // Validations
     if (password !== confirmPassword) {
@@ -82,7 +92,7 @@ export default function RegisterPage() {
           // User is already logged in (email confirmation disabled)
           // Wait a moment for the trigger to create user data
           await new Promise(resolve => setTimeout(resolve, 500));
-          window.location.href = "/dashboard";
+          window.location.href = redirectTo;
           return;
         } else {
           // Email confirmation might be required, but let's try to sign in directly
@@ -95,14 +105,14 @@ export default function RegisterPage() {
           if (!signInError && signInData?.session) {
             // Successfully signed in - go to dashboard
             await new Promise(resolve => setTimeout(resolve, 500));
-            window.location.href = "/dashboard";
+            window.location.href = redirectTo;
             return;
           }
 
           // If we can't sign in, email confirmation is required
           setError(null);
           setLoading(false);
-          alert("¡Cuenta creada! Por favor revisa tu email y haz clic en el enlace de confirmación para activar tu cuenta.");
+          setNeedsEmailConfirm(true);
           return;
         }
       }
@@ -147,13 +157,23 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
+          <Link href="/" className="mx-auto mb-6 flex items-center justify-center">
+            <Image
+              src="/Maflipp-recortada.png"
+              alt="Maflipp"
+              width={72}
+              height={72}
+              className="h-14 w-14 object-contain"
+              priority
+            />
+          </Link>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Crea tu cuenta gratis
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             ¿Ya tienes una cuenta?{" "}
             <Link
-              href="/auth/login"
+              href={`/auth/login?redirect=${encodeURIComponent(redirectTo)}`}
               className="font-medium text-[#2F7E7A] hover:text-[#1F5D59]"
             >
               Inicia sesión
@@ -162,6 +182,22 @@ export default function RegisterPage() {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {needsEmailConfirm && (
+            <div className="rounded-md bg-emerald-50 border border-emerald-200 p-4">
+              <p className="text-sm font-semibold text-emerald-900">Cuenta creada</p>
+              <p className="mt-1 text-sm text-emerald-900/80">
+                Te enviamos un <strong>enlace</strong> de confirmación a tu correo. Ábrelo para activar tu cuenta y luego inicia sesión.
+              </p>
+              <div className="mt-3">
+                <Link
+                  href={`/auth/login?redirect=${encodeURIComponent(redirectTo)}`}
+                  className="inline-flex items-center justify-center w-full py-2.5 rounded-md font-semibold bg-[#2F7E7A] text-white hover:bg-[#1F5D59] transition-colors"
+                >
+                  Ir a iniciar sesión
+                </Link>
+              </div>
+            </div>
+          )}
           {error && (
             <div className="rounded-md bg-red-50 p-4">
               <div className="flex">
@@ -289,12 +325,12 @@ export default function RegisterPage() {
             <div className="ml-3 text-sm">
               <label htmlFor="acceptTerms" className="font-medium text-gray-700">
                 Acepto los{" "}
-                <Link
-                  href="/terminos"
-                  className="text-[#10B981] hover:text-[#059669]"
-                  target="_blank"
-                >
-                  términos y condiciones
+                <Link href="/terminos" className="text-[#2F7E7A] hover:text-[#1F5D59]" target="_blank">
+                  términos
+                </Link>{" "}
+                y la{" "}
+                <Link href="/privacidad" className="text-[#2F7E7A] hover:text-[#1F5D59]" target="_blank">
+                  privacidad
                 </Link>
               </label>
             </div>
@@ -308,6 +344,9 @@ export default function RegisterPage() {
             >
               {loading ? "Creando cuenta..." : "Crear Cuenta Gratis"}
             </button>
+            <p className="mt-2 text-[11px] text-gray-500 text-center leading-relaxed">
+              Sin tarjeta • Cancela cuando quieras
+            </p>
           </div>
         </form>
 

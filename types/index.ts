@@ -4,7 +4,7 @@
 export type User = {
   id: string;
   email: string;
-  subscription_status: 'free' | 'pro' | 'enterprise';
+  subscription_status: 'free' | 'pro' | 'business' | 'enterprise';
   rfc_queries_this_month: number;
   stripe_customer_id: string | null;
   created_at: string;
@@ -29,7 +29,7 @@ export type Subscription = {
   id: string;
   user_id: string;
   stripe_subscription_id: string;
-  plan: 'pro' | 'enterprise';
+  plan: 'pro' | 'business' | 'enterprise';
   status: 'active' | 'canceled';
   current_period_end: string;
   created_at: string;
@@ -40,7 +40,7 @@ export type Subscription = {
  */
 export type CreateUserInput = {
   email: string;
-  subscription_status?: 'free' | 'pro' | 'enterprise';
+  subscription_status?: 'free' | 'pro' | 'business' | 'enterprise';
   rfc_queries_this_month?: number;
   stripe_customer_id?: string | null;
 };
@@ -50,7 +50,7 @@ export type CreateUserInput = {
  */
 export type UpdateUserInput = {
   email?: string;
-  subscription_status?: 'free' | 'pro' | 'enterprise';
+  subscription_status?: 'free' | 'pro' | 'business' | 'enterprise';
   rfc_queries_this_month?: number;
   stripe_customer_id?: string | null;
 };
@@ -71,7 +71,7 @@ export type CreateValidationInput = {
 export type CreateSubscriptionInput = {
   user_id: string;
   stripe_subscription_id: string;
-  plan: 'pro' | 'enterprise';
+  plan: 'pro' | 'business' | 'enterprise';
   status: 'active' | 'canceled';
   current_period_end: string;
 };
@@ -81,7 +81,7 @@ export type CreateSubscriptionInput = {
  */
 export type UpdateSubscriptionInput = {
   stripe_subscription_id?: string;
-  plan?: 'pro' | 'enterprise';
+  plan?: 'pro' | 'business' | 'enterprise';
   status?: 'active' | 'canceled';
   current_period_end?: string;
 };

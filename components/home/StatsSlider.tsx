@@ -12,7 +12,7 @@ export default function StatsSlider() {
   const duplicatedStats = [...stats, ...stats, ...stats];
 
   return (
-    <div className="overflow-hidden bg-[#2F7E7A] py-16 relative">
+    <div className="overflow-hidden bg-[#2F7E7A] py-10 md:py-12 relative">
       <div 
         className="flex gap-8 md:gap-16"
         style={{
@@ -25,10 +25,10 @@ export default function StatsSlider() {
             key={index}
             className="flex-shrink-0 text-center min-w-[180px] md:min-w-[280px] px-4"
           >
-            <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+            <div className="text-3xl md:text-4xl font-semibold text-white mb-1.5">
               {stat.value}
             </div>
-            <div className="text-teal-100 text-sm md:text-base whitespace-normal">
+            <div className="text-teal-100 text-xs md:text-sm whitespace-normal">
               {stat.label}
             </div>
           </div>

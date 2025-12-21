@@ -4,8 +4,8 @@
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.users (id, email, subscription_status, rfc_queries_this_month)
-  VALUES (NEW.id, NEW.email, 'free', 0);
+  INSERT INTO public.users (id, email, subscription_status, rfc_queries_this_month, created_at)
+  VALUES (NEW.id, NEW.email, 'free', 0, COALESCE(NEW.created_at, NOW()));
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

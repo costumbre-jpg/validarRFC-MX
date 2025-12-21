@@ -40,7 +40,7 @@ export default function Input({
         <input
           id={inputId}
           className={cn(
-            "w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-colors",
+            "w-full px-4 py-2.5 border rounded-lg focus:outline-none focus:ring-0 focus:border-gray-300 transition-colors text-gray-900 max-md:text-gray-900",
             error
               ? "border-red-300 focus:border-red-300"
               : "border-gray-300 focus:border-gray-300",

@@ -4,7 +4,13 @@ RETURNS void
 LANGUAGE plpgsql
 AS $$
 BEGIN
+  -- Resetear contadores en api_keys
   UPDATE api_keys
+  SET api_calls_this_month = 0
+  WHERE api_calls_this_month > 0;
+  
+  -- Resetear contadores en users (para estadísticas)
+  UPDATE users
   SET api_calls_this_month = 0
   WHERE api_calls_this_month > 0;
 END;

@@ -7,6 +7,11 @@
   --foreground: #171717;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px; /* header sticky offset */
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -18,6 +23,7 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 @layer utilities {
@@ -56,12 +62,88 @@ body {
   }
 }
 
+/* Asegurar que el texto en inputs y textareas sea visible en móvil */
+@media (max-width: 767px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="url"],
+  input[type="tel"],
+  input[type="search"],
+  input:not([type]),
+  textarea,
+  select {
+    color: #111827 !important; /* text-gray-900 */
+    -webkit-text-fill-color: #111827 !important; /* Para Safari/iOS */
+  }
+  
+  input[type="text"]::placeholder,
+  input[type="email"]::placeholder,
+  input[type="password"]::placeholder,
+  input[type="number"]::placeholder,
+  input[type="url"]::placeholder,
+  input[type="tel"]::placeholder,
+  input[type="search"]::placeholder,
+  input:not([type])::placeholder,
+  textarea::placeholder,
+  select::placeholder {
+    color: #9ca3af !important; /* text-gray-400 */
+    opacity: 1 !important;
+    -webkit-text-fill-color: #9ca3af !important;
+  }
+  
+  /* Asegurar que el valor ingresado también sea oscuro */
+  input[type="text"]:not(:placeholder-shown),
+  input[type="email"]:not(:placeholder-shown),
+  input[type="password"]:not(:placeholder-shown),
+  input[type="number"]:not(:placeholder-shown),
+  input[type="url"]:not(:placeholder-shown),
+  input[type="tel"]:not(:placeholder-shown),
+  input[type="search"]:not(:placeholder-shown),
+  input:not([type]):not(:placeholder-shown),
+  textarea:not(:placeholder-shown),
+  select:not(:placeholder-shown) {
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+  }
+}
+
 @keyframes scroll-infinite {
   0% {
     transform: translateX(0);
   }
   100% {
     transform: translateX(-33.333%);
+  }
+}
+
+/* Ajuste de tamaño de cards solo en móvil - NO afecta escritorio */
+@media (max-width: 1023px) {
+  .hero-card {
+    width: min(180px, 50vw) !important;
+    height: min(280px, 72vw) !important;
+  }
+}
+
+/* Asegurar tamaño correcto en escritorio */
+@media (min-width: 1024px) {
+  .hero-card {
+    width: 240px !important;
+    height: 450px !important;
+  }
+  
+  /* Restaurar transformaciones de desktop para el carrusel 3D */
+  .hero-card[data-pos="center"] {
+    transform: translateX(0px) translateY(0px) scale(1) !important;
+  }
+  
+  .hero-card[data-pos="left"] {
+    transform: translateX(-150px) translateY(10px) scale(0.88) !important;
+  }
+  
+  .hero-card[data-pos="right"] {
+    transform: translateX(150px) translateY(10px) scale(0.88) !important;
   }
 }
 

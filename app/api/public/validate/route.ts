@@ -2,88 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { hashApiKey, isValidApiKeyFormat } from "@/lib/api-keys";
 import { getPlanApiLimit, type PlanId } from "@/lib/plans";
+import { validateRFC, normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
+import { rateLimit } from "@/lib/rate-limit";
 
 const RATE_LIMIT_PER_MINUTE = 60; // 60 requests por minuto
-
-// Rate limiting: Map simple en memoria
-// En producción, usar Redis o similar
-const rateLimitMap = new Map<
-  string,
-  { count: number; resetTime: number }
->();
-
-// Limpiar entradas expiradas cada 5 minutos
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, value] of rateLimitMap.entries()) {
-    if (now > value.resetTime) {
-      rateLimitMap.delete(key);
-    }
-  }
-}, 5 * 60 * 1000);
-
-function checkRateLimit(apiKeyId: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const windowMs = 60 * 1000; // 1 minuto
-  const key = `api_${apiKeyId}`;
-  const limit = rateLimitMap.get(key);
-
-  if (!limit || now > limit.resetTime) {
-    rateLimitMap.set(key, {
-      count: 1,
-      resetTime: now + windowMs,
-    });
-    return { allowed: true, remaining: RATE_LIMIT_PER_MINUTE - 1 };
-  }
-
-  if (limit.count >= RATE_LIMIT_PER_MINUTE) {
-    return { allowed: false, remaining: 0 };
-  }
-
-  limit.count++;
-  rateLimitMap.set(key, limit);
-  return { allowed: true, remaining: RATE_LIMIT_PER_MINUTE - limit.count };
-}
-
-async function validateRFCWithSAT(rfc: string): Promise<{
-  valid: boolean | null;
-  source: string;
-  error?: string;
-}> {
-  const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=${rfc}_`;
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 Maflipp",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
-
-    if (!response.ok) {
-      throw new Error(`SAT API returned status ${response.status}`);
-    }
-
-    const html = await response.text();
-    const isValid =
-      html.includes("Registro activo") ||
-      html.includes("vivo") ||
-      !html.includes("No existe");
-
-    return { valid: isValid, source: "sat" };
-  } catch (error: any) {
-    return {
-      valid: null,
-      source: "error",
-      error: error?.message || "Error desconocido al consultar SAT",
-    };
-  }
-}
-
-function isValidRFCFormat(rfc: string): boolean {
-  const rfcRegex = /^[A-ZÑ&]{3,4}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[A-Z0-9]{2}[0-9A]$/;
-  return rfcRegex.test(rfc.toUpperCase().trim());
-}
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
 export async function POST(request: NextRequest) {
   try {
@@ -210,8 +133,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 7. Rate limiting
-    const rateLimit = checkRateLimit(apiKeyData.id);
-    if (!rateLimit.allowed) {
+    const rate = await rateLimit({
+      key: `public-validate:${apiKeyData.id}`,
+      limit: RATE_LIMIT_PER_MINUTE,
+      windowSeconds: 60,
+      fallbackMap: rateLimitMap,
+    });
+    if (!rate.allowed) {
       return NextResponse.json(
         {
           success: false,
@@ -225,7 +153,7 @@ export async function POST(request: NextRequest) {
           headers: {
             "X-RateLimit-Limit": RATE_LIMIT_PER_MINUTE.toString(),
             "X-RateLimit-Remaining": "0",
-            "Retry-After": "60",
+            "Retry-After": rate.resetSeconds.toString(),
           },
         }
       );
@@ -248,7 +176,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { rfc } = body;
+    const { rfc, forceRefresh = false } = body;
 
     if (!rfc || typeof rfc !== "string") {
       return NextResponse.json(
@@ -264,9 +192,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 9. Formatear y validar RFC
-    const formattedRFC = rfc.trim().toUpperCase().replace(/[-\s]/g, "");
+    const formattedRFC = normalizeRFC(rfc);
 
-    if (!isValidRFCFormat(formattedRFC)) {
+    if (!isValidRFCFormatStrict(formattedRFC)) {
       return NextResponse.json(
         {
           success: false,
@@ -279,12 +207,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 10. Consultar SAT
-    const startTime = performance.now();
-    const satResult = await validateRFCWithSAT(formattedRFC);
-    const responseTime = performance.now() - startTime;
-
-    const isValid = satResult.valid === true;
+    // 10. Consultar SAT (con caché)
+    const satResult = await validateRFC(formattedRFC, {
+      useCache: true,
+      forceRefresh,
+    });
 
     // 11. Actualizar contador mensual y registrar uso
     const newApiCallsThisMonth = (apiCallsThisMonth || 0) + 1;
@@ -321,30 +248,30 @@ export async function POST(request: NextRequest) {
     await supabase.from("api_usage_logs").insert({
       api_key_id: apiKeyData.id,
       rfc: formattedRFC,
-      is_valid: isValid,
-      response_time: responseTime,
+      is_valid: satResult.valid,
+      response_time: satResult.responseTime,
       cost: 0.0, // Sin costo, usa límite mensual del plan
     });
 
     return NextResponse.json(
       {
-        success: true,
-        valid: isValid,
+        success: satResult.success,
+        valid: satResult.valid,
         rfc: formattedRFC,
         remaining: remainingCalls,
-        message: isValid
-          ? "RFC válido"
-          : satResult.error
-          ? "Error al consultar SAT. RFC no pudo ser verificado."
-          : "RFC no existe en el SAT",
+        message: satResult.message,
         source: satResult.source,
-        responseTime: Math.round(responseTime),
+        responseTime: satResult.responseTime,
+        cached: satResult.cached,
+        name: satResult.name,
+        regime: satResult.regime,
+        startDate: satResult.startDate,
       },
       {
-        status: 200,
+        status: satResult.success ? 200 : 502,
         headers: {
           "X-RateLimit-Limit": RATE_LIMIT_PER_MINUTE.toString(),
-          "X-RateLimit-Remaining": rateLimit.remaining.toString(),
+          "X-RateLimit-Remaining": Math.max(rate.remaining, 0).toString(),
         },
       }
     );

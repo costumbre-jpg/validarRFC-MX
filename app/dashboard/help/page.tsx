@@ -11,6 +11,9 @@ function HelpPage() {
   const planParam = searchParams.get("plan");
   const currentPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
   const [expandedFaqs, setExpandedFaqs] = useState<Record<string, boolean>>({});
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactStatus, setContactStatus] = useState<"idle" | "success" | "error">("idle");
+  const [contactMessage, setContactMessage] = useState<string>("");
 
   const toggleFaq = (categoryIndex: number, faqIndex: number) => {
     const key = `${categoryIndex}-${faqIndex}`;
@@ -60,11 +63,11 @@ function HelpPage() {
         },
         {
           question: "¿Tienen prueba gratis?",
-          answer: "Sí, ofrecemos 7 días de prueba completamente gratis para el plan Pro, sin necesidad de tarjeta de crédito. Durante estos 7 días tendrás acceso completo a todas las funcionalidades del plan Pro, incluyendo 1,000 validaciones, historial ilimitado, exportación de datos, acceso a la API, dashboard avanzado, y todas las demás características. Puedes cancelar en cualquier momento durante el período de prueba sin ningún cargo ni compromiso. Si decides continuar después de la prueba, simplemente se iniciará tu suscripción mensual o anual. Además, el plan Free siempre está disponible sin límite de tiempo y sin necesidad de tarjeta de crédito, permitiéndote probar el servicio básico de forma permanente. La prueba gratuita es perfecta para que conozcas todas las capacidades de nuestra plataforma antes de comprometerte con un plan de pago."
+          answer: "Sí, el plan Pro incluye 7 días de prueba. Durante esos 7 días tendrás acceso completo a todas las funcionalidades del plan Pro (1,000 validaciones/mes, historial ilimitado, exportación, acceso a API, dashboard avanzado, etc.). Para activar la prueba se solicita un método de pago en Stripe, pero no se cobra hasta que termine el período de prueba. Puedes cancelar en cualquier momento durante los 7 días y no se te cobrará nada. Además, el plan Free siempre está disponible sin límite de tiempo para probar el servicio básico."
         },
         {
           question: "¿Qué métodos de pago aceptan?",
-          answer: "Aceptamos múltiples métodos de pago para tu comodidad, incluyendo tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencias bancarias, y pagos a través de plataformas seguras como Stripe. Todos los pagos se procesan de forma segura y encriptada, cumpliendo con los más altos estándares de seguridad PCI DSS. No almacenamos información de tarjetas de crédito en nuestros servidores - toda la información sensible es manejada por nuestros procesadores de pago certificados. Los pagos se procesan de forma automática según el ciclo de facturación que elijas (mensual o anual), y recibirás notificaciones por email antes de cada cargo. Si tienes problemas con algún pago, nuestro equipo de soporte está disponible para ayudarte a resolver cualquier inconveniente."
+          answer: "Aceptamos múltiples métodos de pago para tu comodidad, incluyendo tarjetas de crédito y débito (Visa, Mastercard, American Express), transferencias bancarias, y pagos a través de plataformas seguras como Stripe. Todos los pagos se procesan de forma segura y encriptada, cumpliendo con los más altos estándares de seguridad PCI DSS. No almacenamos información de tarjetas de crédito en nuestros servidores - toda la información sensible es manejada por nuestros procesadores de pago certificados. Los pagos se procesan de forma automática según el ciclo de facturación que elijas (mensual o anual), y recibirás notificaciones por email antes de cada cargo. Si tienes problemas con algún pago, nuestro equipo de soporte está disponible para ayudarte a resolver cualquier inconveniente; puedes escribirnos a soporte@maflipp.com."
         }
       ]
     },
@@ -77,11 +80,11 @@ function HelpPage() {
         },
         {
           question: "¿Qué pasa si el SAT no responde?",
-          answer: "En caso de que el SAT no responda o esté temporalmente no disponible, nuestro sistema te indicará claramente que no se pudo verificar el RFC en ese momento. Esto puede ocurrir ocasionalmente debido a mantenimiento programado del SAT, problemas de conectividad temporal, o sobrecarga en los servidores del SAT durante horas pico. Cuando esto sucede, te recomendamos intentar nuevamente en unos minutos. Nuestro sistema realiza múltiples intentos automáticos antes de reportar un error, y utilizamos conexiones optimizadas y caché inteligente para minimizar estos casos. Si el problema persiste, puedes contactar a nuestro equipo de soporte para que investiguemos el problema. Es importante mencionar que estas situaciones son raras y generalmente se resuelven rápidamente. Nuestro sistema está diseñado para ser resiliente y manejar estos casos de manera elegante, sin afectar tu experiencia de usuario."
+          answer: "En caso de que el SAT no responda o esté temporalmente no disponible, nuestro sistema te indicará claramente que no se pudo verificar el RFC en ese momento. Esto puede ocurrir ocasionalmente debido a mantenimiento programado del SAT, problemas de conectividad temporal, o sobrecarga en los servidores del SAT durante horas pico. Cuando esto sucede, te recomendamos intentar nuevamente en unos minutos. Nuestro sistema realiza múltiples intentos automáticos antes de reportar un error, y utilizamos conexiones optimizadas y caché inteligente para minimizar estos casos. Si el problema persiste, puedes contactar a nuestro equipo de soporte para que investiguemos el problema escribiendo a soporte@maflipp.com. Es importante mencionar que estas situaciones son raras y generalmente se resuelven rápidamente. Nuestro sistema está diseñado para ser resiliente y manejar estos casos de manera elegante, sin afectar tu experiencia de usuario."
         },
         {
           question: "¿Puedo usar la API con el plan FREE?",
-          answer: "No, el acceso a la API está disponible exclusivamente para los planes Pro y Business. El plan FREE está diseñado para uso manual a través de nuestra interfaz web intuitiva. Si necesitas integrar la validación de RFCs en tus sistemas, aplicaciones, o procesos automatizados, necesitarás mejorar a un plan Pro (que incluye 2,000 llamadas API por mes) o Business (que incluye 10,000 llamadas API por mes). Nuestra API RESTful es completa, está bien documentada, y permite integrar la validación de RFCs directamente en tus flujos de trabajo. Incluye autenticación mediante API keys, rate limiting configurable, y soporte para múltiples lenguajes de programación. Si estás interesado en usar la API, puedes probar el plan Pro gratis durante 7 días para evaluar si cumple con tus necesidades antes de comprometerte con una suscripción."
+          answer: "No, el acceso a la API está disponible exclusivamente para los planes Pro y Business. El plan FREE está diseñado para uso manual a través de nuestra interfaz web. Si necesitas integrar la validación de RFCs en tus sistemas, necesitarás mejorar a Pro (2,000 llamadas API/mes) o Business (10,000 llamadas API/mes). Si quieres evaluar la API, puedes activar la prueba de 7 días del plan Pro (se solicita método de pago, pero no se cobra durante la prueba)."
         },
         {
           question: "¿Cuál es el tiempo de respuesta de las validaciones?",
@@ -110,7 +113,7 @@ function HelpPage() {
         },
         {
           question: "¿Cómo puedo obtener más validaciones?",
-          answer: "Puedes mejorar a un plan Pro o Business en cualquier momento desde tu dashboard, específicamente en la sección de Facturación. El plan Pro incluye 1,000 validaciones por mes (100 veces más que el plan FREE), además de funcionalidades avanzadas como historial ilimitado de validaciones, exportación de datos a CSV y Excel, acceso completo a la API con 2,000 llamadas mensuales, dashboard avanzado con gráficas y estadísticas detalladas, alertas por email, y gestión de equipo para hasta 3 usuarios. El plan Business incluye 5,000 validaciones por mes, todas las funcionalidades del Pro, más características empresariales como white-label, SSO, usuarios ilimitados, exportación a PDF, y más. El upgrade se aplica inmediatamente y tendrás acceso instantáneo a todas las nuevas funcionalidades. Puedes probar el plan Pro gratis durante 7 días antes de comprometerte."
+          answer: "Puedes mejorar a un plan Pro o Business en cualquier momento desde tu dashboard, en la sección de Facturación. El plan Pro incluye 1,000 validaciones/mes, historial ilimitado, exportación (CSV/Excel), acceso a API (2,000 llamadas/mes), dashboard avanzado y alertas por email, además de equipo (hasta 3 usuarios). El plan Business incluye 5,000 validaciones/mes, todo lo de Pro y funciones empresariales como white-label, SSO, usuarios ilimitados y exportación a PDF. Si quieres probar antes, puedes activar la prueba de 7 días del plan Pro (se solicita método de pago, pero no se cobra durante la prueba)."
         },
         {
           question: "¿El contador de validaciones se reinicia?",
@@ -118,7 +121,7 @@ function HelpPage() {
         },
         {
           question: "¿Qué puedo hacer si me quedo sin validaciones?",
-          answer: "Si te quedas sin validaciones antes del fin del mes, tienes varias opciones. Primero, puedes esperar hasta el primer día del siguiente mes, cuando tu contador se reiniciará automáticamente y tendrás acceso a todas tus validaciones mensuales nuevamente. Segunda opción, puedes mejorar a un plan superior (de FREE a Pro, o de Pro a Business) en cualquier momento desde tu dashboard, y el upgrade se aplicará inmediatamente, dándote acceso a más validaciones y funcionalidades adicionales. Tercera opción, si estás en el plan Pro o Business, puedes revisar tu historial de validaciones para ver si alguna validación anterior puede ser útil, o exportar tus datos para análisis. Si necesitas validaciones urgentes y no puedes esperar, el upgrade a un plan superior es la solución más rápida. Recuerda que puedes probar el plan Pro gratis durante 7 días si vienes del plan FREE."
+          answer: "Si te quedas sin validaciones antes del fin del mes, puedes esperar al reinicio del contador el primer día del siguiente mes o mejorar a un plan superior desde Facturación (el cambio se aplica de inmediato). Si estás en Pro/Business, también puedes usar el historial y exportación para análisis. Si quieres evaluar Pro antes, puedes activar la prueba de 7 días (se solicita método de pago, pero no se cobra durante la prueba)."
         },
         {
           question: "¿Puedo ver mi historial de validaciones en el plan FREE?",
@@ -212,7 +215,7 @@ function HelpPage() {
         },
         {
           question: "¿Qué pasa si excedo mis límites en el plan Business?",
-          answer: "Si excedes tu límite mensual de validaciones (5,000) o llamadas API (10,000) en el plan Business, el servicio se pausará temporalmente hasta que se reinicie tu contador el primer día del siguiente mes. Recibirás alertas por email cuando te acerques a tus límites y cuando los alcances. Si necesitas más capacidad de forma permanente, puedes contactar a nuestro equipo de soporte para discutir opciones de planes personalizados o incrementos de límites. Las validaciones y llamadas API no utilizadas no se acumulan al siguiente mes. Para empresas con necesidades muy altas, ofrecemos soluciones empresariales personalizadas."
+          answer: "Si excedes tu límite mensual de validaciones (5,000) o llamadas API (10,000) en el plan Business, el servicio se pausará temporalmente hasta que se reinicie tu contador el primer día del siguiente mes. Recibirás alertas por email cuando te acerques a tus límites y cuando los alcances. Si necesitas más capacidad de forma permanente, puedes contactar a nuestro equipo de soporte para discutir opciones de planes personalizados o incrementos de límites escribiendo a soporte@maflipp.com. Las validaciones y llamadas API no utilizadas no se acumulan al siguiente mes. Para empresas con necesidades muy altas, ofrecemos soluciones empresariales personalizadas."
         },
         {
           question: "¿Qué es la validación CFDI y cuándo estará disponible?",
@@ -238,36 +241,36 @@ function HelpPage() {
     : [...generalFaqs, ...freeFaqs];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 max-md:space-y-4">
       {/* Header con badge */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] text-white text-sm font-semibold shadow-md mb-3">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="inline-flex items-center px-3 max-md:px-2.5 py-1.5 max-md:py-1 rounded-full bg-[#2F7E7A] bg-opacity-10 text-[#2F7E7A] text-sm max-md:text-xs font-medium mb-3 max-md:mb-2">
+            <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5 mr-2 max-md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Centro de Ayuda
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Preguntas Frecuentes</h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl max-md:text-xl font-bold text-gray-900 mb-2 max-md:mb-1.5">Preguntas Frecuentes</h1>
+          <p className="text-gray-600 text-sm max-md:text-xs">
             Encuentra respuestas rápidas a las preguntas más comunes sobre Maflipp
           </p>
         </div>
       </div>
 
       {/* FAQs por categoría mejoradas */}
-      <div className="space-y-6">
+      <div className="space-y-4 max-md:space-y-3">
         {faqs.map((category, categoryIndex) => (
-          <div key={categoryIndex} className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+          <div key={categoryIndex} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             {/* Header de categoría */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-[#2F7E7A] bg-opacity-10">
-                  <svg className="w-5 h-5 text-[#2F7E7A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-gray-50 px-5 max-md:px-4 py-3 max-md:py-2.5 border-b border-gray-200">
+              <div className="flex items-center gap-3 max-md:gap-2">
+                <div className="p-1.5 max-md:p-1 rounded-md bg-[#2F7E7A] bg-opacity-10">
+                  <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5 text-[#2F7E7A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">{category.category}</h2>
+                <h2 className="text-lg max-md:text-base font-semibold text-gray-900">{category.category}</h2>
               </div>
             </div>
 
@@ -280,11 +283,11 @@ function HelpPage() {
                   <div key={faqIndex} className="transition-all">
                     <button
                       onClick={() => toggleFaq(categoryIndex, faqIndex)}
-                      className="w-full px-6 py-4 text-left hover:bg-gray-50 transition-colors flex items-start justify-between gap-4"
+                      className="w-full px-5 max-md:px-4 py-3.5 max-md:py-3 text-left hover:bg-gray-50 transition-colors flex items-start justify-between gap-4 max-md:gap-3"
                     >
-                      <h3 className="text-sm font-medium text-gray-600 flex-1">{faq.question}</h3>
+                      <h3 className="text-sm max-md:text-xs font-medium text-gray-900 flex-1">{faq.question}</h3>
                       <svg
-                        className={`w-5 h-5 text-[#2F7E7A] flex-shrink-0 transition-transform ${
+                        className={`w-5 h-5 max-md:w-4 max-md:h-4 text-gray-400 flex-shrink-0 transition-transform ${
                           isExpanded ? "transform rotate-180" : ""
                         }`}
                         fill="none"
@@ -295,9 +298,9 @@ function HelpPage() {
                       </svg>
                     </button>
                     {isExpanded && (
-                      <div className="px-6 pb-4 pt-0">
-                        <div className="pl-6 border-l-2 border-[#2F7E7A]">
-                          <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
+                      <div className="px-5 max-md:px-4 pb-4 max-md:pb-3 pt-0">
+                        <div className="pl-4 max-md:pl-3 border-l-2 border-[#2F7E7A]">
+                          <p className="text-gray-600 text-sm max-md:text-xs leading-relaxed">{faq.answer}</p>
                         </div>
                       </div>
                     )}
@@ -309,42 +312,170 @@ function HelpPage() {
         ))}
       </div>
 
-      {/* Contacto adicional mejorado */}
-      <div className="bg-gradient-to-br from-[#2F7E7A] via-[#2F7E7A] to-[#1F5D59] text-white rounded-xl shadow-lg overflow-hidden">
-        <div className="p-8">
-          <div className="flex items-start gap-4 mb-4">
-            <div className="p-3 rounded-lg bg-white bg-opacity-20">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {/* Contacto de soporte */}
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="p-6 max-md:p-4">
+          <div className="flex items-start gap-4 max-md:gap-3">
+            <div className="p-2 max-md:p-1.5 rounded-lg bg-[#2F7E7A] bg-opacity-10">
+              <svg className="w-5 h-5 max-md:w-4 max-md:h-4 text-[#2F7E7A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold mb-2">¿No encuentras lo que buscas?</h2>
-              <p className="text-white text-opacity-90 mb-6">
-                Si tienes más preguntas o necesitas ayuda adicional, puedes revisar nuestra documentación completa o contactarnos directamente.
+              <h2 className="text-lg max-md:text-base font-semibold text-gray-900 mb-2 max-md:mb-1.5">¿Necesitas ayuda adicional?</h2>
+              <p className="text-gray-600 text-sm max-md:text-xs mb-4 max-md:mb-3">
+                Si no encuentras la respuesta que buscas en las FAQs, nuestro equipo de soporte está disponible para ayudarte.
               </p>
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href="/developers"
-                  className="inline-flex items-center px-5 py-2.5 bg-white text-[#2F7E7A] rounded-lg hover:bg-gray-100 transition-all font-semibold text-sm shadow-md hover:shadow-lg"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  Ver Documentación API
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center px-5 py-2.5 bg-white bg-opacity-20 text-white border-2 border-white rounded-lg hover:bg-opacity-30 transition-all font-semibold text-sm"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Ver Planes y Precios
-                </Link>
-              </div>
+              <button
+                onClick={() => setShowContactForm(!showContactForm)}
+                className="inline-flex items-center gap-2 max-md:gap-1.5 px-4 max-md:px-3 py-2 max-md:py-1.5 bg-[#2F7E7A] text-white rounded-lg hover:bg-[#1F5D59] transition-colors font-medium text-sm max-md:text-xs shadow-md hover:shadow-lg"
+              >
+                <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                {showContactForm ? "Ocultar formulario" : "Contactar Soporte"}
+              </button>
             </div>
           </div>
+
+          {/* Formulario de Contacto */}
+          {showContactForm && (
+            <div className="mt-4 max-md:mt-3 pt-4 max-md:pt-3 border-t border-gray-200">
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.currentTarget;
+                  const formData = new FormData(form);
+                  const data = {
+                    name: formData.get("name"),
+                    email: formData.get("email"),
+                    company: formData.get("company") || "",
+                    message: formData.get("message"),
+                  };
+
+                  try {
+                    setContactStatus("idle");
+                    setContactMessage("");
+                    const response = await fetch("/api/contact", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(data),
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                      form.reset();
+                      setContactStatus("success");
+                      setContactMessage(result.message || "¡Mensaje enviado! Te responderemos pronto.");
+                      setTimeout(() => {
+                        setContactStatus("idle");
+                        setContactMessage("");
+                        setShowContactForm(false);
+                      }, 3000);
+                    } else {
+                      setContactStatus("error");
+                      setContactMessage(result.error || "Error al enviar el mensaje. Por favor intenta de nuevo.");
+                      setTimeout(() => {
+                        setContactStatus("idle");
+                        setContactMessage("");
+                      }, 5000);
+                    }
+                  } catch (error) {
+                    setContactStatus("error");
+                    setContactMessage("Error al enviar el mensaje. Por favor intenta de nuevo.");
+                    setTimeout(() => {
+                      setContactStatus("idle");
+                      setContactMessage("");
+                    }, 5000);
+                  }
+                }}
+                className="space-y-4 max-md:space-y-3"
+              >
+                <div>
+                  <label htmlFor="contact-name" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-1 max-md:mb-0.5">
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    id="contact-name"
+                    name="name"
+                    required
+                    placeholder="Tu nombre completo"
+                    className="w-full px-4 max-md:px-3 py-2.5 max-md:py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm max-md:text-sm transition-all"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contact-email" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-1 max-md:mb-0.5">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="contact-email"
+                    name="email"
+                    required
+                    placeholder="tu@email.com"
+                    className="w-full px-4 max-md:px-3 py-2.5 max-md:py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm max-md:text-sm transition-all"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contact-company" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-1 max-md:mb-0.5">
+                    Empresa <span className="text-gray-400 font-normal">(opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="contact-company"
+                    name="company"
+                    placeholder="Nombre de tu empresa"
+                    className="w-full px-4 max-md:px-3 py-2.5 max-md:py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm max-md:text-sm transition-all"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="contact-message" className="block text-sm max-md:text-xs font-medium text-gray-700 mb-1 max-md:mb-0.5">
+                    Mensaje
+                  </label>
+                  <textarea
+                    id="contact-message"
+                    name="message"
+                    required
+                    rows={4}
+                    placeholder="Cuéntanos cómo podemos ayudarte..."
+                    className="w-full px-4 max-md:px-3 py-2.5 max-md:py-2 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm max-md:text-sm resize-none transition-all"
+                  />
+                </div>
+                {contactStatus !== "idle" && contactMessage && (
+                  <div
+                    className={`rounded-lg px-4 max-md:px-3 py-3 max-md:py-2.5 text-sm max-md:text-xs leading-relaxed ${
+                      contactStatus === "success"
+                        ? "bg-green-50 text-green-800 border border-green-200"
+                        : "bg-red-50 text-red-800 border border-red-200"
+                    }`}
+                  >
+                    {contactMessage}
+                  </div>
+                )}
+                <div className="flex items-center gap-3 max-md:gap-2">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-[#2F7E7A] text-white px-4 max-md:px-3 py-2.5 max-md:py-2 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold text-sm max-md:text-xs shadow-md hover:shadow-lg"
+                  >
+                    Enviar Mensaje
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowContactForm(false);
+                      setContactStatus("idle");
+                      setContactMessage("");
+                    }}
+                    className="px-4 max-md:px-3 py-2.5 max-md:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm max-md:text-xs"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </div>

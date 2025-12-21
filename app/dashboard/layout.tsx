@@ -53,11 +53,29 @@ function DashboardLayoutContent({
         });
         // Solo aplicar white label en modo diseño para Business; Free/Pro mantienen Maflipp
         if (designPlan === "business") {
-          setBranding({
-            brand_name: "Tu Marca",
-            custom_logo_url: null,
-            hide_maflipp_brand: true,
-          });
+          try {
+            const stored = typeof window !== "undefined" ? window.localStorage.getItem("branding_preview") : null;
+            if (stored) {
+              setBranding(JSON.parse(stored));
+            } else {
+              setBranding({
+                brand_name: "Tu Marca",
+                custom_logo_url: null,
+                primary_color: "#2F7E7A",
+                secondary_color: "#1F5D59",
+                hide_maflipp_brand: true,
+              });
+            }
+          } catch (e) {
+            console.error("🎨 Layout: Error leyendo branding_preview local", e);
+            setBranding({
+              brand_name: "Tu Marca",
+              custom_logo_url: null,
+              primary_color: "#2F7E7A",
+              secondary_color: "#1F5D59",
+              hide_maflipp_brand: true,
+            });
+          }
         } else {
           setBranding(null);
         }
@@ -105,13 +123,19 @@ function DashboardLayoutContent({
 
       // Branding (solo si autenticado)
       try {
-        const res = await fetch("/api/branding");
+        const res = await fetch("/api/branding", { cache: 'no-store' });
+        console.log("🎨 Layout: Fetching branding, status:", res.status);
         if (res.ok) {
           const data = await res.json();
+          console.log("🎨 Layout: Branding data:", data);
           setBranding(data);
+        } else if (res.status === 401) {
+          console.log("🎨 Layout: No autenticado, no branding");
+          setBranding(null);
         }
       } catch (e) {
-        console.error("Branding fetch error", e);
+        console.error("🎨 Layout: Branding fetch error", e);
+        setBranding(null);
       }
 
       setLoading(false);
@@ -162,8 +186,8 @@ function DashboardLayoutContent({
       <Sidebar userData={userData} branding={branding} />
       <MobileSidebar userData={userData} branding={branding} />
       <div className="lg:pl-64">
-        <main className="py-6">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <main className="py-6 max-md:py-4">
+          <div className="mx-auto max-w-7xl px-4 max-md:px-3 sm:px-6 lg:px-8">
             {children}
           </div>
         </main>

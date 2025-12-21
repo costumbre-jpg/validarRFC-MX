@@ -15,13 +15,22 @@ interface EmailOptions {
   from?: string;
 }
 
-export async function sendEmail(options: EmailOptions): Promise<boolean> {
+export async function sendEmail(options: EmailOptions): Promise<{ success: boolean; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    console.error("RESEND_API_KEY no está configurada");
-    return false;
+    const errorMsg = "RESEND_API_KEY no está configurada en las variables de entorno";
+    console.error("❌", errorMsg);
+    return { success: false, error: errorMsg };
   }
+
+  const fromEmail = options.from || process.env.RESEND_FROM_EMAIL || "Maflipp <onboarding@resend.dev>";
+  
+  console.log("📧 Intentando enviar email:", {
+    from: fromEmail,
+    to: options.to,
+    subject: options.subject,
+  });
 
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -31,7 +40,7 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        from: options.from || process.env.RESEND_FROM_EMAIL || "Maflipp <onboarding@resend.dev>",
+        from: fromEmail,
         to: options.to,
         subject: options.subject,
         html: options.html,
@@ -39,15 +48,19 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error("Error enviando email:", error);
-      return false;
+      const errorData = await response.json();
+      const errorMsg = `Resend API error: ${JSON.stringify(errorData)}`;
+      console.error("❌ Error enviando email:", errorMsg);
+      return { success: false, error: errorMsg };
     }
 
-    return true;
+    const result = await response.json();
+    console.log("✅ Email enviado exitosamente:", result);
+    return { success: true };
   } catch (error) {
-    console.error("Error enviando email:", error);
-    return false;
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    console.error("❌ Error enviando email:", errorMsg);
+    return { success: false, error: errorMsg };
   }
 }
 
@@ -80,7 +93,10 @@ export async function sendThresholdAlert(
       <body>
         <div class="container">
           <div class="header">
-            <h1>⚠️ Alerta de Uso - Maflipp</h1>
+            <div style="margin-bottom: 16px;">
+              <img src="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/imagencorreo.jpg" alt="Maflipp Logo" style="height: 60px; width: auto; display: block; margin: 0 auto; border-radius: 8px; background-color: rgba(255,255,255,0.1); padding: 8px;" />
+            </div>
+            <h1 style="margin: 0;">⚠️ Alerta de Uso - Maflipp</h1>
           </div>
           <div class="content">
             <p>Hola,</p>
@@ -117,11 +133,12 @@ export async function sendThresholdAlert(
     </html>
   `;
 
-  return sendEmail({
+  const result = await sendEmail({
     to: email,
     subject: `⚠️ Has alcanzado el ${usagePercentage.toFixed(1)}% de tu límite mensual - Maflipp`,
     html,
   });
+  return result.success;
 }
 
 /**
@@ -149,7 +166,10 @@ export async function sendLimitReachedAlert(
       <body>
         <div class="container">
           <div class="header">
-            <h1>🚨 Límite Alcanzado - Maflipp</h1>
+            <div style="margin-bottom: 16px;">
+              <img src="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/imagencorreo.jpg" alt="Maflipp Logo" style="height: 60px; width: auto; display: block; margin: 0 auto; border-radius: 8px; background-color: rgba(255,255,255,0.1); padding: 8px;" />
+            </div>
+            <h1 style="margin: 0;">🚨 Límite Alcanzado - Maflipp</h1>
           </div>
           <div class="content">
             <p>Hola,</p>
@@ -180,11 +200,12 @@ export async function sendLimitReachedAlert(
     </html>
   `;
 
-  return sendEmail({
+  const result = await sendEmail({
     to: email,
     subject: "🚨 Has alcanzado tu límite mensual - Maflipp",
     html,
   });
+  return result.success;
 }
 
 /**
@@ -218,7 +239,10 @@ export async function sendMonthlySummary(
       <body>
         <div class="container">
           <div class="header">
-            <h1>📊 Resumen Mensual - Maflipp</h1>
+            <div style="margin-bottom: 16px;">
+              <img src="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/imagencorreo.jpg" alt="Maflipp Logo" style="height: 60px; width: auto; display: block; margin: 0 auto; border-radius: 8px; background-color: rgba(255,255,255,0.1); padding: 8px;" />
+            </div>
+            <h1 style="margin: 0;">📊 Resumen Mensual - Maflipp</h1>
           </div>
           <div class="content">
             <p>Hola,</p>
@@ -258,10 +282,11 @@ export async function sendMonthlySummary(
     </html>
   `;
 
-  return sendEmail({
+  const result = await sendEmail({
     to: email,
     subject: `📊 Resumen mensual - ${queriesUsed.toLocaleString()} validaciones - Maflipp`,
     html,
   });
+  return result.success;
 }
 

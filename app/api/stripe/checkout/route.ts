@@ -21,7 +21,9 @@ export async function POST(request: NextRequest) {
 
     // 2. Parsear body
     const body = await request.json();
-    const { plan } = body;
+    // Compatibilidad: el frontend envía { planId }, pero aceptamos también { plan }
+    const plan = body?.planId || body?.plan;
+    const billingCycle: "monthly" | "annual" = body?.billingCycle === "annual" ? "annual" : "monthly";
 
     // Validar plan (soporta pro, business, y planes futuros)
     const validPlans = ["pro", "business", "basic", "enterprise", "api_premium"];
@@ -33,8 +35,8 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Obtener precio del plan desde Stripe
-    // En producción, estos deberían ser los Price IDs de tus productos en Stripe
-    const priceIds: Record<string, string> = {
+    // Mensual (defaults existentes)
+    const priceIdsMonthly: Record<string, string> = {
       pro: process.env.STRIPE_PRICE_ID_PRO || "",
       business: process.env.STRIPE_PRICE_ID_BUSINESS || process.env.STRIPE_PRICE_ID_ENTERPRISE || "",
       // Planes futuros (preparados)
@@ -43,11 +45,25 @@ export async function POST(request: NextRequest) {
       api_premium: process.env.STRIPE_PRICE_ID_API_PREMIUM || "",
     };
 
-    const priceId = priceIds[plan];
+    // Anual (nuevas variables)
+    const priceIdsAnnual: Record<string, string> = {
+      pro: process.env.STRIPE_PRICE_ID_PRO_ANNUAL || "",
+      business: process.env.STRIPE_PRICE_ID_BUSINESS_ANNUAL || process.env.STRIPE_PRICE_ID_ENTERPRISE_ANNUAL || "",
+      basic: process.env.STRIPE_PRICE_ID_BASIC_ANNUAL || "",
+      enterprise: process.env.STRIPE_PRICE_ID_ENTERPRISE_ANNUAL || "",
+      api_premium: process.env.STRIPE_PRICE_ID_API_PREMIUM_ANNUAL || "",
+    };
+
+    const priceId = billingCycle === "annual" ? priceIdsAnnual[plan] : priceIdsMonthly[plan];
 
     if (!priceId) {
       return NextResponse.json(
-        { error: "Price ID no configurado para este plan" },
+        {
+          error:
+            billingCycle === "annual"
+              ? "Price ID anual no configurado para este plan"
+              : "Price ID no configurado para este plan",
+        },
         { status: 500 }
       );
     }
@@ -80,6 +96,9 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Crear sesión de checkout
+    // Trial: solo PRO (con tarjeta; Stripe no cobrará hasta terminar el trial)
+    const trialDays = plan === "pro" ? 7 : 0;
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ["card"],
@@ -95,12 +114,15 @@ export async function POST(request: NextRequest) {
       metadata: {
         user_id: user.id,
         plan: plan,
+        billing_cycle: billingCycle,
       },
       subscription_data: {
         metadata: {
           user_id: user.id,
           plan: plan,
+          billing_cycle: billingCycle,
         },
+        ...(trialDays > 0 ? { trial_period_days: trialDays } : {}),
       },
     });
 

@@ -9,16 +9,29 @@ import {
 
 /**
  * Endpoint para verificar y enviar alertas por email
- * Este endpoint puede ser llamado por un cron job o manualmente
+ * Este endpoint puede ser llamado por un cron job de Vercel o manualmente
  */
+export async function GET(request: NextRequest) {
+  return handleAlerts(request);
+}
+
 export async function POST(request: NextRequest) {
+  return handleAlerts(request);
+}
+
+async function handleAlerts(request: NextRequest) {
   try {
-    // Verificar que sea una llamada autorizada (desde cron job o con API key)
+    // Verificar que sea una llamada autorizada
+    // Vercel Cron envía el header 'x-vercel-cron' automáticamente
+    const isVercelCron = request.headers.get("x-vercel-cron") === "1";
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    // Permitir si es Vercel Cron o si tiene el secret correcto
+    if (!isVercelCron) {
+      if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+        return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+      }
     }
 
     const supabase = await createClient();

@@ -13,7 +13,7 @@ export interface Database {
         Row: {
           id: string;
           email: string;
-          subscription_status: "free" | "pro" | "enterprise";
+          subscription_status: "free" | "pro" | "business" | "enterprise";
           rfc_queries_this_month: number;
           stripe_customer_id: string | null;
           created_at: string;
@@ -21,7 +21,7 @@ export interface Database {
         Insert: {
           id?: string;
           email: string;
-          subscription_status?: "free" | "pro" | "enterprise";
+          subscription_status?: "free" | "pro" | "business" | "enterprise";
           rfc_queries_this_month?: number;
           stripe_customer_id?: string | null;
           created_at?: string;
@@ -29,7 +29,7 @@ export interface Database {
         Update: {
           id?: string;
           email?: string;
-          subscription_status?: "free" | "pro" | "enterprise";
+          subscription_status?: "free" | "pro" | "business" | "enterprise";
           rfc_queries_this_month?: number;
           stripe_customer_id?: string | null;
           created_at?: string;
@@ -66,7 +66,7 @@ export interface Database {
           id: string;
           user_id: string;
           stripe_subscription_id: string;
-          plan: "pro" | "enterprise";
+          plan: "pro" | "business" | "enterprise";
           status: "active" | "canceled";
           current_period_end: string;
           created_at: string;
@@ -75,7 +75,7 @@ export interface Database {
           id?: string;
           user_id: string;
           stripe_subscription_id: string;
-          plan: "pro" | "enterprise";
+          plan: "pro" | "business" | "enterprise";
           status: "active" | "canceled";
           current_period_end: string;
           created_at?: string;
@@ -84,7 +84,7 @@ export interface Database {
           id?: string;
           user_id?: string;
           stripe_subscription_id?: string;
-          plan?: "pro" | "enterprise";
+          plan?: "pro" | "business" | "enterprise";
           status?: "active" | "canceled";
           current_period_end?: string;
           created_at?: string;

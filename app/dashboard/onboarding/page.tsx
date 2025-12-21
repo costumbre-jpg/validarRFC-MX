@@ -41,6 +41,8 @@ function OnboardingPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [planId, setPlanId] = useState<PlanId>("free");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -48,7 +50,7 @@ function OnboardingPage() {
       const planParam = searchParams.get("plan");
       const designPlan = (planParam && ["pro", "business"].includes(planParam)
         ? planParam
-        : "free") as PlanId;
+        : "business") as PlanId;
 
       try {
         const res = await fetch("/api/onboarding");
@@ -82,10 +84,13 @@ function OnboardingPage() {
 
   const handleSave = async () => {
     if (!isBusiness) {
-      alert("Disponible solo para plan Business");
+      setErrorMessage("Disponible solo para plan Business");
+      setTimeout(() => setErrorMessage(null), 5000);
       return;
     }
     setSaving(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
     try {
       const res = await fetch("/api/onboarding", {
         method: "POST",
@@ -94,13 +99,16 @@ function OnboardingPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || "No se pudo guardar");
+        setErrorMessage(data.error || "No se pudo guardar");
+        setTimeout(() => setErrorMessage(null), 5000);
       } else {
-        alert("✅ Preferencias de onboarding guardadas");
+        setSuccessMessage("✅ Preferencias de onboarding guardadas correctamente");
+        setTimeout(() => setSuccessMessage(null), 5000);
       }
     } catch (e) {
       console.error(e);
-      alert("Error al guardar");
+      setErrorMessage("Error al guardar. Por favor intenta de nuevo.");
+      setTimeout(() => setErrorMessage(null), 5000);
     } finally {
       setSaving(false);
     }
@@ -125,24 +133,24 @@ function OnboardingPage() {
 
   if (!isBusiness) {
     return (
-      <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8">
-        <div className="text-center py-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-6">
-            <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-md:p-4">
+        <div className="text-center space-y-4 max-md:space-y-3">
+          <div className="inline-flex items-center justify-center w-14 max-md:w-12 h-14 max-md:h-12 bg-gray-100 rounded-full">
+            <svg className="w-7 h-7 max-md:w-6 max-md:h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5s-3 1.343-3 3 1.343 3 3 3z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.5 20a5.5 5.5 0 1111 0" />
             </svg>
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-3">Onboarding Personalizado Disponible</h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
-            Esta funcionalidad está disponible solo para el plan Business. Configura tu cuenta a medida con nuestro equipo.
+          <h3 className="text-lg max-md:text-base font-semibold text-gray-900">Onboarding Personalizado</h3>
+          <p className="text-xs max-md:text-[11px] text-gray-600 max-w-md mx-auto">
+            Disponible solo en plan Business. Configura tu cuenta a medida con nuestro equipo.
           </p>
           <a
             href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
-            className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg hover:scale-105"
+            className="inline-flex items-center gap-2 max-md:gap-1.5 px-5 max-md:px-4 py-2.5 max-md:py-2 text-sm max-md:text-xs text-white rounded-lg transition-all font-semibold shadow-sm hover:shadow-md"
             style={{ backgroundColor: brandPrimary }}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
             Mejorar a Business
@@ -153,202 +161,220 @@ function OnboardingPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-600 mb-2">Onboarding Personalizado</h1>
-        <p className="text-sm text-gray-500">
-          Cuéntanos sobre tu empresa, flujos y necesidades para configurar tu cuenta a medida.
+    <div className="space-y-4 max-md:space-y-3">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 max-md:p-3">
+        <h1 className="text-lg max-md:text-base font-semibold text-gray-900">Onboarding Personalizado</h1>
+        <p className="text-xs max-md:text-[11px] text-gray-500 mt-1 max-md:mt-0.5">
+          Cuéntanos sobre tu empresa y casos de uso para configurar tu cuenta.
         </p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 space-y-6">
-        <div className="grid md:grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 max-md:p-3 space-y-3 max-md:space-y-2.5">
+        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Nombre de la empresa
             </label>
             <input
               type="text"
               value={form.company_name}
               onChange={(e) => handleChange("company_name", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
               placeholder="Ej. Fintech XYZ"
               maxLength={120}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Industria
             </label>
             <input
               type="text"
               value={form.industry}
               onChange={(e) => handleChange("industry", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
               placeholder="Finanzas, SaaS, Servicios, etc."
               maxLength={120}
             />
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Tamaño del equipo
             </label>
             <input
               type="text"
               value={form.team_size}
               onChange={(e) => handleChange("team_size", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
               placeholder="Ej. 5-10 usuarios"
               maxLength={80}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Email de contacto
             </label>
             <input
               type="email"
               value={form.contact_email}
               onChange={(e) => handleChange("contact_email", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
               placeholder="contacto@empresa.com"
               maxLength={200}
             />
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Nombre de contacto
             </label>
             <input
               type="text"
               value={form.contact_name}
               onChange={(e) => handleChange("contact_name", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
               placeholder="Nombre y rol (ej. Operaciones)"
               maxLength={120}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Objetivo del onboarding / casos de uso
             </label>
             <textarea
               value={form.use_cases}
               onChange={(e) => handleChange("use_cases", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
-              rows={4}
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
+              rows={3}
               placeholder="Ej. Alta masiva de clientes, screening recurrente, monitoreo de RFCs..."
               maxLength={800}
             />
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Fuentes de datos / integraciones
             </label>
             <textarea
               value={form.data_sources}
               onChange={(e) => handleChange("data_sources", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
-              rows={4}
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
+              rows={3}
               placeholder="CRMs, core bancario, ERP, csv, API interna..."
               maxLength={800}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Preferencias de integración
             </label>
             <textarea
               value={form.integration_preferences}
               onChange={(e) => handleChange("integration_preferences", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
-              rows={4}
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
+              rows={3}
               placeholder="API, Webhooks, carga masiva, validaciones batch, roles de acceso..."
               maxLength={800}
             />
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
               Webhook de notificaciones (opcional)
             </label>
             <input
               type="url"
               value={form.webhook_url}
               onChange={(e) => handleChange("webhook_url", e.target.value)}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
+              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all text-gray-900"
               placeholder="https://tuapp.com/webhooks/rfc"
               maxLength={240}
             />
           </div>
-          <div className="flex items-center gap-3 mt-6">
+          <div className="flex items-center gap-2 max-md:gap-1.5 mt-6 max-md:mt-4">
             <input
               id="sandbox"
               type="checkbox"
               checked={form.sandbox}
               onChange={(e) => handleChange("sandbox", e.target.checked)}
-              className="h-4 w-4 text-[#2F7E7A] border-gray-300 rounded"
+              className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-[#2F7E7A] border-gray-300 rounded"
             />
-            <label htmlFor="sandbox" className="text-sm text-gray-700">
+            <label htmlFor="sandbox" className="text-sm max-md:text-xs text-gray-700">
               Necesito ambiente sandbox para pruebas
             </label>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
             Notas adicionales
           </label>
           <textarea
             value={form.notes}
             onChange={(e) => handleChange("notes", e.target.value)}
-            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-0 focus:border-gray-200 transition-all"
+            className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all text-gray-900"
             rows={3}
             placeholder="Tiempos deseados, restricciones de seguridad, compliance, SLA interno..."
             maxLength={1000}
           />
         </div>
 
-        <div className="flex items-center justify-between bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-xl p-6">
+        {/* Mensajes de éxito/error */}
+        {successMessage && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 max-md:p-2.5 flex items-center gap-2 max-md:gap-1.5">
+            <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5 text-green-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <p className="text-xs max-md:text-[11px] font-semibold text-green-800">{successMessage}</p>
+          </div>
+        )}
+        {errorMessage && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-3 max-md:p-2.5 flex items-center gap-2 max-md:gap-1.5">
+            <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <p className="text-xs max-md:text-[11px] font-semibold text-red-800">{errorMessage}</p>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between max-md:flex-col max-md:items-stretch max-md:gap-3 bg-gray-50 border border-gray-200 rounded-lg p-4 max-md:p-3">
           <div>
-            <p className="text-sm font-semibold text-gray-700">
+            <p className="text-xs max-md:text-[11px] font-semibold text-gray-700">
               Alcance incluido en Business
             </p>
-            <p className="text-xs text-gray-600 mt-1">
+            <p className="text-[11px] max-md:text-[10px] text-gray-500 mt-1 max-md:mt-0.5">
               Configuración de cuenta, roles, webhooks, guías de integración y walkthrough inicial.
             </p>
           </div>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-6 py-2.5 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-md hover:shadow-lg hover:scale-105"
+            className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-5 max-md:px-4 py-2 max-md:py-1.5 text-xs max-md:text-[11px] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold shadow-sm hover:shadow"
             style={{ backgroundColor: brandPrimary }}
           >
             {saving ? (
               <>
-                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin h-3.5 max-md:h-3 w-3.5 max-md:w-3" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Guardando...
+                Guardando
               </>
             ) : (
               <>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 max-md:w-3 h-3.5 max-md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Guardar solicitud
+                Guardar
               </>
             )}
           </button>

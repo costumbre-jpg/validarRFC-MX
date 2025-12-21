@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const redirectTo = useMemo(() => {
+    const raw = searchParams.get("redirect");
+    return raw && raw.startsWith("/") ? raw : "/dashboard";
+  }, [searchParams]);
 
   // Validación de email en tiempo real
   const validateEmail = (emailValue: string) => {
@@ -54,8 +61,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Redirect to dashboard on success
-      router.push("/dashboard");
+      // Redirigir (por defecto: /dashboard)
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       setError("Ocurrió un error inesperado. Por favor intenta de nuevo.");
@@ -94,13 +101,23 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
+          <Link href="/" className="mx-auto mb-6 flex items-center justify-center">
+            <Image
+              src="/Maflipp-recortada.png"
+              alt="Maflipp"
+              width={72}
+              height={72}
+              className="h-14 w-14 object-contain"
+              priority
+            />
+          </Link>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
             Inicia sesión en tu cuenta
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             ¿No tienes una cuenta?{" "}
             <Link
-              href="/auth/register"
+              href={`/auth/register?redirect=${encodeURIComponent(redirectTo)}`}
               className="font-medium text-[#2F7E7A] hover:text-[#1F5D59]"
             >
               Crear cuenta
@@ -216,6 +233,9 @@ export default function LoginPage() {
             >
               {loading ? "Iniciando sesión..." : "Iniciar sesión"}
             </button>
+            <p className="mt-2 text-[11px] text-gray-500 text-center leading-relaxed">
+              Acceso seguro • Datos protegidos
+            </p>
           </div>
         </form>
 
