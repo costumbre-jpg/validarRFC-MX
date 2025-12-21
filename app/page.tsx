@@ -345,7 +345,7 @@ function HomeContent() {
                 </p>
                 <button
                   type="button"
-                  onClick={openRegisterModal}
+                  onClick={() => openRegisterModal()}
                   className="inline-flex items-center gap-2 max-md:gap-1.5 text-[#2F7E7A] font-semibold text-sm max-md:text-xs sm:text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
                   Comenzar Gratis
@@ -369,7 +369,7 @@ function HomeContent() {
                 </p>
                 <button
                   type="button"
-                  onClick={openRegisterModal}
+                  onClick={() => openRegisterModal()}
                   className="inline-flex items-center gap-2 max-md:gap-1.5 text-[#2F7E7A] font-semibold text-sm max-md:text-xs sm:text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
                   Comenzar Gratis
@@ -393,7 +393,7 @@ function HomeContent() {
                 </p>
                 <button
                   type="button"
-                  onClick={openRegisterModal}
+                  onClick={() => openRegisterModal()}
                   className="inline-flex items-center gap-2 max-md:gap-1.5 text-[#2F7E7A] font-semibold text-sm max-md:text-xs sm:text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
                   Comenzar Gratis
@@ -417,7 +417,7 @@ function HomeContent() {
                 </p>
                 <button
                   type="button"
-                  onClick={openRegisterModal}
+                  onClick={() => openRegisterModal()}
                   className="inline-flex items-center gap-2 max-md:gap-1.5 text-[#2F7E7A] font-semibold text-sm max-md:text-xs sm:text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
                   Comenzar Gratis
@@ -554,7 +554,7 @@ function HomeContent() {
                 </p>
                 <button
                   type="button"
-                  onClick={openRegisterModal}
+                  onClick={() => openRegisterModal()}
                   className="inline-flex items-center gap-2 max-md:gap-1.5 text-[#2F7E7A] font-semibold text-sm max-md:text-xs sm:text-base hover:text-[#1F5D59] hover:gap-3 transition-all group/link"
                 >
                   Probar Ahora
@@ -595,7 +595,7 @@ function HomeContent() {
                 <div className="text-center mt-6 max-md:mt-4">
                   <button
                     type="button"
-                    onClick={openRegisterModal}
+                    onClick={() => openRegisterModal()}
                     className="inline-flex items-center gap-2 max-md:gap-1.5 bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] text-white px-6 max-md:px-4 py-3 max-md:py-2 sm:px-8 sm:py-4 rounded-xl hover:from-[#1F5D59] hover:to-[#2F7E7A] transition-all font-semibold text-base max-md:text-sm sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 group/cta"
                   >
                     Comenzar Gratis Ahora
@@ -977,7 +977,7 @@ function HomeContent() {
                   <div className="mt-6 max-md:mt-4">
                     <button
                       type="button"
-                      onClick={openRegisterModal}
+                      onClick={() => openRegisterModal()}
                       className="inline-block bg-[#2F7E7A] text-white px-5 max-md:px-4 py-2.5 max-md:py-2 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold text-sm max-md:text-xs"
                     >
                       Comenzar Gratis
@@ -1041,7 +1041,7 @@ function HomeContent() {
                   <div className="mt-6 max-md:mt-4">
                     <button
                       type="button"
-                      onClick={openRegisterModal}
+                      onClick={() => openRegisterModal()}
                       className="inline-block bg-[#2F7E7A] text-white px-5 max-md:px-4 py-2.5 max-md:py-2 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold text-sm max-md:text-xs"
                     >
                       Comenzar Gratis
@@ -1361,7 +1361,7 @@ Authorization: Bearer YOUR_API_KEY
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-8">
               <button
                 type="button"
-                onClick={openRegisterModal}
+                onClick={() => openRegisterModal()}
                 className="bg-white text-[#2F7E7A] px-7 py-3.5 rounded-xl font-semibold text-sm sm:text-base hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl inline-flex items-center gap-2"
               >
                 Comenzar Gratis

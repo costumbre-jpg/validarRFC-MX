@@ -165,8 +165,6 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
   // 3. Si no hay logo personalizado y hideMaflipp está desactivado → mostrar logo Maflipp
   // 4. Si no es Business → siempre mostrar logo Maflipp
 
-  const brandFallback = branding?.brand_name || "Tu Empresa";
-
   return (
     <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 px-6 pb-4">

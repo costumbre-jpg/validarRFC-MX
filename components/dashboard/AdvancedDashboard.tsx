@@ -551,7 +551,7 @@ export default function AdvancedDashboard({
           currentY += 6;
           
           const changeColor = yearComparison.change > 0 ? [34, 197, 94] : yearComparison.change < 0 ? [239, 68, 68] : [100, 100, 100];
-          doc.setTextColor(changeColor[0], changeColor[1], changeColor[2]);
+          doc.setTextColor(changeColor[0] ?? 100, changeColor[1] ?? 100, changeColor[2] ?? 100);
           doc.text(`Cambio: ${yearComparison.change > 0 ? '+' : ''}${yearComparison.change.toLocaleString()} (${yearComparison.changePercent > 0 ? '+' : ''}${yearComparison.changePercent}%)`, margin, currentY);
           currentY += 10;
         }

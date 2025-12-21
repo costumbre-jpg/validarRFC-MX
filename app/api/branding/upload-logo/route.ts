@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     // Subir a Supabase Storage
     // Nota: Necesitas crear el bucket "branding" en Supabase Storage con políticas públicas
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("branding")
       .upload(filePath, buffer, {
         contentType: file.type,

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -172,17 +172,6 @@ function CardStackCarousel({
     } as any;
   };
 
-  const hasThree = cards.length >= 3;
-  const visibleCards = useMemo(() => {
-    // En móvil, mostrar todas las tarjetas
-    // En escritorio, solo mostrar 3 (left, center, right)
-    if (!hasThree) return cards.map((_, i) => i);
-    const leftIndex = (active - 1 + cards.length) % cards.length;
-    const rightIndex = (active + 1) % cards.length;
-    // Para móvil, retornar todas las tarjetas; la lógica de desktop se maneja con getPos
-    return cards.map((_, i) => i);
-  }, [active, cards, hasThree]);
-
   return (
     <div
       className="relative h-[280px] xs:h-[320px] sm:h-[360px] md:h-[390px] lg:h-[450px] w-full max-w-[90vw] xs:max-w-[380px] sm:max-w-[480px] md:max-w-[520px] lg:max-w-[560px] mx-auto lg:mx-0 max-md:z-0"
@@ -197,7 +186,6 @@ function CardStackCarousel({
         const pos = getPos(idx);
         const s = styleFor(pos, idx);
         const isCenter = pos === "center";
-        const isVisible = visibleCards.includes(idx);
 
         return (
           <div
@@ -206,9 +194,8 @@ function CardStackCarousel({
             className={`hero-card absolute top-0 rounded-2xl border border-gray-200 bg-white transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
               isCenter ? "shadow-md lg:shadow" : "shadow-sm"
             } ${
-              pos === "mobile-visible" ? "lg:hidden max-md:left-0 max-md:scroll-snap-align-start" : pos === "hidden" ? "max-md:hidden left-1/2 -translate-x-1/2" : "max-md:left-0 max-md:scroll-snap-align-start lg:left-1/2 lg:-translate-x-1/2"
+              pos === "mobile-visible" ? "lg:hidden max-md:left-0 max-md:scroll-snap-align-start" : "max-md:left-0 max-md:scroll-snap-align-start lg:left-1/2 lg:-translate-x-1/2"
             }`}
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
             style={{
               ...(prefersReducedMotion ? {} : s),
               width: "240px",

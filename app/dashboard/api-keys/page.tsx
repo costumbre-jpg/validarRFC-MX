@@ -332,7 +332,7 @@ function APIKeysPage() {
           <div>
             <h2 className="text-sm font-semibold text-gray-700">Crear Nueva API Key</h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Asigna un nombre descriptivo (ej: "Producción", "Desarrollo", "Sistema ERP")
+              Asigna un nombre descriptivo (ej: &quot;Producción&quot;, &quot;Desarrollo&quot;, &quot;Sistema ERP&quot;)
             </p>
           </div>
         </div>

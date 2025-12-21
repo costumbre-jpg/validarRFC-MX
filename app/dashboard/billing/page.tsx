@@ -133,9 +133,9 @@ function BillingPage() {
       setBillingCycle(cycleParam);
     }
 
-    if (!auto || !planParam) return;
-    if (!["pro", "business", "basic", "enterprise", "api_premium"].includes(planParam)) return;
-    if (autoCheckoutFiredRef.current) return;
+    if (!auto || !planParam) return undefined;
+    if (!["pro", "business", "basic", "enterprise", "api_premium"].includes(planParam)) return undefined;
+    if (autoCheckoutFiredRef.current) return undefined;
 
     // Evitar re-intentos
     autoCheckoutFiredRef.current = true;
@@ -145,7 +145,7 @@ function BillingPage() {
       setTimeout(() => {
         window.location.href = `/dashboard?plan=${planParam}`;
       }, 100);
-      return;
+      return undefined;
     }
 
     // Si está cargando, esperar un poco y reintentar
@@ -159,12 +159,13 @@ function BillingPage() {
     // Si ya está en ese plan, redirigir al dashboard
     if (userData.subscription_status === planParam) {
       window.location.href = `/dashboard?plan=${planParam}`;
-      return;
+      return undefined;
     }
 
     // Iniciar checkout para usuarios reales
     handleCheckout(planParam as PlanId);
     router.replace("/dashboard/billing");
+    return undefined;
   }, [loading, searchParams, userData, router, handleCheckout]);
 
   const handleCustomerPortal = async () => {

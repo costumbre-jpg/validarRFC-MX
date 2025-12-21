@@ -228,10 +228,10 @@ export async function validateRFC(
     source: satResult.valid === null ? "error" : "sat",
     responseTime: Math.round(responseTime),
     message,
-    error: satResult.error,
-    name: satResult.name,
-    regime: satResult.regime,
-    startDate: satResult.startDate,
+    error: satResult.source === "error" ? satResult.error : undefined,
+    name: satResult.source === "sat" ? satResult.name : undefined,
+    regime: satResult.source === "sat" ? satResult.regime : undefined,
+    startDate: satResult.source === "sat" ? satResult.startDate : undefined,
   };
 
   // Guardar en caché si hay respuesta

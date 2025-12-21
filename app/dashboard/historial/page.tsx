@@ -14,7 +14,6 @@ function HistorialPage() {
   const [validations, setValidations] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
   const searchParams = useSearchParams();
 
@@ -44,7 +43,6 @@ function HistorialPage() {
 
     setValidations(dbValidations || []);
     setTotalCount(count || 0);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -155,7 +153,6 @@ function HistorialPage() {
           setValidations([]);
           setTotalCount(0);
         }
-        setLoading(false);
         return;
       }
 
@@ -180,7 +177,6 @@ function HistorialPage() {
     if (userData && currentPage > 0) {
       // Si es modo diseño, recargar validaciones mock paginadas
       if (userData.id === "mock-user") {
-        setLoading(true);
         const planParam = searchParams.get("plan");
         const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
         
@@ -207,17 +203,14 @@ function HistorialPage() {
           setTimeout(() => {
             setValidations(paginatedValidations);
             setTotalCount(allMockValidations.length);
-            setLoading(false);
           }, 300); // Simular carga
         } else {
           setValidations([]);
           setTotalCount(0);
-          setLoading(false);
         }
       } else {
         // Usuario real: cargar desde servidor
-        setLoading(true);
-        loadValidations(currentPage).finally(() => setLoading(false));
+        loadValidations(currentPage);
       }
     }
   }, [currentPage, userData, searchParams]);

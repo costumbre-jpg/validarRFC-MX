@@ -4,7 +4,6 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 function HelpPage() {
   const searchParams = useSearchParams();

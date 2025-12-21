@@ -150,8 +150,6 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
 
-  const brandFallback = branding?.brand_name || "Tu Empresa";
-
   return (
     <>
       {/* Mobile menu button */}
