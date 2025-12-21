@@ -2,21 +2,22 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Maflipp - Validación de RFCs contra el SAT en 2 segundos",
-  description: "Plataforma profesional B2B para validar RFCs contra el SAT en tiempo real. Ideal para contadores, empresas, fintechs y desarrolladores. Validación instantánea, 100% precisa.",
+  title: "Maflipp | Validación de RFCs en segundos",
+  description:
+    "Plataforma profesional B2B para validar RFCs contra el SAT en tiempo real. Ideal para contadores, empresas, fintechs y desarrolladores. Validación precisa y rápida.",
   keywords: ["validación RFC", "SAT", "RFC México", "validar RFC", "consulta SAT", "padrón contribuyentes", "validación fiscal"],
   authors: [{ name: "Maflipp" }],
   openGraph: {
-    title: "Maflipp - Validación de RFCs contra el SAT",
-    description: "Valida RFCs contra el SAT en 2 segundos. Plataforma profesional para contadores, empresas y desarrolladores.",
+    title: "Maflipp | Validación de RFCs en segundos",
+    description: "Valida RFCs contra el SAT en segundos. Plataforma profesional para contadores, empresas y desarrolladores.",
     type: "website",
     locale: "es_MX",
     siteName: "Maflipp",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Maflipp - Validación de RFCs contra el SAT",
-    description: "Valida RFCs contra el SAT en 2 segundos. Plataforma profesional B2B.",
+    title: "Maflipp | Validación de RFCs en segundos",
+    description: "Valida RFCs contra el SAT en segundos. Plataforma profesional B2B.",
   },
   icons: {
     icon: [
