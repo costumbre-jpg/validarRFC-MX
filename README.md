@@ -2,6 +2,8 @@
 
 Sistema de validación de RFC construido con Next.js 14, TypeScript, Tailwind CSS y Supabase.
 
+> Última actualización: Diseño responsive completo y optimizaciones móvil - Enero 2025
+
 ## 🚀 Inicio Rápido
 
 ### Prerrequisitos
