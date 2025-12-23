@@ -1248,7 +1248,7 @@ export default function AdvancedDashboard({
                       }
                     }}
                     disabled={exportingPDF || !isBusiness}
-                    className="px-6 max-md:px-4 py-3 max-md:py-2 bg-white text-[#2F7E7A] rounded-lg font-semibold text-sm max-md:text-xs hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 max-md:gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed w-full max-md:w-full justify-center"
+                    className="px-5 max-md:px-4 py-3 max-md:py-2 bg-white text-[#2F7E7A] rounded-lg font-semibold text-sm max-md:text-xs hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 max-md:gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed w-auto max-md:w-full justify-center"
                   >
                     {exportingPDF ? (
                       <>
