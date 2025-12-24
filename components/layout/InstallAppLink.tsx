@@ -99,7 +99,7 @@ export default function InstallAppLink() {
     <li>
       <button
         onClick={handleInstallClick}
-        className="hover:text-[#2F7E7A] transition-colors text-sm flex items-center gap-1.5 group w-full text-left"
+        className="text-gray-400 hover:text-[#2F7E7A] transition-colors text-sm flex items-center gap-1.5 group w-full text-left"
         aria-label="Instalar aplicación Maflipp"
         type="button"
       >

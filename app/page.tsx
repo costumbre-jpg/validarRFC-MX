@@ -7,6 +7,7 @@ import Hero from "@/components/home/Hero";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import StatsSlider from "@/components/home/StatsSlider";
 import AuthModal from "@/components/auth/AuthModal";
+import InstallAppLink from "@/components/layout/InstallAppLink";
 import { getPlan } from "@/lib/plans";
 
 function HomeContent() {
@@ -1437,6 +1438,9 @@ Authorization: Bearer YOUR_API_KEY
                   <Link href="/dashboard" className="text-gray-400 text-sm hover:text-[#2F7E7A] transition-colors">
                     Dashboard
                   </Link>
+                </li>
+                <li>
+                  <InstallAppLink />
                 </li>
               </ul>
             </div>
