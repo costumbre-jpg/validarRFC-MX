@@ -109,30 +109,62 @@ function HomeContent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // Escuchar cuando la app se instala y guardar flag permanente
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleAppInstalled = () => {
+      // Cuando se instala, guardar flag permanente
+      window.localStorage.setItem("maflipp_pwa_installed", "1");
+      window.localStorage.setItem("maflipp_pwa", "1");
+    };
+
+    window.addEventListener("appinstalled", handleAppInstalled);
+    return () => window.removeEventListener("appinstalled", handleAppInstalled);
+  }, []);
+
   // Detectar si es PWA y manejar autenticación
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Detectar si está en modo PWA (standalone) o si viene del start_url con ?pwa=1
+    // Múltiples métodos de detección PWA
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
     const isMinimalUI = window.matchMedia("(display-mode: minimal-ui)").matches;
     const isInWebAppiOS = (window.navigator as any).standalone === true;
     const isFromAndroidApp = document.referrer?.startsWith?.("android-app://");
     const isPWAParam = searchParams.get("pwa") === "1";
     const storedPwaFlag = window.localStorage.getItem("maflipp_pwa") === "1";
+    const storedPwaInstalled = window.localStorage.getItem("maflipp_pwa_installed") === "1";
 
     // Si viene con ?pwa=1, guardar bandera para próximos lanzamientos
     if (isPWAParam) {
       window.localStorage.setItem("maflipp_pwa", "1");
+      window.localStorage.setItem("maflipp_pwa_installed", "1");
     }
 
+    // Detección: si está instalada (flag permanente) Y no viene de navegador explícitamente
+    const isFromBrowser = searchParams.get("from") === "browser";
+    
+    // Verificar si la ventana tiene características de PWA (sin barra de navegación)
+    // En PWA instalada, window.navigator.standalone puede ser true o la ventana no tiene toolbar
+    const hasPWACharacteristics = 
+      (window.navigator as any).standalone === true ||
+      (window.matchMedia("(display-mode: standalone)").matches) ||
+      (window.matchMedia("(display-mode: minimal-ui)").matches) ||
+      // Heurística: si no hay referrer y viene de start_url, probablemente es PWA
+      (!document.referrer && isPWAParam);
+    
+    // Si tiene el flag de instalación permanente Y no viene explícitamente del navegador
+    // O si tiene características de PWA
     const isPWAInstalled =
       isStandalone ||
       isMinimalUI ||
       isInWebAppiOS ||
       isFromAndroidApp ||
       isPWAParam ||
-      storedPwaFlag;
+      hasPWACharacteristics ||
+      (storedPwaInstalled && !isFromBrowser) ||
+      (storedPwaFlag && !isFromBrowser);
 
     setIsPWA(isPWAInstalled);
 
