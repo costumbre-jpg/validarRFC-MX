@@ -44,16 +44,19 @@ export default function PwaEntryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => {
-          // Si se cierra sin login, se vuelve a abrir
-          setAuthModalOpen(true);
-        }}
-        initialMode={authMode}
-        redirectTo="/dashboard"
-      />
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => {
+            // Si se cierra sin login, se vuelve a abrir
+            setAuthModalOpen(true);
+          }}
+          initialMode={authMode}
+          redirectTo="/dashboard"
+          centered={true}
+        />
+      </div>
     </div>
   );
 }
