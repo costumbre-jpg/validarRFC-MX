@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "og:site_name": "Maflipp",
     "application-name": "Maflipp",
   },
-  manifest: "/site.webmanifest",
+  manifest: "/pwa.webmanifest",
 };
 
 export default function RootLayout({
