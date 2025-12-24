@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Maflipp",
+  title: "Maflipp | Validación de RFCs en segundos",
   applicationName: "Maflipp",
   description:
     "Plataforma profesional B2B para validar RFCs contra el SAT en tiempo real. Ideal para contadores, empresas, fintechs y desarrolladores. Validación precisa y rápida.",
   keywords: ["validación RFC", "SAT", "RFC México", "validar RFC", "consulta SAT", "padrón contribuyentes", "validación fiscal"],
   authors: [{ name: "Maflipp" }],
   openGraph: {
-    title: "Maflipp",
+    title: "Maflipp | Validación de RFCs en segundos",
     description: "Valida RFCs contra el SAT en segundos. Plataforma profesional para contadores, empresas y desarrolladores.",
     type: "website",
     locale: "es_MX",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Maflipp",
+    title: "Maflipp | Validación de RFCs en segundos",
     description: "Valida RFCs contra el SAT en segundos. Plataforma profesional B2B.",
     images: ["https://maflipp.com/web-app-manifest-512x512.png"],
   },
@@ -73,7 +73,26 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Maflipp",
+    alternateName: "Maflipp",
     url: "https://maflipp.com",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://maflipp.com/?s={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Maflipp",
+        item: "https://maflipp.com",
+      },
+    ],
   };
 
   return (
@@ -86,6 +105,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
         />
       </head>
       <body className="antialiased">
