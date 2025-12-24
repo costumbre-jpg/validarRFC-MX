@@ -113,10 +113,11 @@ function HomeContent() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Detectar si está en modo PWA (standalone)
+    // Detectar si está en modo PWA (standalone) o si viene del start_url con ?pwa=1
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
     const isInWebAppiOS = (window.navigator as any).standalone === true;
-    const isPWAInstalled = isStandalone || isInWebAppiOS;
+    const isPWAParam = searchParams.get("pwa") === "1";
+    const isPWAInstalled = isStandalone || isInWebAppiOS || isPWAParam;
 
     setIsPWA(isPWAInstalled);
 
@@ -151,7 +152,7 @@ function HomeContent() {
       // No es PWA, mostrar landing normal
       setCheckingAuth(false);
     }
-  }, [router, supabase]);
+  }, [router, supabase, searchParams]);
 
   // Verificar periódicamente si el usuario se autenticó en PWA
   useEffect(() => {
