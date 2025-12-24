@@ -115,9 +115,11 @@ function HomeContent() {
 
     // Detectar si está en modo PWA (standalone) o si viene del start_url con ?pwa=1
     const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const isMinimalUI = window.matchMedia("(display-mode: minimal-ui)").matches;
     const isInWebAppiOS = (window.navigator as any).standalone === true;
+    const isFromAndroidApp = document.referrer?.startsWith?.("android-app://");
     const isPWAParam = searchParams.get("pwa") === "1";
-    const isPWAInstalled = isStandalone || isInWebAppiOS || isPWAParam;
+    const isPWAInstalled = isStandalone || isMinimalUI || isInWebAppiOS || isFromAndroidApp || isPWAParam;
 
     setIsPWA(isPWAInstalled);
 
