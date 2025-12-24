@@ -13,37 +13,39 @@ export default function InstallAppLink() {
 
   useEffect(() => {
     // Verificar si ya está instalada
-    if (typeof window !== "undefined") {
-      // Detectar si está en modo standalone (ya instalada)
-      const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
-      const isInWebAppiOS = (window.navigator as any).standalone === true;
-      
-      if (isStandalone || isInWebAppiOS) {
-        setIsInstalled(true);
-        return;
-      }
-
-      // Escuchar el evento beforeinstallprompt
-      const handleBeforeInstallPrompt = (e: Event) => {
-        e.preventDefault();
-        setDeferredPrompt(e as BeforeInstallPromptEvent);
-      };
-
-      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-      // Verificar si ya fue instalada (appinstalled event)
-      const handleAppInstalled = () => {
-        setIsInstalled(true);
-        setDeferredPrompt(null);
-      };
-
-      window.addEventListener("appinstalled", handleAppInstalled);
-
-      return () => {
-        window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-        window.removeEventListener("appinstalled", handleAppInstalled);
-      };
+    if (typeof window === "undefined") {
+      return;
     }
+
+    // Detectar si está en modo standalone (ya instalada)
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const isInWebAppiOS = (window.navigator as any).standalone === true;
+    
+    if (isStandalone || isInWebAppiOS) {
+      setIsInstalled(true);
+      return;
+    }
+
+    // Escuchar el evento beforeinstallprompt
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    // Verificar si ya fue instalada (appinstalled event)
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
   }, []);
 
   const handleInstallClick = async () => {
