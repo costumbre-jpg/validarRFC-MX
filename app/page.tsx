@@ -119,7 +119,20 @@ function HomeContent() {
     const isInWebAppiOS = (window.navigator as any).standalone === true;
     const isFromAndroidApp = document.referrer?.startsWith?.("android-app://");
     const isPWAParam = searchParams.get("pwa") === "1";
-    const isPWAInstalled = isStandalone || isMinimalUI || isInWebAppiOS || isFromAndroidApp || isPWAParam;
+    const storedPwaFlag = window.localStorage.getItem("maflipp_pwa") === "1";
+
+    // Si viene con ?pwa=1, guardar bandera para próximos lanzamientos
+    if (isPWAParam) {
+      window.localStorage.setItem("maflipp_pwa", "1");
+    }
+
+    const isPWAInstalled =
+      isStandalone ||
+      isMinimalUI ||
+      isInWebAppiOS ||
+      isFromAndroidApp ||
+      isPWAParam ||
+      storedPwaFlag;
 
     setIsPWA(isPWAInstalled);
 
