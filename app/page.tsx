@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import Hero from "@/components/home/Hero";
@@ -8,10 +8,13 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import StatsSlider from "@/components/home/StatsSlider";
 import AuthModal from "@/components/auth/AuthModal";
 import InstallAppLink from "@/components/layout/InstallAppLink";
+import { createClient } from "@/lib/supabase/client";
 import { getPlan } from "@/lib/plans";
 
 function HomeContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const supabase = createClient();
   const [isScrolled, setIsScrolled] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -22,6 +25,9 @@ function HomeContent() {
   const [showLogoutMessage, setShowLogoutMessage] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [isPWA, setIsPWA] = useState(false);
+  const [showOnlyLogin, setShowOnlyLogin] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Bloquear scroll cuando el menú móvil está abierto
   useEffect(() => {
@@ -103,6 +109,74 @@ function HomeContent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // Detectar si es PWA y manejar autenticación
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Detectar si está en modo PWA (standalone)
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const isInWebAppiOS = (window.navigator as any).standalone === true;
+    const isPWAInstalled = isStandalone || isInWebAppiOS;
+
+    setIsPWA(isPWAInstalled);
+
+    if (isPWAInstalled) {
+      // Si es PWA, verificar autenticación
+      const checkAuthStatus = async () => {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          
+          if (user) {
+            // Usuario autenticado → redirigir al dashboard
+            router.push("/dashboard");
+          } else {
+            // Usuario NO autenticado → mostrar solo el login
+            setShowOnlyLogin(true);
+            setAuthModalOpen(true);
+            setAuthModalMode("login");
+          }
+        } catch (error) {
+          console.error("Error checking auth:", error);
+          // En caso de error, mostrar login
+          setShowOnlyLogin(true);
+          setAuthModalOpen(true);
+          setAuthModalMode("login");
+        } finally {
+          setCheckingAuth(false);
+        }
+      };
+
+      checkAuthStatus();
+    } else {
+      // No es PWA, mostrar landing normal
+      setCheckingAuth(false);
+    }
+  }, [router, supabase]);
+
+  // Verificar periódicamente si el usuario se autenticó en PWA
+  useEffect(() => {
+    if (!authModalOpen && showOnlyLogin && isPWA) {
+      const checkAuthPeriodically = async () => {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            // Usuario autenticado → redirigir al dashboard
+            router.push("/dashboard");
+          } else {
+            // Usuario NO autenticado → mantener modal abierto
+            setAuthModalOpen(true);
+          }
+        } catch (error) {
+          console.error("Error checking auth:", error);
+        }
+      };
+
+      const interval = setInterval(checkAuthPeriodically, 1000);
+      return () => clearInterval(interval);
+    }
+    return undefined;
+  }, [authModalOpen, showOnlyLogin, isPWA, supabase, router]);
+
   // Detectar logout exitoso
   useEffect(() => {
     if (searchParams.get("loggedOut") === "1") {
@@ -117,6 +191,35 @@ function HomeContent() {
       }, 5000);
     }
   }, [searchParams]);
+
+  // Si es PWA y está verificando autenticación, mostrar loading
+  if (checkingAuth && isPWA) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7E7A] mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si es PWA y solo debe mostrar login, ocultar landing
+  if (showOnlyLogin && isPWA) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => {
+            // Permitir cerrar temporalmente, pero verificar si se autenticó
+            setAuthModalOpen(false);
+          }}
+          initialMode={authModalMode}
+          redirectTo={authRedirectTo}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white max-md:overflow-x-hidden" style={{ position: "relative" }}>
