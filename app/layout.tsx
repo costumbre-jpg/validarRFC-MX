@@ -3,6 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Maflipp | Validación de RFCs en segundos",
+  applicationName: "Maflipp",
   description:
     "Plataforma profesional B2B para validar RFCs contra el SAT en tiempo real. Ideal para contadores, empresas, fintechs y desarrolladores. Validación precisa y rápida.",
   keywords: ["validación RFC", "SAT", "RFC México", "validar RFC", "consulta SAT", "padrón contribuyentes", "validación fiscal"],
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_MX",
     siteName: "Maflipp",
+    url: "https://maflipp.com",
   },
   twitter: {
     card: "summary_large_image",
@@ -39,6 +41,8 @@ export const metadata: Metadata = {
     "msapplication-square150x150logo": "/web-app-manifest-192x192.png",
     "msapplication-wide310x150logo": "/web-app-manifest-512x512.png",
     "msapplication-square310x310logo": "/web-app-manifest-512x512.png",
+    "og:site_name": "Maflipp",
+    "application-name": "Maflipp",
   },
   manifest: "/site.webmanifest",
 };
@@ -48,8 +52,33 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Maflipp",
+    url: "https://maflipp.com",
+    logo: "https://maflipp.com/web-app-manifest-512x512.png",
+  };
+
+  const webSiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Maflipp",
+    url: "https://maflipp.com",
+  };
+
   return (
     <html lang="es">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
+        />
+      </head>
       <body className="antialiased">
         {children}
       </body>

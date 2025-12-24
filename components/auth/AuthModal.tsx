@@ -30,11 +30,21 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
   const finalRedirectTo = redirectTo || "/dashboard";
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      // Reset completo al cerrar el modal para evitar estados de carga atascados
+      setLoading(false);
+      setError(null);
+      setForgotSuccess(false);
+      setRegisterNeedsEmailConfirm(false);
+      return;
+    }
+
+    // Al abrir, restablecer modo inicial y limpiar mensajes
     setMode(initialMode);
     setError(null);
     setForgotSuccess(false);
     setRegisterNeedsEmailConfirm(false);
+    setLoading(false);
   }, [isOpen, initialMode]);
 
   // Validación de email en tiempo real
@@ -189,7 +199,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
 
   const handleOAuthSignIn = async (provider: "google") => {
     setError(null);
-    setLoading(true);
 
     try {
       const supabase = createClient();
@@ -203,11 +212,9 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
 
       if (oauthError) {
         setError(oauthError.message);
-        setLoading(false);
       }
     } catch (err: any) {
       setError(err.message || "Ocurrió un error inesperado. Por favor intenta de nuevo.");
-      setLoading(false);
     }
   };
 
@@ -228,7 +235,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
         <div className="relative h-full overflow-y-auto p-6 max-md:p-4 pt-5 max-md:pt-4">
           {/* Close Button */}
           <button
-            onClick={onClose}
+            onClick={() => {
+              setLoading(false);
+              onClose();
+            }}
             className="absolute top-4 max-md:top-3 right-4 max-md:right-3 text-gray-400 hover:text-gray-600 transition-colors p-2 max-md:p-1.5"
             aria-label="Cerrar"
           >
@@ -269,6 +279,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
                 setMode("login");
                 setError(null);
                 setForgotSuccess(false);
+                setLoading(false);
               }}
               className={`flex-1 py-3 max-md:py-2 text-center font-medium transition-colors text-sm max-md:text-xs ${
                 mode === "login"
@@ -283,6 +294,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
                 setMode("register");
                 setError(null);
                 setForgotSuccess(false);
+                setLoading(false);
               }}
               className={`flex-1 py-3 max-md:py-2 text-center font-medium transition-colors text-sm max-md:text-xs ${
                 mode === "register"
@@ -393,6 +405,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
                     e.preventDefault();
                     setError(null);
                     setForgotSuccess(false);
+                    setLoading(false);
                     setMode("forgot");
                   }}
                 >
@@ -462,6 +475,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
                 onClick={() => {
                   setError(null);
                   setForgotSuccess(false);
+                  setLoading(false);
                   setMode("login");
                 }}
                 className="w-full py-3 max-md:py-2.5 rounded-lg font-semibold text-sm max-md:text-xs border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
@@ -564,11 +578,21 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
                 />
                 <label htmlFor="accept-terms" className="ml-2 max-md:ml-1.5 text-sm max-md:text-xs text-gray-600">
                   Acepto los{" "}
-                  <a href="/terminos" className="text-[#2F7E7A] hover:text-[#1F5D59]">
+                  <a
+                    href="/terminos"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#2F7E7A] hover:text-[#1F5D59]"
+                  >
                     términos
                   </a>{" "}
                   y la{" "}
-                  <a href="/privacidad" className="text-[#2F7E7A] hover:text-[#1F5D59]">
+                  <a
+                    href="/privacidad"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#2F7E7A] hover:text-[#1F5D59]"
+                  >
                     privacidad
                   </a>
                 </label>
@@ -597,8 +621,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
           <div className="space-y-3 max-md:space-y-2">
             <button
               onClick={() => handleOAuthSignIn("google")}
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-3 max-md:gap-2 px-4 max-md:px-3 py-3 max-md:py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-3 max-md:gap-2 px-4 max-md:px-3 py-3 max-md:py-2.5 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
               <svg className="w-5 h-5 max-md:w-4 max-md:h-4" viewBox="0 0 24 24">
                 <path
