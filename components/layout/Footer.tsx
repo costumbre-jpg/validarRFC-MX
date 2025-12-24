@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
+import InstallAppLink from "@/components/layout/InstallAppLink";
 
 export default function Footer() {
   return (
@@ -41,6 +42,9 @@ export default function Footer() {
                 >
                   Dashboard
                 </Link>
+              </li>
+              <li>
+                <InstallAppLink />
               </li>
             </ul>
           </div>
