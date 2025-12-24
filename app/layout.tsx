@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Maflipp | Validación de RFCs en segundos",
+  title: "Maflipp | Validación de RFCs contra el SAT en 2 segundos",
   applicationName: "Maflipp",
   description:
     "Plataforma profesional B2B para validar RFCs contra el SAT en tiempo real. Ideal para contadores, empresas, fintechs y desarrolladores. Validación precisa y rápida.",
   keywords: ["validación RFC", "SAT", "RFC México", "validar RFC", "consulta SAT", "padrón contribuyentes", "validación fiscal"],
   authors: [{ name: "Maflipp" }],
   openGraph: {
-    title: "Maflipp | Validación de RFCs en segundos",
+    title: "Maflipp | Validación de RFCs contra el SAT en 2 segundos",
     description: "Valida RFCs contra el SAT en segundos. Plataforma profesional para contadores, empresas y desarrolladores.",
     type: "website",
     locale: "es_MX",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Maflipp | Validación de RFCs en segundos",
+    title: "Maflipp | Validación de RFCs contra el SAT en 2 segundos",
     description: "Valida RFCs contra el SAT en segundos. Plataforma profesional B2B.",
     images: ["https://maflipp.com/web-app-manifest-512x512.png"],
   },
@@ -98,6 +98,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        {/* iOS PWA Splash Screen - Mejora la nitidez */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Maflipp" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

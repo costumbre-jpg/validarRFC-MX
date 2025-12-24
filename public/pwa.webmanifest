@@ -14,12 +14,19 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
     }
   ],
   "theme_color": "#2F7E7A",
   "background_color": "#ffffff",
   "display": "standalone",
   "start_url": "/pwa?pwa=1",
-  "scope": "/"
+  "scope": "/",
+  "orientation": "portrait-primary"
 }
 
