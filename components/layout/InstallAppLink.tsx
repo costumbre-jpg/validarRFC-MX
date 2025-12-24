@@ -9,7 +9,6 @@ interface BeforeInstallPromptEvent extends Event {
 
 export default function InstallAppLink() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
@@ -28,7 +27,6 @@ export default function InstallAppLink() {
       const handleBeforeInstallPrompt = (e: Event) => {
         e.preventDefault();
         setDeferredPrompt(e as BeforeInstallPromptEvent);
-        setIsInstallable(true);
       };
 
       window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -36,7 +34,6 @@ export default function InstallAppLink() {
       // Verificar si ya fue instalada (appinstalled event)
       const handleAppInstalled = () => {
         setIsInstalled(true);
-        setIsInstallable(false);
         setDeferredPrompt(null);
       };
 
@@ -85,7 +82,6 @@ export default function InstallAppLink() {
 
     if (outcome === "accepted") {
       setIsInstalled(true);
-      setIsInstallable(false);
     }
 
     // Limpiar el prompt
