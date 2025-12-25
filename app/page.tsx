@@ -207,6 +207,8 @@ function HomeContent() {
   if (checkingAuth && isPWA) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
+        {/* H1 para SEO - siempre presente */}
+        <h1 className="sr-only">Maflipp | Validación de RFCs contra el SAT en 2 segundos</h1>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7E7A] mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando...</p>
@@ -219,6 +221,8 @@ function HomeContent() {
   if (showOnlyLogin && isPWA) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
+        {/* H1 para SEO - siempre presente */}
+        <h1 className="sr-only">Maflipp | Validación de RFCs contra el SAT en 2 segundos</h1>
         <AuthModal
           isOpen={authModalOpen}
           onClose={() => {
@@ -234,6 +238,8 @@ function HomeContent() {
 
   return (
     <div className="min-h-screen bg-white max-md:overflow-x-hidden" style={{ position: "relative" }}>
+      {/* H1 para SEO - siempre presente en el HTML inicial */}
+      <h1 className="sr-only">Maflipp | Validación de RFCs contra el SAT en 2 segundos</h1>
       {/* Mensaje de confirmación de logout */}
       {showLogoutMessage && (
         <div className="fixed top-0 left-0 right-0 z-50 animate-in slide-in-from-top duration-300">
