@@ -417,12 +417,12 @@ const Hero = ({ onValidateClick }: HeroProps) => {
       <div className="grid lg:grid-cols-2 gap-8 lg:gap-10 items-center">
         {/* LEFT */}
         <div className="text-center lg:text-left">
-          <h2 className="text-3xl max-md:text-2xl max-md:mb-4 sm:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 tracking-tight leading-tight">
+          <h1 className="text-3xl max-md:text-2xl max-md:mb-4 sm:text-4xl lg:text-5xl font-semibold text-gray-900 mb-6 tracking-tight leading-tight">
             Valida RFCs contra el SAT en{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59]">
               segundos
             </span>
-          </h2>
+          </h1>
           <p className="text-lg max-md:text-sm max-md:mb-3 sm:text-xl text-gray-700 mb-5 max-w-4xl mx-auto lg:mx-0 font-medium leading-relaxed">
             Plataforma B2B para validar y auditar documentos fiscales y legales
           </p>
