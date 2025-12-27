@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://maflipp.com"),
+  alternates: {
+    canonical: "https://maflipp.com",
+  },
   title: "Maflipp | Validación de RFCs contra el SAT en 2 segundos",
   applicationName: "Maflipp",
   description:
