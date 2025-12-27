@@ -102,6 +102,8 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        {/* Google Search Console Verification */}
+        <meta name="google-site-verification" content="_lGaiikbCqO9gM7FAHGzl7N2Tm61Ss7w1Y5fKYR3wqw" />
         {/* iOS PWA Splash Screen - Mejora la nitidez */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
