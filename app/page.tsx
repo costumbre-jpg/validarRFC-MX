@@ -1706,15 +1706,17 @@ Authorization: Bearer YOUR_API_KEY
 export default function Home() {
   return (
     <>
-      {/* H1 para SEO - siempre presente en HTML del servidor, oculto visualmente pero accesible para buscadores */}
-      <h1 style={{ 
-        position: 'absolute', 
-        left: '-9999px', 
-        width: '1px', 
-        height: '1px', 
-        overflow: 'hidden' 
-      }}>
-        Maflipp | Validación de RFCs contra el SAT en 2 segundos
+      {/* H1 redundante oculto para bots/SEO */}
+      <h1
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          width: "1px",
+          height: "1px",
+          overflow: "hidden",
+        }}
+      >
+        Maflipp - Validación de RFCs contra el SAT en 2 segundos
       </h1>
       <Suspense fallback={null}>
         <HomeContent />
