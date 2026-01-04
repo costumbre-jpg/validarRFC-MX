@@ -203,6 +203,13 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
 
     try {
       const supabase = createClient();
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("auth-from", "oauth");
+        }
+      } catch (_e) {
+        // ignore localStorage issues
+      }
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {

@@ -13,12 +13,18 @@ export default function TerminosPage() {
     const search = new URLSearchParams(window.location.search);
     const hinted = search.get("from") === "oauth";
     const hintedLogin = search.get("from") === "login";
+    let stored: string | null = null;
+    try {
+      stored = localStorage.getItem("auth-from");
+    } catch (_e) {
+      // ignore
+    }
     const isOauthRef =
       ref.includes("accounts.google.com") ||
       ref.includes("accounts.google.") ||
       ref.includes("google.com");
-    setFromOauth(Boolean(isOauthRef || hinted));
-    setFromLogin(Boolean(hintedLogin));
+    setFromOauth(Boolean(isOauthRef || hinted || stored === "oauth"));
+    setFromLogin(Boolean(hintedLogin || stored === "login"));
   }, []);
 
   return (

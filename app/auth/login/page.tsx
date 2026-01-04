@@ -75,6 +75,13 @@ function LoginForm() {
     setLoading(true);
 
     try {
+      try {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("auth-from", "oauth");
+        }
+      } catch (_e) {
+        // ignore
+      }
       const supabase = createClient();
 
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
