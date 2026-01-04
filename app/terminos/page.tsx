@@ -35,15 +35,16 @@ export default function TerminosPage() {
       return;
     }
     // fromOauth
-    if (document.referrer) {
-      window.history.back();
-      return;
-    }
     if (typeof window !== "undefined" && window.opener && !window.opener.closed) {
       window.close();
       return;
     }
-    window.location.href = "/auth/login";
+    if (document.referrer) {
+      window.history.back();
+      return;
+    }
+    // Último recurso: volver al selector de cuentas de Google
+    window.location.href = "https://accounts.google.com/";
   };
 
   return (

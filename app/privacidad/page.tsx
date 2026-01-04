@@ -34,15 +34,15 @@ export default function PrivacidadPage() {
       window.location.href = "/auth/login";
       return;
     }
-    if (document.referrer) {
-      window.history.back();
-      return;
-    }
     if (typeof window !== "undefined" && window.opener && !window.opener.closed) {
       window.close();
       return;
     }
-    window.location.href = "/auth/login";
+    if (document.referrer) {
+      window.history.back();
+      return;
+    }
+    window.location.href = "https://accounts.google.com/";
   };
 
   return (
