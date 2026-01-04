@@ -116,7 +116,7 @@ export default function AuthCallbackPage() {
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Error de Autenticación</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <a
-            href="/auth/login"
+            href="/?auth=login"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#2F7E7A] hover:bg-[#1F5D59] shadow-lg hover:shadow-xl"
           >
             Volver a Iniciar Sesión

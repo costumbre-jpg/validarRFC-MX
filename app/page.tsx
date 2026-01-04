@@ -109,6 +109,15 @@ function HomeContent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // Abrir modal de login si viene ?auth=login|register
+  useEffect(() => {
+    const authParam = searchParams.get("auth");
+    if (authParam === "login" || authParam === "register") {
+      setAuthModalMode(authParam === "register" ? "register" : "login");
+      setAuthModalOpen(true);
+    }
+  }, [searchParams]);
+
   // Detectar si es PWA y manejar autenticación
   useEffect(() => {
     if (typeof window === "undefined") return;
