@@ -6,6 +6,7 @@ import Logo from "@/components/layout/Logo";
 export default function TerminosPage() {
   const [fromOauth, setFromOauth] = useState(false);
   const [fromLogin, setFromLogin] = useState(false);
+  const [fromRegister, setFromRegister] = useState(false);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -13,6 +14,7 @@ export default function TerminosPage() {
     const search = new URLSearchParams(window.location.search);
     const hinted = search.get("from") === "oauth";
     const hintedLogin = search.get("from") === "login";
+    const hintedRegister = search.get("from") === "register";
     let stored: string | null = null;
     try {
       stored = localStorage.getItem("auth-from");
@@ -25,13 +27,18 @@ export default function TerminosPage() {
       ref.includes("google.com");
     setFromOauth(Boolean(isOauthRef || hinted || stored === "oauth"));
     setFromLogin(Boolean(hintedLogin || stored === "login"));
+    setFromRegister(Boolean(hintedRegister || stored === "register"));
   }, []);
 
   const handleBack = (e: React.MouseEvent) => {
-    if (!(fromOauth || fromLogin)) return;
+    if (!(fromOauth || fromLogin || fromRegister)) return;
     e.preventDefault();
     if (fromLogin) {
-      window.location.href = "/auth/login";
+      window.location.href = "/?auth=login";
+      return;
+    }
+    if (fromRegister) {
+      window.location.href = "/?auth=register";
       return;
     }
     // fromOauth: intentar regresar al selector de cuentas
@@ -55,32 +62,34 @@ export default function TerminosPage() {
             <div className="transform scale-125 origin-left">
               <Logo size="md" showText={false} />
             </div>
-            <Link
-              href={
-                fromOauth
-                  ? "https://accounts.google.com/"
-                  : fromLogin
-                    ? "/auth/login"
-                    : "/#contacto"
-              }
-              onClick={handleBack}
-              className="inline-flex items-center gap-1 text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium text-sm"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {!fromOauth && (
+              <Link
+                href={
+                  fromLogin
+                    ? "/?auth=login"
+                    : fromRegister
+                      ? "/?auth=register"
+                      : "/#contacto"
+                }
+                onClick={handleBack}
+                className="inline-flex items-center gap-1 text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium text-sm"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-              <span>Volver al inicio</span>
-            </Link>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                <span>Volver al inicio</span>
+              </Link>
+            )}
           </div>
         </div>
       </header>
