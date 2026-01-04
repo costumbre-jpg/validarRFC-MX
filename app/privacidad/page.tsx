@@ -45,19 +45,6 @@ export default function PrivacidadPage() {
     window.location.href = "https://accounts.google.com/";
   };
 
-  const handleSelector = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (typeof window !== "undefined" && window.opener && !window.opener.closed) {
-      window.close();
-      return;
-    }
-    if (document.referrer) {
-      window.history.back();
-      return;
-    }
-    window.location.href = "https://accounts.google.com/";
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -94,16 +81,6 @@ export default function PrivacidadPage() {
               <span>Volver al inicio</span>
             </Link>
           </div>
-          {fromOauth && (
-            <div className="mt-2">
-              <button
-                onClick={handleSelector}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#2F7E7A] hover:text-[#1F5D59] underline"
-              >
-                Volver al selector de cuentas
-              </button>
-            </div>
-          )}
         </div>
       </header>
 
