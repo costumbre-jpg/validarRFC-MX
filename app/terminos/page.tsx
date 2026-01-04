@@ -30,29 +30,6 @@ export default function TerminosPage() {
     setFromRegister(Boolean(hintedRegister || stored === "register"));
   }, []);
 
-  const handleBack = (e: React.MouseEvent) => {
-    if (!(fromOauth || fromLogin || fromRegister)) return;
-    e.preventDefault();
-    if (fromLogin) {
-      window.location.href = "/?auth=login";
-      return;
-    }
-    if (fromRegister) {
-      window.location.href = "/?auth=register";
-      return;
-    }
-    // fromOauth: intentar regresar al selector de cuentas
-    if (typeof window !== "undefined" && window.opener && !window.opener.closed) {
-      window.close();
-      return;
-    }
-    if (document.referrer) {
-      window.history.back();
-      return;
-    }
-    window.location.href = "https://accounts.google.com/";
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
