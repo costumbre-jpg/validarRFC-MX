@@ -61,34 +61,6 @@ export default function PrivacidadPage() {
             <div className="transform scale-125 origin-left">
               <Logo size="md" showText={false} />
             </div>
-            {!fromOauth && (
-              <Link
-                href={
-                  fromLogin
-                    ? "/?auth=login"
-                    : fromRegister
-                      ? "/?auth=register"
-                      : "/#contacto"
-                }
-                onClick={handleBack}
-                className="inline-flex items-center gap-1 text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium text-sm"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-                <span>Volver al inicio</span>
-              </Link>
-            )}
           </div>
         </div>
       </header>
