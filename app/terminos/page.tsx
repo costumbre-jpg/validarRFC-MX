@@ -56,7 +56,13 @@ export default function TerminosPage() {
               <Logo size="md" showText={false} />
             </div>
             <Link
-              href={fromOauth || fromLogin ? "#" : "/#contacto"}
+              href={
+                fromOauth
+                  ? "https://accounts.google.com/"
+                  : fromLogin
+                    ? "/auth/login"
+                    : "/#contacto"
+              }
               onClick={handleBack}
               className="inline-flex items-center gap-1 text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium text-sm"
             >
