@@ -1,7 +1,16 @@
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import Logo from "@/components/layout/Logo";
 
 export default function TerminosPage() {
+  const [fromOauth, setFromOauth] = useState(false);
+
+  useEffect(() => {
+    if (typeof document !== "undefined" && document.referrer?.includes("accounts.google.com")) {
+      setFromOauth(true);
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -12,7 +21,13 @@ export default function TerminosPage() {
               <Logo size="md" showText={false} />
             </div>
             <Link
-              href="/#contacto"
+              href={fromOauth ? "#" : "/#contacto"}
+              onClick={(e) => {
+                if (fromOauth) {
+                  e.preventDefault();
+                  window.history.back();
+                }
+              }}
               className="inline-flex items-center gap-1 text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium text-sm"
             >
               <svg
