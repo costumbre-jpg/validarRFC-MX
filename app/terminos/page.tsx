@@ -27,6 +27,25 @@ export default function TerminosPage() {
     setFromLogin(Boolean(hintedLogin || stored === "login"));
   }, []);
 
+  const handleBack = (e: React.MouseEvent) => {
+    if (!(fromOauth || fromLogin)) return;
+    e.preventDefault();
+    if (fromLogin) {
+      window.location.href = "/auth/login";
+      return;
+    }
+    // fromOauth
+    if (document.referrer) {
+      window.history.back();
+      return;
+    }
+    if (typeof window !== "undefined" && window.opener && !window.opener.closed) {
+      window.close();
+      return;
+    }
+    window.location.href = "/auth/login";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -38,21 +57,7 @@ export default function TerminosPage() {
             </div>
             <Link
               href={fromOauth || fromLogin ? "#" : "/#contacto"}
-              onClick={(e) => {
-                if (fromLogin) {
-                  e.preventDefault();
-                  window.location.href = "/auth/login";
-                  return;
-                }
-                if (fromOauth) {
-                  e.preventDefault();
-                  if (document.referrer) {
-                    window.history.back();
-                  } else {
-                    window.location.href = "/auth/login";
-                  }
-                }
-              }}
+              onClick={handleBack}
               className="inline-flex items-center gap-1 text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium text-sm"
             >
               <svg
