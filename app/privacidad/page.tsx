@@ -5,17 +5,20 @@ import Logo from "@/components/layout/Logo";
 
 export default function PrivacidadPage() {
   const [fromOauth, setFromOauth] = useState(false);
+  const [fromLogin, setFromLogin] = useState(false);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
     const ref = document.referrer || "";
     const search = new URLSearchParams(window.location.search);
     const hinted = search.get("from") === "oauth";
+    const hintedLogin = search.get("from") === "login";
     const isOauthRef =
       ref.includes("accounts.google.com") ||
       ref.includes("accounts.google.") ||
       ref.includes("google.com");
     setFromOauth(Boolean(isOauthRef || hinted));
+    setFromLogin(Boolean(hintedLogin));
   }, []);
 
   return (
@@ -28,8 +31,13 @@ export default function PrivacidadPage() {
               <Logo size="md" showText={false} />
             </div>
             <Link
-              href={fromOauth ? "#" : "/#contacto"}
+              href={fromOauth || fromLogin ? "#" : "/#contacto"}
               onClick={(e) => {
+                if (fromLogin) {
+                  e.preventDefault();
+                  window.location.href = "/auth/login";
+                  return;
+                }
                 if (fromOauth) {
                   e.preventDefault();
                   if (document.referrer) {
