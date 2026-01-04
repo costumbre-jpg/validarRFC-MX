@@ -1,35 +1,8 @@
- "use client";
+"use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import Logo from "@/components/layout/Logo";
 
 export default function PrivacidadPage() {
-  const [fromOauth, setFromOauth] = useState(false);
-  const [fromLogin, setFromLogin] = useState(false);
-  const [fromRegister, setFromRegister] = useState(false);
-
-  useEffect(() => {
-    if (typeof document === "undefined") return;
-    const ref = document.referrer || "";
-    const search = new URLSearchParams(window.location.search);
-    const hinted = search.get("from") === "oauth";
-    const hintedLogin = search.get("from") === "login";
-    const hintedRegister = search.get("from") === "register";
-    let stored: string | null = null;
-    try {
-      stored = localStorage.getItem("auth-from");
-    } catch (_e) {
-      // ignore
-    }
-    const isOauthRef =
-      ref.includes("accounts.google.com") ||
-      ref.includes("accounts.google.") ||
-      ref.includes("google.com");
-    setFromOauth(Boolean(isOauthRef || hinted || stored === "oauth"));
-    setFromLogin(Boolean(hintedLogin || stored === "login"));
-    setFromRegister(Boolean(hintedRegister || stored === "register"));
-  }, []);
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
