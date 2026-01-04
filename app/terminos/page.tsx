@@ -7,9 +7,15 @@ export default function TerminosPage() {
   const [fromOauth, setFromOauth] = useState(false);
 
   useEffect(() => {
-    if (typeof document !== "undefined" && document.referrer?.includes("accounts.google.com")) {
-      setFromOauth(true);
-    }
+    if (typeof document === "undefined") return;
+    const ref = document.referrer || "";
+    const search = new URLSearchParams(window.location.search);
+    const hinted = search.get("from") === "oauth";
+    const isOauthRef =
+      ref.includes("accounts.google.com") ||
+      ref.includes("accounts.google.") ||
+      ref.includes("google.com");
+    setFromOauth(Boolean(isOauthRef || hinted));
   }, []);
 
   return (
@@ -26,7 +32,11 @@ export default function TerminosPage() {
               onClick={(e) => {
                 if (fromOauth) {
                   e.preventDefault();
-                  window.history.back();
+                  if (document.referrer) {
+                    window.history.back();
+                  } else {
+                    window.location.href = "/auth/login";
+                  }
                 }
               }}
               className="inline-flex items-center gap-1 text-gray-700 hover:text-[#2F7E7A] transition-colors font-medium text-sm"
