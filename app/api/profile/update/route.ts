@@ -53,25 +53,33 @@ export async function PUT(request: NextRequest) {
     const updates: any = {};
     
     if (full_name !== undefined) {
-      if (typeof full_name !== "string") {
+      if (full_name !== null && typeof full_name !== "string") {
         return NextResponse.json(
           { error: "full_name debe ser un texto" },
           { status: 400 }
         );
       }
-      const sanitized = full_name.trim().slice(0, 100);
-      updates.full_name = sanitized || null;
+      const sanitized =
+        (full_name ?? "")
+          .toString()
+          .trim()
+          .slice(0, 100) || null;
+      updates.full_name = sanitized;
     }
 
     if (company_name !== undefined) {
-      if (typeof company_name !== "string") {
+      if (company_name !== null && typeof company_name !== "string") {
         return NextResponse.json(
           { error: "company_name debe ser un texto" },
           { status: 400 }
         );
       }
-      const sanitized = company_name.trim().slice(0, 100);
-      updates.company_name = sanitized || null;
+      const sanitized =
+        (company_name ?? "")
+          .toString()
+          .trim()
+          .slice(0, 100) || null;
+      updates.company_name = sanitized;
     }
 
     if (phone !== undefined) {
@@ -110,7 +118,7 @@ export async function PUT(request: NextRequest) {
       .update(updates)
       .eq("id", user.id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error actualizando perfil:", error);
