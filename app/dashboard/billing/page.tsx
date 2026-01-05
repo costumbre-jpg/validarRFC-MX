@@ -21,6 +21,7 @@ function BillingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const autoCheckoutFiredRef = useRef(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -36,6 +37,8 @@ function BillingPage() {
       const {
         data: { user: currentUser },
       } = await supabase.auth.getUser();
+      const { data: sessionData } = await supabase.auth.getSession();
+      setAccessToken(sessionData.session?.access_token ?? null);
 
       // Modo diseño: permitir uso sin sesión
       if (!currentUser) {
@@ -100,7 +103,9 @@ function BillingPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify({ planId, billingCycle }),
       });
 
