@@ -72,22 +72,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Crear/actualizar registro de subscriptions con estado activo (mock)
-    const { error: upsertError } = await supabase
+    // Nota: la tabla no tiene unique constraint en user_id; evitamos onConflict y hacemos upsert manual
+    await supabase
       .from("subscriptions")
-      .upsert(
-        {
-          user_id: user.id,
-          stripe_subscription_id: "test-upgrade",
-          plan,
-          status: "active",
-          current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        { onConflict: "user_id" }
-      );
+      .delete()
+      .eq("user_id", user.id)
+      .eq("stripe_subscription_id", "test-upgrade");
 
-    if (upsertError) {
+    const { error: insertError } = await supabase
+      .from("subscriptions")
+      .insert({
+        user_id: user.id,
+        stripe_subscription_id: "test-upgrade",
+        plan,
+        status: "active",
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+
+    if (insertError) {
       return NextResponse.json(
-        { error: upsertError.message || "No se pudo registrar la suscripción" },
+        { error: insertError.message || "No se pudo registrar la suscripción" },
         { status: 500 }
       );
     }
