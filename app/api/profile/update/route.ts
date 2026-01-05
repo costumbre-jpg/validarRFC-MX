@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
+type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
+
 export async function PUT(request: NextRequest) {
   try {
     // Prepara respuesta para propagar cookies si Supabase las refresca
@@ -18,7 +20,7 @@ export async function PUT(request: NextRequest) {
           cookiesToSet: {
             name: string;
             value: string;
-            options?: Parameters<(typeof response.cookies)["set"]>[2];
+            options?: CookieSetOptions;
           }[]
         ) {
           cookiesToSet.forEach(({ name, value, options }) =>
