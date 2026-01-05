@@ -97,7 +97,8 @@ function BillingPage() {
       return;
     }
 
-    const testMode = searchParams.get("testMode") === "1" || searchParams.get("skipCheckout") === "1";
+    // Modo test siempre activo para desarrollo (sin necesidad de parámetro)
+    const testMode = true; // Siempre usar modo test por ahora
 
     setProcessing(true);
     try {
@@ -122,9 +123,9 @@ function BillingPage() {
         }
 
         // Refrescar la página para reflejar el plan
-        router.refresh();
         setProcessing(false);
-        alert(`Plan ${planId} activado en modo test (sin pago).`);
+        alert(`Plan ${planId.toUpperCase()} activado correctamente.`);
+        window.location.reload(); // Recargar para ver los cambios
         return;
       }
 
