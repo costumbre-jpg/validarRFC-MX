@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Prepara respuesta para poder adjuntar cookies si Supabase las refresca
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    });
+
     const {
       data: { user },
       error: authError,
@@ -88,10 +106,14 @@ export async function POST(request: NextRequest) {
       // No fallar si hay error, la imagen ya se subió
     }
 
-    return NextResponse.json({
-      success: true,
-      avatar_url: avatarUrl,
-    });
+    response.body = null; // no body mutation; send json below
+    return NextResponse.json(
+      { success: true, avatar_url: avatarUrl },
+      {
+        status: 200,
+        headers: response.headers,
+      }
+    );
   } catch (error: any) {
     console.error("Error en upload avatar:", error);
     return NextResponse.json(

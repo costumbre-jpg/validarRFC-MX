@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Prepara respuesta para propagar cookies si Supabase las refresca
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+    });
+
     const {
       data: { user },
       error: authError,
@@ -90,7 +108,10 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true, user: data });
+    return NextResponse.json(
+      { success: true, user: data },
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error en update profile:", error);
     return NextResponse.json(
