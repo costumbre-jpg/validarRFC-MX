@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -26,11 +27,26 @@ export default function EditProfileModal({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [emailVerificationSent, setEmailVerificationSent] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const brandPrimary = "var(--brand-primary, #2F7E7A)";
   const brandSecondary = "var(--brand-secondary, #1F5D59)";
 
   useEffect(() => {
+    const loadSession = async () => {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase.auth.getSession();
+        setAccessToken(data.session?.access_token ?? null);
+      } catch {
+        setAccessToken(null);
+      }
+    };
+
+    if (isOpen) {
+      loadSession();
+    }
+
     if (isOpen && userData) {
       setFullName(userData.full_name || "");
       setCompanyName(userData.company_name || "");
@@ -80,6 +96,12 @@ export default function EditProfileModal({
       const response = await fetch("/api/profile/upload-avatar", {
         method: "POST",
         body: formData,
+        credentials: "include",
+        headers: accessToken
+          ? {
+              Authorization: `Bearer ${accessToken}`,
+            }
+          : undefined,
       });
 
       const data = await response.json();
@@ -143,7 +165,9 @@ export default function EditProfileModal({
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify({
           full_name: fullName.trim() || null,
           company_name: companyName.trim() || null,
