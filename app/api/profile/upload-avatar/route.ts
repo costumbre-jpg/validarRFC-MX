@@ -114,7 +114,6 @@ export async function POST(request: NextRequest) {
       // No fallar si hay error, la imagen ya se subió
     }
 
-    response.body = null; // no body mutation; send json below
     return NextResponse.json(
       { success: true, avatar_url: avatarUrl },
       {
