@@ -1,16 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
-    // 1. Verificar autenticación
-    const supabase = await createClient();
+    // 1. Verificar autenticación (Bearer o cookies)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const authHeader = request.headers.get("authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401 }
+      );
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // No seteamos cookies en esta ruta
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+    });
+
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser(jwt);
 
     if (!user || authError) {
       return NextResponse.json(
