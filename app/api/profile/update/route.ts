@@ -15,6 +15,13 @@ export async function PUT(request: NextRequest) {
     ? authHeader.replace("Bearer ", "")
     : undefined;
 
+  if (!jwt) {
+    return NextResponse.json(
+      { error: "Usuario no autenticado" },
+      { status: 401 }
+    );
+  }
+
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
@@ -32,6 +39,11 @@ export async function PUT(request: NextRequest) {
           );
         },
       },
+    global: {
+      headers: {
+        Authorization: `Bearer ${jwt}`,
+      },
+    },
     });
 
     const {
