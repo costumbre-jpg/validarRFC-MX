@@ -97,8 +97,37 @@ function BillingPage() {
       return;
     }
 
+    const testMode = searchParams.get("testMode") === "1" || searchParams.get("skipCheckout") === "1";
+
     setProcessing(true);
     try {
+      // Modo test: activar plan sin pasar por Stripe
+      if (testMode) {
+        const resp = await fetch("/api/subscription/test-upgrade", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+          credentials: "include",
+          body: JSON.stringify({ planId }),
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          alert(data.error || "No se pudo activar el plan en modo test");
+          setProcessing(false);
+          return;
+        }
+
+        // Refrescar la página para reflejar el plan
+        router.refresh();
+        setProcessing(false);
+        alert(`Plan ${planId} activado en modo test (sin pago).`);
+        return;
+      }
+
       const response = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: {
