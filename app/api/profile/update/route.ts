@@ -10,6 +10,10 @@ export async function PUT(request: NextRequest) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  const authHeader = request.headers.get("authorization") || "";
+  const jwt = authHeader.startsWith("Bearer ")
+    ? authHeader.replace("Bearer ", "")
+    : undefined;
 
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
@@ -33,7 +37,7 @@ export async function PUT(request: NextRequest) {
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser(jwt);
 
     if (!user || authError) {
       return NextResponse.json(
