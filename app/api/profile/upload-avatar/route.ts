@@ -107,15 +107,40 @@ export async function POST(request: NextRequest) {
 
     const avatarUrl = urlData.publicUrl;
 
-    // Actualizar avatar_url en la tabla users
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({ avatar_url: avatarUrl })
-      .eq("id", user.id);
+    // Actualizar avatar_url en la tabla users; si no existe fila por RLS, hacer upsert
+    const doUpdate = async () => {
+      return supabase
+        .from("users")
+        .update({ avatar_url: avatarUrl })
+        .eq("id", user.id)
+        .select()
+        .maybeSingle();
+    };
+
+    let { error: updateError } = await doUpdate();
 
     if (updateError) {
-      console.error("Error actualizando avatar_url:", updateError);
-      // No fallar si hay error, la imagen ya se subió
+      // Intentar upsert creando la fila si no existe
+      const { error: upsertError } = await supabase
+        .from("users")
+        .upsert(
+          {
+            id: user.id,
+            email: user.email || "",
+            avatar_url: avatarUrl,
+          },
+          { onConflict: "id" }
+        )
+        .select()
+        .maybeSingle();
+
+      if (upsertError) {
+        console.error("Error actualizando avatar_url (upsert):", upsertError);
+        return NextResponse.json(
+          { error: upsertError.message || "Error al subir la imagen" },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json(

@@ -112,13 +112,35 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    // Actualizar en la base de datos
-    const { data, error } = await supabase
-      .from("users")
-      .update(updates)
-      .eq("id", user.id)
-      .select()
-      .maybeSingle();
+    // Actualizar en la base de datos; si no existe fila por RLS, hacer upsert
+    const doUpdate = async () => {
+      return supabase
+        .from("users")
+        .update(updates)
+        .eq("id", user.id)
+        .select()
+        .maybeSingle();
+    };
+
+    let { data, error } = await doUpdate();
+
+    // Si RLS impide update o no hay fila, intentar upsert (crea o reemplaza)
+    if (error || !data) {
+      const upsertPayload = {
+        id: user.id,
+        email: user.email || "",
+        ...updates,
+      };
+
+      const upsertResult = await supabase
+        .from("users")
+        .upsert(upsertPayload, { onConflict: "id" })
+        .select()
+        .maybeSingle();
+
+      data = upsertResult.data;
+      error = upsertResult.error;
+    }
 
     if (error) {
       console.error("Error actualizando perfil:", error);
