@@ -127,7 +127,11 @@ function BillingPage() {
 
         // Mostrar mensaje de éxito y recargar
         setProcessing(false);
-        setSuccessMessage(`Plan ${planId.toUpperCase()} activado correctamente.`);
+        setSuccessMessage(
+          planId === "free"
+            ? "Plan Gratis activado correctamente."
+            : `Plan ${planId.toUpperCase()} activado correctamente.`
+        );
         setTimeout(() => {
           window.location.reload(); // Recargar para ver los cambios
         }, 1500);
@@ -922,7 +926,9 @@ function BillingPage() {
                   ) : (
                     <span className="flex items-center justify-center gap-1.5">
                       {plan.monthlyPrice === 0
-                        ? "Comenzar Gratis"
+                        ? currentPlan === "free"
+                          ? "Plan Actual"
+                          : "Cambiar a Gratis"
                         : planId === "pro" && currentPlan === "free"
                           ? "Probar Pro 7 Días"
                           : "Mejorar Plan"}

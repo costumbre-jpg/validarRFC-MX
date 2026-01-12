@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const ALLOWED_PLANS = ["pro", "business"];
+const ALLOWED_PLANS = ["free", "pro", "business"];
 
 export async function POST(request: NextRequest) {
   try {
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -30,13 +32,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
+
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll() {
-          // no-op
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
         },
       },
       global: {
@@ -58,7 +70,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Actualizar users.subscription_status
+    // Si el plan es "free", eliminar todas las suscripciones y actualizar a free
+    if (plan === "free") {
+      // Eliminar todas las suscripciones de test-upgrade
+      await supabase
+        .from("subscriptions")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("stripe_subscription_id", "test-upgrade");
+
+      // Actualizar subscription_status a free
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ subscription_status: "free" })
+        .eq("id", user.id);
+
+      if (updateError) {
+        return NextResponse.json(
+          { error: updateError.message || "No se pudo cambiar al plan gratis" },
+          { status: 500, headers: response.headers }
+        );
+      }
+
+      return NextResponse.json(
+        {
+          success: true,
+          plan: "free",
+          message: "Plan Gratis activado correctamente.",
+        },
+        { status: 200, headers: response.headers }
+      );
+    }
+
+    // Para planes Pro/Business: actualizar users.subscription_status
     const { error: updateError } = await supabase
       .from("users")
       .update({ subscription_status: plan })
@@ -67,7 +111,7 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       return NextResponse.json(
         { error: updateError.message || "No se pudo actualizar el plan" },
-        { status: 500 }
+        { status: 500, headers: response.headers }
       );
     }
 
@@ -92,15 +136,18 @@ export async function POST(request: NextRequest) {
     if (insertError) {
       return NextResponse.json(
         { error: insertError.message || "No se pudo registrar la suscripción" },
-        { status: 500 }
+        { status: 500, headers: response.headers }
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      plan,
-      message: `Plan ${plan} activado en modo test (sin pago).`,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        plan,
+        message: `Plan ${plan.toUpperCase()} activado correctamente.`,
+      },
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     return NextResponse.json(
       { error: error?.message || "Error interno del servidor" },
