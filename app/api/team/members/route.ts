@@ -1,15 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+
+type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
 
 // GET: Obtener miembros del equipo
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const authHeader = request.headers.get("authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+    });
+
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser(jwt);
 
-    if (!user) {
+    if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
@@ -52,7 +91,10 @@ export async function GET(_request: NextRequest) {
       })),
     ];
 
-    return NextResponse.json({ members: allMembers });
+    return NextResponse.json(
+      { members: allMembers },
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error en members route:", error);
     return NextResponse.json(
@@ -65,12 +107,49 @@ export async function GET(_request: NextRequest) {
 // DELETE: Eliminar miembro del equipo
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const authHeader = request.headers.get("authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+    });
+
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser(jwt);
 
-    if (!user) {
+    if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
@@ -122,7 +201,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { success: true },
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error en delete member route:", error);
     return NextResponse.json(

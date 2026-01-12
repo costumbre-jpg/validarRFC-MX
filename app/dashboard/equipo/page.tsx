@@ -17,6 +17,7 @@ function EquipoPage() {
   const [deleting, setDeleting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -65,10 +66,21 @@ function EquipoPage() {
       
       setUserData(dbUser);
 
+      // Obtener token de acceso
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        setAccessToken(session.access_token);
+      }
+
       // Get team members reales
       if (dbUser && ((dbUser as any).subscription_status === "pro" || (dbUser as any).subscription_status === "business")) {
         try {
-          const response = await fetch("/api/team/members");
+          const response = await fetch("/api/team/members", {
+            headers: {
+              ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+            },
+            credentials: "include",
+          });
           if (response.ok) {
             const data = await response.json();
             setTeamMembers(data.members || []);
@@ -186,7 +198,9 @@ function EquipoPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify({ email: inviteEmail }),
       });
 
@@ -200,7 +214,12 @@ function EquipoPage() {
       }
 
       // Recargar lista de miembros
-      const membersResponse = await fetch("/api/team/members");
+      const membersResponse = await fetch("/api/team/members", {
+        headers: {
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        credentials: "include",
+      });
       if (membersResponse.ok) {
         const membersData = await membersResponse.json();
         setTeamMembers(membersData.members || []);
@@ -244,7 +263,9 @@ function EquipoPage() {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify({ memberId: memberToDelete.id }),
       });
 
@@ -259,7 +280,12 @@ function EquipoPage() {
       }
 
       // Recargar lista de miembros
-      const membersResponse = await fetch("/api/team/members");
+      const membersResponse = await fetch("/api/team/members", {
+        headers: {
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
+        credentials: "include",
+      });
       if (membersResponse.ok) {
         const membersData = await membersResponse.json();
         setTeamMembers(membersData.members || []);

@@ -1,16 +1,55 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { getPlan, type PlanId } from "@/lib/plans";
 import { sendEmail } from "@/lib/email";
 
+type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
+
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const authHeader = request.headers.get("authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+    });
+
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser(jwt);
 
-    if (!user) {
+    if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
@@ -120,14 +159,17 @@ export async function POST(request: NextRequest) {
       // Continuar aunque falle el email
     }
 
-    return NextResponse.json({
-      success: true,
-      invitation: {
-        id: invitation.id,
-        email: invitation.email,
-        status: invitation.status,
+    return NextResponse.json(
+      {
+        success: true,
+        invitation: {
+          id: invitation.id,
+          email: invitation.email,
+          status: invitation.status,
+        },
       },
-    });
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error en invite route:", error);
     return NextResponse.json(
