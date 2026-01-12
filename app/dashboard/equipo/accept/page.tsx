@@ -55,7 +55,10 @@ function AcceptInvitationPage() {
         const userEmail = user.email;
         if (!userEmail || !invitationEmail || invitationEmail.toLowerCase() !== userEmail.toLowerCase()) {
           setStatus("error");
-          setMessage(`Esta invitación fue enviada a ${invitationEmail || "email desconocido"}, pero estás logueado como ${userEmail || "usuario sin email"}`);
+          setMessage(
+            `Esta invitación fue enviada al correo ${invitationEmail || "email desconocido"}, pero estás iniciado sesión con ${userEmail || "otro email"}. ` +
+            `Para aceptar esta invitación, debes cerrar sesión y crear una cuenta o iniciar sesión con el correo ${invitationEmail || "al que se envió la invitación"}.`
+          );
           return;
         }
 
@@ -186,20 +189,30 @@ function AcceptInvitationPage() {
               </svg>
             </div>
             <h2 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-2 max-md:mb-1.5">Error al aceptar invitación</h2>
-            <p className="text-sm max-md:text-xs text-gray-600 mb-6 max-md:mb-4">{message}</p>
+            <p className="text-sm max-md:text-xs text-gray-600 mb-4 max-md:mb-3">{message}</p>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 max-md:mb-4 text-left">
+              <p className="text-xs max-md:text-[11px] text-blue-800 font-medium mb-1">💡 ¿Qué hacer?</p>
+              <p className="text-xs max-md:text-[11px] text-blue-700">
+                Si recibiste esta invitación en tu correo, debes cerrar sesión y crear una cuenta o iniciar sesión con el correo al que se envió la invitación.
+              </p>
+            </div>
             <div className="flex gap-3 max-md:gap-2 justify-center max-md:flex-col">
+              <button
+                onClick={async () => {
+                  const supabase = createClient();
+                  await supabase.auth.signOut();
+                  window.location.href = `/auth/login?redirect=/dashboard/equipo/accept?token=${token}`;
+                }}
+                className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-sm max-md:text-xs text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg"
+                style={{ backgroundColor: brandPrimary }}
+              >
+                Cerrar Sesión y Continuar
+              </button>
               <Link
                 href="/dashboard"
                 className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-sm max-md:text-xs text-gray-700 bg-gray-100 rounded-xl transition-all font-medium hover:bg-gray-200"
               >
                 Ir al Dashboard
-              </Link>
-              <Link
-                href="/dashboard/equipo"
-                className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-sm max-md:text-xs text-white rounded-xl transition-all font-medium shadow-md hover:shadow-lg"
-                style={{ backgroundColor: brandPrimary }}
-              >
-                Ver Equipo
               </Link>
             </div>
           </div>
