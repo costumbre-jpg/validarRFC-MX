@@ -30,6 +30,15 @@ export default function AdvancedDashboard({
   const planLimit = plan.validationsPerMonth;
   const isBusiness = planId === "business";
 
+  // En modo diseño (mock-user), no mostrar gráficas con datos de ejemplo
+  if (userData?.id === "mock-user") {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-600">
+        Aún no hay datos reales para mostrar en el análisis detallado.
+      </div>
+    );
+  }
+
   useEffect(() => {
     const loadAdvancedData = async () => {
       // Resetear estados al cambiar datos
