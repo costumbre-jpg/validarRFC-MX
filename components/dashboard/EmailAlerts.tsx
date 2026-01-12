@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { getPlan, type PlanId } from "@/lib/plans";
 
 interface EmailAlertsProps {
@@ -14,12 +15,30 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
   const [loading, setLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const planId = (userData?.subscription_status || "free") as PlanId;
   const plan = getPlan(planId);
   const queriesThisMonth = userData?.rfc_queries_this_month || 0;
   const planLimit = plan.validationsPerMonth;
   const usagePercentage = planLimit === -1 ? 0 : (queriesThisMonth / planLimit) * 100;
+
+  // Obtener access token
+  useEffect(() => {
+    const getToken = async () => {
+      if (userData?.id === "mock-user") {
+        return;
+      }
+      try {
+        const supabase = createClient();
+        const { data: sessionData } = await supabase.auth.getSession();
+        setAccessToken(sessionData.session?.access_token ?? null);
+      } catch (error) {
+        console.error("Error obteniendo token:", error);
+      }
+    };
+    getToken();
+  }, [userData]);
 
   // Cargar preferencias al montar el componente
   useEffect(() => {
@@ -33,7 +52,12 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
       }
 
       try {
-        const response = await fetch("/api/alerts/preferences");
+        const response = await fetch("/api/alerts/preferences", {
+          headers: {
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          },
+          credentials: "include",
+        });
         if (response.ok) {
           const data = await response.json();
           setAlertsEnabled(data.alerts_enabled ?? true);
@@ -46,10 +70,10 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
       }
     };
 
-    if (userData) {
+    if (userData && (userData.id === "mock-user" || accessToken !== null)) {
       loadPreferences();
     }
-  }, [userData]);
+  }, [userData, accessToken]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -71,7 +95,9 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify({
           alerts_enabled: alertsEnabled,
           alert_threshold: alertThreshold,

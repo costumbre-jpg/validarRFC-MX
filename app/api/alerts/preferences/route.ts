@@ -1,16 +1,61 @@
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
+type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
+
 // GET: Obtener preferencias de alertas del usuario
-export async function GET(_request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const authHeader = request.headers.get("authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401 }
+      );
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+    });
+
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser(jwt);
 
-    if (!user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    if (!user || authError) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401, headers: response.headers }
+      );
     }
 
     // Obtener preferencias del usuario
@@ -22,21 +67,30 @@ export async function GET(_request: NextRequest) {
 
     if (error && error.code !== "PGRST116") {
       // PGRST116 = no rows returned
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500, headers: response.headers }
+      );
     }
 
     // Si no existen preferencias, retornar valores por defecto
     if (!preferences) {
-      return NextResponse.json({
-        alerts_enabled: true,
-        alert_threshold: 80,
-      });
+      return NextResponse.json(
+        {
+          alerts_enabled: true,
+          alert_threshold: 80,
+        },
+        { status: 200, headers: response.headers }
+      );
     }
 
-    return NextResponse.json({
-      alerts_enabled: preferences.alerts_enabled,
-      alert_threshold: preferences.alert_threshold,
-    });
+    return NextResponse.json(
+      {
+        alerts_enabled: preferences.alerts_enabled,
+        alert_threshold: preferences.alert_threshold,
+      },
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error obteniendo preferencias:", error);
     return NextResponse.json(
@@ -49,13 +103,56 @@ export async function GET(_request: NextRequest) {
 // POST/PUT: Guardar o actualizar preferencias de alertas
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const authHeader = request.headers.get("authorization") || "";
+    const jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401 }
+      );
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+    });
+
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+      error: authError,
+    } = await supabase.auth.getUser(jwt);
 
-    if (!user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    if (!user || authError) {
+      return NextResponse.json(
+        { error: "Usuario no autenticado" },
+        { status: 401, headers: response.headers }
+      );
     }
 
     const body = await request.json();
@@ -99,16 +196,22 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       console.error("Error guardando preferencias:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(
+        { error: error.message },
+        { status: 500, headers: response.headers }
+      );
     }
 
-    return NextResponse.json({
-      success: true,
-      preferences: {
-        alerts_enabled: data.alerts_enabled,
-        alert_threshold: data.alert_threshold,
+    return NextResponse.json(
+      {
+        success: true,
+        preferences: {
+          alerts_enabled: data.alerts_enabled,
+          alert_threshold: data.alert_threshold,
+        },
       },
-    });
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error guardando preferencias:", error);
     return NextResponse.json(
