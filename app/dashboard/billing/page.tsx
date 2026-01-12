@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -92,7 +92,7 @@ function BillingPage() {
     loadData();
   }, [router, searchParams]);
 
-  const handleCheckout = async (planId: PlanId) => {
+  const handleCheckout = useCallback(async (planId: PlanId) => {
     // Modo diseño: redirigir al Dashboard con el plan seleccionado
     if (!userData || userData.id === "mock-user") {
       router.push(`/dashboard?plan=${planId}`);
@@ -167,7 +167,7 @@ function BillingPage() {
       setProcessing(false);
       setTimeout(() => setErrorMessage(null), 5000);
     }
-  };
+  }, [accessToken, billingCycle, router, userData]);
 
   // Auto-checkout: cuando viene desde "Probar Pro 7 Días"
   useEffect(() => {

@@ -29,15 +29,7 @@ export default function AdvancedDashboard({
   const queriesThisMonth = userData?.rfc_queries_this_month || 0;
   const planLimit = plan.validationsPerMonth;
   const isBusiness = planId === "business";
-
-  // En modo diseño (mock-user), no mostrar gráficas con datos de ejemplo
-  if (userData?.id === "mock-user") {
-    return (
-      <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-600">
-        Aún no hay datos reales para mostrar en el análisis detallado.
-      </div>
-    );
-  }
+  const isMock = userData?.id === "mock-user";
 
   useEffect(() => {
     const loadAdvancedData = async () => {
@@ -48,58 +40,13 @@ export default function AdvancedDashboard({
       setYearComparison(null);
       setEfficiencyMetrics(null);
       setLoading(true);
-      // Modo diseño: usar datos mock en cero (sin ejemplos)
-      if (userData?.id === "mock-user") {
-        // Mock en cero para visualización
-        const mockDaily = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date();
-          date.setDate(date.getDate() - (6 - i));
-          const exampleCounts = [0, 0, 0, 0, 0, 0, 0];
-          return {
-            date: date.toLocaleDateString("es-MX", { weekday: "short", day: "numeric" }),
-            count: exampleCounts[i] || 0,
-          };
-        });
-        const mockMonthly = Array.from({ length: 6 }, (_, i) => {
-          const date = new Date();
-          date.setMonth(date.getMonth() - (5 - i));
-          const exampleCounts = [0, 0, 0, 0, 0, 0];
-          return {
-            month: date.toLocaleDateString("es-MX", { month: "short", year: "numeric" }),
-            count: exampleCounts[i] || 0,
-          };
-        });
-        setDailyUsage(mockDaily);
-        setMonthlyTrends(mockMonthly);
-        
-        // Datos mock adicionales para Business
-        if (isBusiness) {
-          // Mock de análisis por hora
-          const mockHourly = Array.from({ length: 24 }, (_, i) => ({
-            hour: i,
-            count: 0,
-            label: `${i.toString().padStart(2, '0')}:00`
-          }));
-          setHourlyUsage(mockHourly);
-
-          // Mock de comparación año anterior
-          setYearComparison({
-            current: 0,
-            lastYear: 0,
-            change: 0,
-            changePercent: '0',
-            month: new Date().toLocaleDateString("es-MX", { month: "long", year: "numeric" })
-          });
-
-          // Mock de métricas de eficiencia
-          setEfficiencyMetrics({
-            errorRate: 0,
-            avgResponseTime: 0,
-            totalRequests: 0,
-            successRate: '0'
-          });
-        }
-        
+      // Modo diseño: no mostrar datos (todo en cero)
+      if (isMock) {
+        setDailyUsage([]);
+        setMonthlyTrends([]);
+        setHourlyUsage([]);
+        setYearComparison(null);
+        setEfficiencyMetrics(null);
         setLoading(false);
         return;
       }
@@ -318,33 +265,9 @@ export default function AdvancedDashboard({
 
   // Calcular máximos para escalar las barras
   // Datos de ejemplo para asegurar vista previa siempre visible
-  const sampleDaily = [
-    { date: "lun 01", count: 12 },
-    { date: "mar 02", count: 25 },
-    { date: "mié 03", count: 18 },
-    { date: "jue 04", count: 32 },
-    { date: "vie 05", count: 28 },
-    { date: "sáb 06", count: 15 },
-    { date: "dom 07", count: 22 },
-  ];
-  const sampleMonthly = [
-    { month: "may 2024", count: 450 },
-    { month: "jun 2024", count: 520 },
-    { month: "jul 2024", count: 680 },
-    { month: "ago 2024", count: 750 },
-    { month: "sep 2024", count: 820 },
-    { month: "oct 2024", count: 950 },
-  ];
-
-  // Usar datos reales; si están vacíos o todos en 0, mostrar muestras
-  const dailyToShow =
-    dailyUsage.length === 7 && dailyUsage.some((d) => d.count > 0)
-      ? dailyUsage
-      : sampleDaily;
-  const monthlyToShow =
-    monthlyTrends.length === 6 && monthlyTrends.some((m) => m.count > 0)
-      ? monthlyTrends
-      : sampleMonthly;
+  // Usar datos reales; sin datos = arreglos vacíos (no mostrar ejemplos)
+  const dailyToShow = isMock ? [] : dailyUsage;
+  const monthlyToShow = isMock ? [] : monthlyTrends;
 
   // Calcular máximos para escalar las barras
   const maxDailyUsage =
@@ -355,6 +278,14 @@ export default function AdvancedDashboard({
     monthlyToShow.length > 0
       ? Math.max(...monthlyToShow.map((m) => m.count), 1)
       : 1;
+
+  if (isMock) {
+    return (
+      <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-600">
+        Aún no hay datos reales para mostrar en el análisis detallado.
+      </div>
+    );
+  }
 
   // Función para exportar reporte analytics a PDF
   const handleExportAnalyticsPDF = async () => {
