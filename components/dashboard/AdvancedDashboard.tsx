@@ -39,14 +39,13 @@ export default function AdvancedDashboard({
       setYearComparison(null);
       setEfficiencyMetrics(null);
       setLoading(true);
-      // Modo diseño: usar datos mock con ejemplos visuales
+      // Modo diseño: usar datos mock en cero (sin ejemplos)
       if (userData?.id === "mock-user") {
-        // Mock con datos de ejemplo para visualizar el diseño
+        // Mock en cero para visualización
         const mockDaily = Array.from({ length: 7 }, (_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - (6 - i));
-          // Datos de ejemplo: variación realista
-          const exampleCounts = [12, 25, 18, 32, 28, 15, 22]; // Ejemplo de uso diario
+          const exampleCounts = [0, 0, 0, 0, 0, 0, 0];
           return {
             date: date.toLocaleDateString("es-MX", { weekday: "short", day: "numeric" }),
             count: exampleCounts[i] || 0,
@@ -55,8 +54,7 @@ export default function AdvancedDashboard({
         const mockMonthly = Array.from({ length: 6 }, (_, i) => {
           const date = new Date();
           date.setMonth(date.getMonth() - (5 - i));
-          // Datos de ejemplo: tendencia creciente
-          const exampleCounts = [450, 520, 680, 750, 820, queriesThisMonth || 950]; // Ejemplo de uso mensual
+          const exampleCounts = [0, 0, 0, 0, 0, 0];
           return {
             month: date.toLocaleDateString("es-MX", { month: "short", year: "numeric" }),
             count: exampleCounts[i] || 0,
@@ -70,26 +68,26 @@ export default function AdvancedDashboard({
           // Mock de análisis por hora
           const mockHourly = Array.from({ length: 24 }, (_, i) => ({
             hour: i,
-            count: Math.floor(Math.random() * 15) + (i >= 9 && i <= 17 ? 10 : 0), // Más actividad en horas laborales
+            count: 0,
             label: `${i.toString().padStart(2, '0')}:00`
           }));
           setHourlyUsage(mockHourly);
 
           // Mock de comparación año anterior
           setYearComparison({
-            current: queriesThisMonth || 850,
-            lastYear: 720,
-            change: (queriesThisMonth || 850) - 720,
-            changePercent: '18.1',
+            current: 0,
+            lastYear: 0,
+            change: 0,
+            changePercent: '0',
             month: new Date().toLocaleDateString("es-MX", { month: "long", year: "numeric" })
           });
 
           // Mock de métricas de eficiencia
           setEfficiencyMetrics({
-            errorRate: 2.3,
-            avgResponseTime: 1.8,
-            totalRequests: queriesThisMonth || 850,
-            successRate: '97.7'
+            errorRate: 0,
+            avgResponseTime: 0,
+            totalRequests: 0,
+            successRate: '0'
           });
         }
         
