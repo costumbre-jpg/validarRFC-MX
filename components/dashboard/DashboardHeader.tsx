@@ -57,8 +57,16 @@ export default function DashboardHeader({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 max-md:gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-3 max-md:gap-2">
-            <div className="h-12 w-12 max-md:h-10 max-md:w-10 rounded-full bg-[#2F7E7A]/10 text-[#2F7E7A] font-semibold flex items-center justify-center uppercase text-sm max-md:text-xs">
-              {getInitials(displayName)}
+            <div className="h-12 w-12 max-md:h-10 max-md:w-10 rounded-full overflow-hidden bg-[#2F7E7A]/10 text-[#2F7E7A] font-semibold flex items-center justify-center uppercase text-sm max-md:text-xs ring-2 ring-gray-100">
+              {userData?.avatar_url ? (
+                <img
+                  src={userData.avatar_url}
+                  alt={displayName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                getInitials(displayName)
+              )}
             </div>
             <div>
               <p className="text-xs max-md:text-[10px] uppercase tracking-wide text-gray-500">Panel</p>
