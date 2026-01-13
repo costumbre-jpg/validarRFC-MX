@@ -14,7 +14,6 @@ function AcceptInvitationPage() {
   const [status, setStatus] = useState<"loading" | "success" | "error" | "already-accepted">("loading");
   const [message, setMessage] = useState("");
   const [teamOwnerEmail, setTeamOwnerEmail] = useState("");
-  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
     const acceptInvitation = async () => {
@@ -32,9 +31,6 @@ function AcceptInvitationPage() {
 
         const { data: sessionResp } = await supabase.auth.getSession();
         const tokenAuth = sessionResp?.session?.access_token || null;
-        if (tokenAuth) {
-          setAccessToken(tokenAuth);
-        }
 
         if (!user) {
           // Si no está autenticado, redirigir a login con el token
