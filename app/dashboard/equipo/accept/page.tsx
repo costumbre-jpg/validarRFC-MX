@@ -77,20 +77,20 @@ function AcceptInvitationPage() {
           return;
         }
 
-        // Actualizar la invitación para marcarla como aceptada
-        const { error: updateError } = await (supabase
-          .from("team_members") as any)
-          .update({
-            user_id: user.id,
-            status: "active",
-            accepted_at: new Date().toISOString(),
-          })
-          .eq("id", inv.id);
+        // Llamar al endpoint server-side que usa service role para aceptar
+        const acceptResp = await fetch("/api/team/accept", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token ?? ""}`,
+          },
+          body: JSON.stringify({ token }),
+        });
 
-        if (updateError) {
-          console.error("Error aceptando invitación:", updateError);
+        if (!acceptResp.ok) {
+          const err = await acceptResp.json().catch(() => ({}));
           setStatus("error");
-          setMessage("Error al aceptar la invitación. Por favor intenta de nuevo.");
+          setMessage(err.error || "Error al aceptar la invitación. Por favor intenta de nuevo.");
           return;
         }
 
