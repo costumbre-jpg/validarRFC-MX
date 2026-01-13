@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 
+// Aseguramos runtime Node (no Edge) para usar service role
+export const runtime = "nodejs";
+
 // Aceptar invitación de equipo usando Service Role para evitar bloqueo por RLS
 export async function POST(request: NextRequest) {
   try {
@@ -52,13 +55,27 @@ export async function POST(request: NextRequest) {
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
     // Buscar invitación por token
-    const { data: invitation, error: inviteError } = await supabaseAdmin
+    let { data: invitation, error: inviteError } = await supabaseAdmin
       .from("team_members")
       .select("*")
       .eq("invitation_token", token)
       .single();
 
-    if (inviteError || !invitation) {
+    // Fallback: si el token no se encuentra, buscar por email pendiente (caso de enlaces viejos o duplicados)
+    if ((inviteError || !invitation) && user.email) {
+      const { data: pendingInvites } = await supabaseAdmin
+        .from("team_members")
+        .select("*")
+        .eq("email", user.email.toLowerCase())
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      if (pendingInvites && pendingInvites.length === 1) {
+        invitation = pendingInvites[0];
+      }
+    }
+
+    if (!invitation) {
       return NextResponse.json(
         { error: "Invitación no encontrada o token inválido" },
         { status: 404 }
