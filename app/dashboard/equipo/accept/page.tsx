@@ -38,48 +38,6 @@ function AcceptInvitationPage() {
           return;
         }
 
-        // Buscar la invitación por token
-        const { data: invitation, error: inviteError } = await supabase
-          .from("team_members")
-          .select("*, team_owner_id, users!team_members_team_owner_id_fkey(email)")
-          .eq("invitation_token", token)
-          .single();
-
-        if (inviteError || !invitation) {
-          setStatus("error");
-          setMessage("Invitación no encontrada o token inválido");
-          return;
-        }
-
-        const inv = invitation as any;
-
-        // Verificar que el email coincida
-        const invitationEmail = inv.email;
-        const userEmail = user.email;
-        if (!userEmail || !invitationEmail || invitationEmail.toLowerCase() !== userEmail.toLowerCase()) {
-          // Si la sesión es de otro usuario, cerrar sesión y redirigir a login con el token
-          setStatus("error");
-          setMessage(
-            `Esta invitación fue enviada al correo ${invitationEmail || "email desconocido"}, ` +
-            `pero estás iniciado sesión con ${userEmail || "otro email"}. ` +
-            `Te redirigiremos para iniciar sesión con el correo invitado.`
-          );
-          try {
-            await supabase.auth.signOut();
-          } catch (_e) {
-            // ignorar
-          }
-          router.push(`/auth/login?redirect=/dashboard/equipo/accept?token=${token}`);
-          return;
-        }
-
-        // Verificar si ya fue aceptada
-        if (inv.status === "active" && inv.user_id) {
-          setStatus("already-accepted");
-          setMessage("Esta invitación ya fue aceptada anteriormente");
-          return;
-        }
-
         // Llamar al endpoint server-side que usa service role para aceptar
         const acceptResp = await fetch("/api/team/accept", {
           method: "POST",
@@ -87,6 +45,7 @@ function AcceptInvitationPage() {
             "Content-Type": "application/json",
             ...(tokenAuth ? { Authorization: `Bearer ${tokenAuth}` } : {}),
           },
+          credentials: "include",
           body: JSON.stringify({ token }),
         });
 
@@ -95,19 +54,6 @@ function AcceptInvitationPage() {
           setStatus("error");
           setMessage(err.error || "Error al aceptar la invitación. Por favor intenta de nuevo.");
           return;
-        }
-
-        // Obtener email del dueño del equipo
-        if (inv.team_owner_id) {
-          const { data: ownerData } = await supabase
-            .from("users")
-            .select("email")
-            .eq("id", inv.team_owner_id)
-            .single();
-          
-          if (ownerData) {
-            setTeamOwnerEmail((ownerData as any).email);
-          }
         }
 
         setStatus("success");

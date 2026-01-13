@@ -24,10 +24,6 @@ export async function POST(request: NextRequest) {
       ? authHeader.replace("Bearer ", "")
       : undefined;
 
-    if (!jwt) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-    }
-
     const body = await request.json().catch(() => null);
     const token = body?.token as string | undefined;
     if (!token) {
@@ -37,15 +33,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Cliente para autenticar al usuario (respeta RLS)
+    // Cliente para autenticar al usuario (respeta RLS); usa cookie o header
     const supabaseAuth = createServerClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: `Bearer ${jwt}` } },
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // no-op
+        },
+      },
+      global: jwt
+        ? {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        : undefined,
     });
 
     const {
       data: { user },
       error: authError,
-    } = await supabaseAuth.auth.getUser(jwt);
+    } = jwt ? await supabaseAuth.auth.getUser(jwt) : await supabaseAuth.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
