@@ -16,10 +16,6 @@ export async function POST(request: NextRequest) {
       ? authHeader.replace("Bearer ", "")
       : undefined;
 
-    if (!jwt) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-    }
-
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
@@ -37,17 +33,19 @@ export async function POST(request: NextRequest) {
           );
         },
       },
-      global: {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      },
+      global: jwt
+        ? {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        : undefined,
     });
 
     const {
       data: { user },
       error: authError,
-    } = await supabase.auth.getUser(jwt);
+    } = jwt ? await supabase.auth.getUser(jwt) : await supabase.auth.getUser();
 
     if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
