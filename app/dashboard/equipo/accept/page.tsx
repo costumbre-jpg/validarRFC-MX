@@ -54,11 +54,19 @@ function AcceptInvitationPage() {
         const invitationEmail = inv.email;
         const userEmail = user.email;
         if (!userEmail || !invitationEmail || invitationEmail.toLowerCase() !== userEmail.toLowerCase()) {
+          // Si la sesión es de otro usuario, cerrar sesión y redirigir a login con el token
           setStatus("error");
           setMessage(
-            `Esta invitación fue enviada al correo ${invitationEmail || "email desconocido"}, pero estás iniciado sesión con ${userEmail || "otro email"}. ` +
-            `Para aceptar esta invitación, debes cerrar sesión y crear una cuenta o iniciar sesión con el correo ${invitationEmail || "al que se envió la invitación"}.`
+            `Esta invitación fue enviada al correo ${invitationEmail || "email desconocido"}, ` +
+            `pero estás iniciado sesión con ${userEmail || "otro email"}. ` +
+            `Te redirigiremos para iniciar sesión con el correo invitado.`
           );
+          try {
+            await supabase.auth.signOut();
+          } catch (_e) {
+            // ignorar
+          }
+          router.push(`/auth/login?redirect=/dashboard/equipo/accept?token=${token}`);
           return;
         }
 
