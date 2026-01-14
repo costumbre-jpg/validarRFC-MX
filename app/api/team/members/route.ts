@@ -7,6 +7,22 @@ type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
 // Usamos runtime Node para poder utilizar la service role key
 export const runtime = "nodejs";
 
+// Extrae el JWT de cookies supabase (pueden venir como JSON stringificado)
+const extractJwtFromCookie = (raw?: string) => {
+  if (!raw) return undefined;
+  if (raw.trim().startsWith("[")) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr[0]) {
+        return arr[0] as string;
+      }
+    } catch {
+      // ignore parse error
+    }
+  }
+  return raw;
+};
+
 // GET: Obtener miembros del equipo
 export async function GET(request: NextRequest) {
   try {
@@ -29,9 +45,9 @@ export async function GET(request: NextRequest) {
     // Fallback: intentar obtener el token de cookies (sb-access-token)
     if (!jwt) {
       const cookieToken =
-        request.cookies.get("sb-access-token")?.value ||
-        request.cookies.get("supabase-auth-token")?.value ||
-        request.cookies.get("sb:token")?.value;
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
       jwt = cookieToken || undefined;
     }
 
@@ -158,9 +174,9 @@ export async function DELETE(request: NextRequest) {
     // Fallback: intentar obtener el token de cookies
     if (!jwt) {
       const cookieToken =
-        request.cookies.get("sb-access-token")?.value ||
-        request.cookies.get("supabase-auth-token")?.value ||
-        request.cookies.get("sb:token")?.value;
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
       jwt = cookieToken || undefined;
     }
 
