@@ -64,19 +64,21 @@ export async function POST(request: NextRequest) {
     // Cliente admin para saltar RLS en la actualización controlada
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
-    // Buscar invitación por token
-    let { data: invitation, error: inviteError } = await supabaseAdmin
+    const userEmailLower = (user.email || "").toLowerCase();
+
+    // 1) Buscar invitación por token
+    let { data: invitation } = await supabaseAdmin
       .from("team_members")
       .select("*")
       .eq("invitation_token", token)
       .single();
 
-    // Fallback: si el token no se encuentra, buscar por email pendiente (caso de enlaces viejos o duplicados)
-    if ((inviteError || !invitation) && user.email) {
+    // 2) Si no se encontró por token, buscar la más reciente pendiente por email
+    if (!invitation && userEmailLower) {
       const { data: pendingInvites } = await supabaseAdmin
         .from("team_members")
         .select("*")
-        .eq("email", user.email.toLowerCase())
+        .eq("email", userEmailLower)
         .eq("status", "pending")
         .order("created_at", { ascending: false })
         .limit(1);
@@ -85,19 +87,32 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fallback adicional: si ya existe un miembro activo con ese email, devolver success
-    if (!invitation && user.email) {
+    // 3) Si existe activo con ese email, devolver success
+    if (!invitation && userEmailLower) {
       const { data: activeMembers } = await supabaseAdmin
         .from("team_members")
         .select("*")
-        .eq("email", user.email.toLowerCase())
+        .eq("email", userEmailLower)
         .eq("status", "active")
         .limit(1);
       if (activeMembers && activeMembers.length === 1) {
+        // Si no tiene user_id, asociarlo
+        const active = activeMembers[0];
+        if (!active.user_id) {
+          await supabaseAdmin
+            .from("team_members")
+            .update({
+              user_id: user.id,
+              status: "active",
+              accepted_at: new Date().toISOString(),
+            })
+            .eq("id", active.id);
+        }
         return NextResponse.json({ success: true });
       }
     }
 
+    // 4) Último intento: si no hay invitación, devolver error
     if (!invitation) {
       return NextResponse.json(
         { error: "Invitación no encontrada o token inválido" },
