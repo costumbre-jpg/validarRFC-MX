@@ -51,7 +51,12 @@ function AcceptInvitationPage() {
         if (!acceptResp.ok) {
           const err = await acceptResp.json().catch(() => ({}));
           setStatus("error");
-          setMessage(err.error || "Error al aceptar la invitación. Por favor intenta de nuevo.");
+          setMessage(
+            err.error ||
+            err.detail ||
+            err.debug?.suggestion ||
+            "Error al aceptar la invitación. Por favor intenta de nuevo."
+          );
           return;
         }
 
