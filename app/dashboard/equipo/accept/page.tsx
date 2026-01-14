@@ -98,9 +98,7 @@ function AcceptInvitationPage() {
             </div>
             <h2 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-2 max-md:mb-1.5">¡Invitación Aceptada!</h2>
             <p className="text-sm max-md:text-xs text-gray-600 mb-6 max-md:mb-4">
-              {teamOwnerEmail 
-                ? `Ahora eres miembro del equipo de ${teamOwnerEmail}`
-                : "Ahora eres miembro del equipo"}
+              Ahora eres miembro del equipo
             </p>
             <Link
               href="/dashboard/equipo"
