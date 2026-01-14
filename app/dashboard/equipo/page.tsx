@@ -97,14 +97,6 @@ function EquipoPage() {
     loadData();
   }, [searchParams]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2F7E7A]"></div>
-      </div>
-    );
-  }
-
   const isOwner = useMemo(() => {
     if (!userData?.email) return false;
     return teamMembers.some(
@@ -126,6 +118,14 @@ function EquipoPage() {
 
   const brandPrimary = getBrandColor('--brand-primary', '#2F7E7A');
   const brandSecondary = getBrandColor('--brand-secondary', '#1F5D59');
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2F7E7A]"></div>
+      </div>
+    );
+  }
 
   // Solo mostrar para Pro y Business
   if (planId !== "pro" && planId !== "business") {
