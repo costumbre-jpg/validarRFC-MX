@@ -85,6 +85,19 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Fallback adicional: si ya existe un miembro activo con ese email, devolver success
+    if (!invitation && user.email) {
+      const { data: activeMembers } = await supabaseAdmin
+        .from("team_members")
+        .select("*")
+        .eq("email", user.email.toLowerCase())
+        .eq("status", "active")
+        .limit(1);
+      if (activeMembers && activeMembers.length === 1) {
+        return NextResponse.json({ success: true });
+      }
+    }
+
     if (!invitation) {
       return NextResponse.json(
         { error: "Invitación no encontrada o token inválido" },
@@ -103,6 +116,11 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // Si ya está activa y con user_id, devolver success
+    if (invitation.status === "active" && invitation.user_id) {
+      return NextResponse.json({ success: true });
     }
 
     // Actualizar invitación a activa y asociar usuario
