@@ -119,7 +119,7 @@ export async function GET(request: NextRequest) {
     let teamOwnerId = user.id; // Por defecto, el usuario es owner
     let members: any[] = [];
 
-    if (ownedMembers && ownedMembers.length >= 0) {
+    if (ownedMembers && ownedMembers.length > 0) {
       // El usuario es owner de un equipo
       members = ownedMembers;
       teamOwnerId = user.id;
