@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getPlan, type PlanId } from "@/lib/plans";
@@ -109,6 +109,13 @@ function EquipoPage() {
   const plan = getPlan(planId);
   const maxUsers = plan.features.users === -1 ? Infinity : plan.features.users;
   const canAddMembers = teamMembers.length < maxUsers;
+
+  const isOwner = useMemo(() => {
+    if (!userData?.email) return false;
+    return teamMembers.some(
+      (m) => m.role?.toLowerCase() === "owner" && m.email?.toLowerCase() === userData.email.toLowerCase()
+    );
+  }, [teamMembers, userData]);
 
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {
@@ -670,7 +677,7 @@ function EquipoPage() {
                       })}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-right text-xs font-medium">
-                      {member.role !== "Owner" && member.role !== "owner" && (
+                      {isOwner && member.role !== "Owner" && member.role !== "owner" && (
                         <button
                           onClick={() => handleDeleteMember(rowId, member.email)}
                           className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition-colors"
