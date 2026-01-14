@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { getPlan, type PlanId } from "@/lib/plans";
 import { sendEmail } from "@/lib/email";
 
 type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
+
+// Necesitamos runtime Node para poder usar la service role key
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +15,13 @@ export async function POST(request: NextRequest) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: "Falta SUPABASE_SERVICE_ROLE_KEY en el servidor" },
+        { status: 500 }
+      );
+    }
     const authHeader = request.headers.get("authorization") || "";
     const jwt = authHeader.startsWith("Bearer ")
       ? authHeader.replace("Bearer ", "")
@@ -42,10 +53,11 @@ export async function POST(request: NextRequest) {
         : undefined,
     });
 
-    const {
-      data: { user },
-      error: authError,
-    } = jwt ? await supabase.auth.getUser(jwt) : await supabase.auth.getUser();
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
+    const { data: userData, error: authError } = jwt
+      ? await supabaseAdmin.auth.getUser(jwt)
+      : await supabase.auth.getUser();
+    const user = userData?.user || null;
 
     if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
@@ -79,13 +91,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Cliente admin (service role) para evitar bloqueos por RLS en conteos e inserts
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
+
     // Verificar límite de usuarios
     const maxUsers = plan.features.users === -1 ? Infinity : plan.features.users;
-    const { count: currentMembersCount } = await supabase
+    const { count: currentMembersCount, error: membersCountError } = await supabaseAdmin
       .from("team_members")
       .select("*", { count: "exact", head: true })
       .eq("team_owner_id", user.id)
       .in("status", ["pending", "active"]);
+
+    if (membersCountError) {
+      console.error("Error contando miembros:", membersCountError);
+      return NextResponse.json(
+        { error: "No se pudo validar el límite de usuarios" },
+        { status: 500 }
+      );
+    }
 
     if (currentMembersCount !== null && currentMembersCount >= maxUsers) {
       return NextResponse.json(
@@ -95,12 +118,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar que el email no esté ya en el equipo
-    const { data: existingMember } = await supabase
+    const { data: existingMember } = await supabaseAdmin
       .from("team_members")
       .select("*")
       .eq("team_owner_id", user.id)
       .eq("email", email.toLowerCase())
-      .single();
+      .maybeSingle();
 
     if (existingMember) {
       return NextResponse.json(
@@ -112,8 +135,8 @@ export async function POST(request: NextRequest) {
     // Generar token de invitación único
     const invitationToken = crypto.randomUUID() + "-" + Date.now().toString(36);
 
-    // Crear invitación
-    const { data: invitation, error: inviteError } = await supabase
+    // Crear invitación con service role (evita bloqueos por RLS)
+    const { data: invitation, error: inviteError } = await supabaseAdmin
       .from("team_members")
       .insert({
         team_owner_id: user.id,

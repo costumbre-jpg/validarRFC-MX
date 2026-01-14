@@ -47,17 +47,31 @@ export async function POST(request: NextRequest) {
         : undefined,
     });
 
-    const {
-      data: { user },
-      error: authError,
-    } = jwt ? await supabaseAuth.auth.getUser(jwt) : await supabaseAuth.auth.getUser();
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    // Autenticación robusta: intenta con admin + fallback al cliente normal
+    let user = null;
+    let authError: any = null;
+    if (jwt) {
+      const adminRes = await supabaseAdmin.auth.getUser(jwt);
+      if (adminRes.data?.user) {
+        user = adminRes.data.user;
+      } else {
+        const userRes = await supabaseAuth.auth.getUser(jwt);
+        user = userRes.data?.user ?? null;
+        authError = adminRes.error || userRes.error;
+      }
+    } else {
+      const userRes = await supabaseAuth.auth.getUser();
+      user = userRes.data?.user ?? null;
+      authError = userRes.error;
+    }
 
     if (authError || !user) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
-
-    // Cliente admin para saltar RLS en la actualización controlada
-    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
     const userEmailLower = (user.email || "").toLowerCase().trim();
 
@@ -218,7 +232,7 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       console.error("[TEAM ACCEPT] Error actualizando invitación:", updateError);
       return NextResponse.json(
-        { error: "No se pudo aceptar la invitación" },
+        { error: "No se pudo aceptar la invitación", detail: updateError.message },
         { status: 500 }
       );
     }

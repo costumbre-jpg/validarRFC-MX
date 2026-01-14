@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
+
+// Usamos runtime Node para poder utilizar la service role key
+export const runtime = "nodejs";
 
 // GET: Obtener miembros del equipo
 export async function GET(request: NextRequest) {
@@ -10,6 +14,13 @@ export async function GET(request: NextRequest) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: "Falta SUPABASE_SERVICE_ROLE_KEY en el servidor" },
+        { status: 500 }
+      );
+    }
     const authHeader = request.headers.get("authorization") || "";
     const jwt = authHeader.startsWith("Bearer ")
       ? authHeader.replace("Bearer ", "")
@@ -41,10 +52,12 @@ export async function GET(request: NextRequest) {
         : undefined,
     });
 
-    const {
-      data: { user },
-      error: authError,
-    } = jwt ? await supabase.auth.getUser(jwt) : await supabase.auth.getUser();
+    // Validar usuario; si hay JWT úsalo vía service role para evitar fallos de cookies
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
+    const { data: userData, error: authError } = jwt
+      ? await supabaseAdmin.auth.getUser(jwt)
+      : await supabase.auth.getUser();
+    const user = userData?.user || null;
 
     if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
@@ -109,6 +122,13 @@ export async function DELETE(request: NextRequest) {
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: "Falta SUPABASE_SERVICE_ROLE_KEY en el servidor" },
+        { status: 500 }
+      );
+    }
     const authHeader = request.headers.get("authorization") || "";
     const jwt = authHeader.startsWith("Bearer ")
       ? authHeader.replace("Bearer ", "")
@@ -140,10 +160,11 @@ export async function DELETE(request: NextRequest) {
         : undefined,
     });
 
-    const {
-      data: { user },
-      error: authError,
-    } = jwt ? await supabase.auth.getUser(jwt) : await supabase.auth.getUser();
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
+    const { data: userData, error: authError } = jwt
+      ? await supabaseAdmin.auth.getUser(jwt)
+      : await supabase.auth.getUser();
+    const user = userData?.user || null;
 
     if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
