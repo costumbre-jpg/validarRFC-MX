@@ -54,23 +54,23 @@ export async function POST(request: NextRequest) {
     });
 
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
-    const { data: userData, error: authError } = jwt
+    const { data: authUserData, error: authError } = jwt
       ? await supabaseAdmin.auth.getUser(jwt)
       : await supabase.auth.getUser();
-    const user = userData?.user || null;
+    const user = authUserData?.user || null;
 
     if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
     // Verificar que el usuario tenga plan Pro o Business
-    const { data: userData } = await supabase
+    const { data: dbUser } = await supabase
       .from("users")
       .select("subscription_status")
       .eq("id", user.id)
       .single();
 
-    const planId = (userData?.subscription_status || "free") as PlanId;
+    const planId = (dbUser?.subscription_status || "free") as PlanId;
     const plan = getPlan(planId);
     const isPro = planId === "pro" || planId === "business";
 
@@ -90,9 +90,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Cliente admin (service role) para evitar bloqueos por RLS en conteos e inserts
-    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
     // Verificar límite de usuarios
     const maxUsers = plan.features.users === -1 ? Infinity : plan.features.users;
