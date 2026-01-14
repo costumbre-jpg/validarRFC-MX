@@ -105,17 +105,17 @@ function EquipoPage() {
     );
   }
 
-  const planId = (userData?.subscription_status || "free") as PlanId;
-  const plan = getPlan(planId);
-  const maxUsers = plan.features.users === -1 ? Infinity : plan.features.users;
-  const canAddMembers = teamMembers.length < maxUsers;
-
   const isOwner = useMemo(() => {
     if (!userData?.email) return false;
     return teamMembers.some(
       (m) => m.role?.toLowerCase() === "owner" && m.email?.toLowerCase() === userData.email.toLowerCase()
     );
   }, [teamMembers, userData]);
+
+  const planId = (userData?.subscription_status || "free") as PlanId;
+  const plan = getPlan(planId);
+  const maxUsers = plan.features.users === -1 ? Infinity : plan.features.users;
+  const canAddMembers = teamMembers.length < maxUsers;
 
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {
