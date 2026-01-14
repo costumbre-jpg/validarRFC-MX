@@ -22,9 +22,18 @@ export async function GET(request: NextRequest) {
       );
     }
     const authHeader = request.headers.get("authorization") || "";
-    const jwt = authHeader.startsWith("Bearer ")
+    let jwt = authHeader.startsWith("Bearer ")
       ? authHeader.replace("Bearer ", "")
       : undefined;
+
+    // Fallback: intentar obtener el token de cookies (sb-access-token)
+    if (!jwt) {
+      const cookieToken =
+        request.cookies.get("sb-access-token")?.value ||
+        request.cookies.get("supabase-auth-token")?.value ||
+        request.cookies.get("sb:token")?.value;
+      jwt = cookieToken || undefined;
+    }
 
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
@@ -54,10 +63,22 @@ export async function GET(request: NextRequest) {
 
     // Validar usuario; si hay JWT úsalo vía service role para evitar fallos de cookies
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
-    const { data: userData, error: authError } = jwt
-      ? await supabaseAdmin.auth.getUser(jwt)
-      : await supabase.auth.getUser();
-    const user = userData?.user || null;
+    let user = null;
+    let authError: any = null;
+    if (jwt) {
+      const adminRes = await supabaseAdmin.auth.getUser(jwt);
+      user = adminRes.data?.user || null;
+      authError = adminRes.error;
+      if (!user) {
+        const userRes = await supabase.auth.getUser(jwt);
+        user = userRes.data?.user || null;
+        authError = authError || userRes.error;
+      }
+    } else {
+      const userRes = await supabase.auth.getUser();
+      user = userRes.data?.user || null;
+      authError = userRes.error;
+    }
 
     if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
@@ -130,9 +151,18 @@ export async function DELETE(request: NextRequest) {
       );
     }
     const authHeader = request.headers.get("authorization") || "";
-    const jwt = authHeader.startsWith("Bearer ")
+    let jwt = authHeader.startsWith("Bearer ")
       ? authHeader.replace("Bearer ", "")
       : undefined;
+
+    // Fallback: intentar obtener el token de cookies
+    if (!jwt) {
+      const cookieToken =
+        request.cookies.get("sb-access-token")?.value ||
+        request.cookies.get("supabase-auth-token")?.value ||
+        request.cookies.get("sb:token")?.value;
+      jwt = cookieToken || undefined;
+    }
 
     const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
@@ -161,10 +191,22 @@ export async function DELETE(request: NextRequest) {
     });
 
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
-    const { data: userData, error: authError } = jwt
-      ? await supabaseAdmin.auth.getUser(jwt)
-      : await supabase.auth.getUser();
-    const user = userData?.user || null;
+    let user = null;
+    let authError: any = null;
+    if (jwt) {
+      const adminRes = await supabaseAdmin.auth.getUser(jwt);
+      user = adminRes.data?.user || null;
+      authError = adminRes.error;
+      if (!user) {
+        const userRes = await supabase.auth.getUser(jwt);
+        user = userRes.data?.user || null;
+        authError = authError || userRes.error;
+      }
+    } else {
+      const userRes = await supabase.auth.getUser();
+      user = userRes.data?.user || null;
+      authError = userRes.error;
+    }
 
     if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
