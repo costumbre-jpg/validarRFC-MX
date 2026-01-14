@@ -230,8 +230,25 @@ export async function POST(request: NextRequest) {
       .eq("id", invitation.id);
 
     if (updateError) {
-      console.error("[TEAM ACCEPT] Error actualizando invitación, intentando upsert:", updateError);
-      // Fallback: upsert por email+owner para forzar activación
+      console.error("[TEAM ACCEPT] Error actualizando invitación, intentando fallback:", updateError);
+
+      // Fallback 1: actualizar por owner+email (maneja violación de unique en team_owner_id,email)
+      const { error: ownerEmailUpdateError } = await supabaseAdmin
+        .from("team_members")
+        .update({
+          user_id: user.id,
+          status: "active",
+          accepted_at: new Date().toISOString(),
+        })
+        .eq("team_owner_id", invitation.team_owner_id)
+        .ilike("email", invitation.email || "");
+
+      if (!ownerEmailUpdateError) {
+        console.log("[TEAM ACCEPT] ✅ Fallback owner+email aplicado");
+        return NextResponse.json({ success: true });
+      }
+
+      // Fallback 2: upsert por owner+email para forzar activación
       const { error: upsertError } = await supabaseAdmin
         .from("team_members")
         .upsert(
