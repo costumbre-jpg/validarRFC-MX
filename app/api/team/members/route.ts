@@ -108,31 +108,13 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     // Buscar si el usuario es miembro de algún equipo (donde user_id coincide)
-    // Buscar si el usuario es miembro (user_id) o, si no existe user_id, por email activo
-    let memberOf: any = null;
-    let memberError: any = null;
-    const memberResp = await supabaseAdmin
+    // Buscar si el usuario es miembro (requiere user_id poblado)
+    const { data: memberOf, error: memberError } = await supabaseAdmin
       .from("team_members")
       .select("*")
       .eq("user_id", user.id)
       .eq("status", "active")
       .maybeSingle();
-    memberOf = memberResp.data;
-    memberError = memberResp.error;
-
-    if (!memberOf) {
-      const memberEmailResp = await supabaseAdmin
-        .from("team_members")
-        .select("*")
-        .ilike("email", userEmailLower)
-        .eq("status", "active")
-        .maybeSingle();
-      if (memberEmailResp.data) {
-        memberOf = memberEmailResp.data;
-      } else if (memberEmailResp.error) {
-        memberError = memberEmailResp.error;
-      }
-    }
 
     let teamOwnerId = user.id; // Por defecto, el usuario es owner
     let members: any[] = [];

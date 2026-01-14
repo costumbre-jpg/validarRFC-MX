@@ -272,84 +272,22 @@ export async function POST(request: NextRequest) {
         .eq("id", invitation.id);
     };
 
-    // Intentar actualizar con user_id; si falta la columna, reintentar sin user_id
-    let updateError = null;
-    {
-      const { error } = await applyUpdate(true);
-      updateError = error;
-      if (updateError && updateError.message?.includes("user_id")) {
-        console.warn("[TEAM ACCEPT] user_id column missing, reintentando sin user_id");
-        const retry = await applyUpdate(false);
-        updateError = retry.error;
-      }
-    }
+    // Intentar actualizar con user_id (columna requerida)
+    const { error: updateError } = await applyUpdate(true);
 
     if (updateError) {
-      console.error("[TEAM ACCEPT] Error actualizando invitación, intentando fallback:", updateError);
-
-      // Fallback 1: actualizar por owner+email (maneja violación de unique en team_owner_id,email)
-      const ownerEmailUpdate = await supabaseAdmin
-        .from("team_members")
-        .update({
-          user_id: user.id,
-          status: "active",
-          accepted_at: new Date().toISOString(),
-        })
-        .eq("team_owner_id", invitation.team_owner_id)
-        .ilike("email", invitation.email || "");
-      let ownerEmailUpdateError = ownerEmailUpdate.error;
-      if (ownerEmailUpdateError && ownerEmailUpdateError.message?.includes("user_id")) {
-        console.warn("[TEAM ACCEPT] owner+email sin user_id (columna faltante)");
-        const retry = await supabaseAdmin
-          .from("team_members")
-          .update({
-            status: "active",
-            accepted_at: new Date().toISOString(),
-          })
-          .eq("team_owner_id", invitation.team_owner_id)
-          .ilike("email", invitation.email || "");
-        ownerEmailUpdateError = retry.error;
-      }
-
-      if (!ownerEmailUpdateError) {
-        console.log("[TEAM ACCEPT] ✅ Fallback owner+email aplicado");
-        return NextResponse.json({ success: true });
-      }
-
-      // Fallback 2: upsert por owner+email para forzar activación
-      const baseUpsert = {
-        id: invitation.id,
-        team_owner_id: invitation.team_owner_id,
-        email: invitation.email?.toLowerCase(),
-        role: invitation.role || "member",
-        status: "active",
-        user_id: user.id,
-        invitation_token: invitation.invitation_token,
-        accepted_at: new Date().toISOString(),
-      };
-      const tryUpsert = async (withUserId: boolean) => {
-        const payload = { ...baseUpsert };
-        if (!withUserId) {
-          delete (payload as any).user_id;
-        }
-        return supabaseAdmin
-          .from("team_members")
-          .upsert(payload, { onConflict: "team_owner_id,email" });
-      };
-
-      let upsertError = (await tryUpsert(true)).error;
-      if (upsertError && upsertError.message?.includes("user_id")) {
-        console.warn("[TEAM ACCEPT] upsert sin user_id (columna faltante)");
-        upsertError = (await tryUpsert(false)).error;
-      }
-
-      if (upsertError) {
-        console.error("[TEAM ACCEPT] Error en upsert de invitación:", upsertError);
+      console.error("[TEAM ACCEPT] Error actualizando invitación:", updateError);
+      // Devolver error claro si falta user_id para evitar estados inconsistentes
+      if (updateError.message?.includes("user_id")) {
         return NextResponse.json(
-          { error: "No se pudo aceptar la invitación", detail: upsertError.message },
+          { error: "Falta columna user_id en team_members. Ejecuta la migración en BD y vuelve a invitar." },
           { status: 500 }
         );
       }
+      return NextResponse.json(
+        { error: "No se pudo aceptar la invitación", detail: updateError.message },
+        { status: 500 }
+      );
     }
 
     console.log("[TEAM ACCEPT] ✅ Invitación aceptada exitosamente");
