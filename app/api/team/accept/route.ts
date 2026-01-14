@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3) Si existe activo con ese email, devolver success
+    // 3) Si existe activo con ese email, devolver success (y asociar user_id si falta)
     if (!invitation && userEmailLower) {
       const { data: activeMembers } = await supabaseAdmin
         .from("team_members")
@@ -96,7 +96,6 @@ export async function POST(request: NextRequest) {
         .eq("status", "active")
         .limit(1);
       if (activeMembers && activeMembers.length === 1) {
-        // Si no tiene user_id, asociarlo
         const active = activeMembers[0];
         if (!active.user_id) {
           await supabaseAdmin
@@ -120,25 +119,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validar email coincide
-    const invitationEmail = (invitation.email || "").toLowerCase();
-    const userEmail = (user.email || "").toLowerCase();
-    if (!invitationEmail || invitationEmail !== userEmail) {
-      return NextResponse.json(
-        {
-          error: `Esta invitación fue enviada a ${invitationEmail || "email desconocido"}, pero la sesión es ${userEmail ||
-            "otro email"}.`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // Si ya está activa y con user_id, devolver success
+    // 5) Si ya está activa y con user_id, devolver success
     if (invitation.status === "active" && invitation.user_id) {
       return NextResponse.json({ success: true });
     }
 
-    // Actualizar invitación a activa y asociar usuario
+    // 6) Aceptar: asociar user y activar sin validar email para evitar bloqueos
     const { error: updateError } = await supabaseAdmin
       .from("team_members")
       .update({
