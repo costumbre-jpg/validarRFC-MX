@@ -13,7 +13,6 @@ function AcceptInvitationPage() {
   const token = searchParams.get("token");
   const [status, setStatus] = useState<"loading" | "success" | "error" | "already-accepted">("loading");
   const [message, setMessage] = useState("");
-  const [teamOwnerEmail, setTeamOwnerEmail] = useState("");
 
   useEffect(() => {
     const acceptInvitation = async () => {
