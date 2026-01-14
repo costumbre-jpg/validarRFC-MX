@@ -230,11 +230,31 @@ export async function POST(request: NextRequest) {
       .eq("id", invitation.id);
 
     if (updateError) {
-      console.error("[TEAM ACCEPT] Error actualizando invitación:", updateError);
-      return NextResponse.json(
-        { error: "No se pudo aceptar la invitación", detail: updateError.message },
-        { status: 500 }
-      );
+      console.error("[TEAM ACCEPT] Error actualizando invitación, intentando upsert:", updateError);
+      // Fallback: upsert por email+owner para forzar activación
+      const { error: upsertError } = await supabaseAdmin
+        .from("team_members")
+        .upsert(
+          {
+            id: invitation.id,
+            team_owner_id: invitation.team_owner_id,
+            email: invitation.email?.toLowerCase(),
+            role: invitation.role || "member",
+            status: "active",
+            user_id: user.id,
+            invitation_token: invitation.invitation_token,
+            accepted_at: new Date().toISOString(),
+          },
+          { onConflict: "team_owner_id,email" }
+        );
+
+      if (upsertError) {
+        console.error("[TEAM ACCEPT] Error en upsert de invitación:", upsertError);
+        return NextResponse.json(
+          { error: "No se pudo aceptar la invitación", detail: upsertError.message },
+          { status: 500 }
+        );
+      }
     }
 
     console.log("[TEAM ACCEPT] ✅ Invitación aceptada exitosamente");
