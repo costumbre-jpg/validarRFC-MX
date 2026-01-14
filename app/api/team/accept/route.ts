@@ -26,12 +26,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => null);
     const token = body?.token as string | undefined;
-    if (!token) {
-      return NextResponse.json(
-        { error: "Token de invitación requerido" },
-        { status: 400 }
-      );
-    }
+    // Token es opcional ahora - buscaremos por email si no se proporciona
 
     // Cliente para autenticar al usuario (respeta RLS); usa cookie o header
     const supabaseAuth = createServerClient(supabaseUrl, supabaseAnonKey, {
@@ -64,40 +59,74 @@ export async function POST(request: NextRequest) {
     // Cliente admin para saltar RLS en la actualización controlada
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
-    const userEmailLower = (user.email || "").toLowerCase();
+    const userEmailLower = (user.email || "").toLowerCase().trim();
 
-    // 1) Buscar invitación por token
-    let { data: invitation } = await supabaseAdmin
-      .from("team_members")
-      .select("*")
-      .eq("invitation_token", token)
-      .single();
+    console.log("[TEAM ACCEPT] Buscando invitación:", {
+      token: token ? `${token.substring(0, 20)}...` : "NO TOKEN",
+      userEmail: user.email,
+      userEmailLower,
+      userId: user.id,
+    });
 
-    // 2) Si no se encontró por token, buscar la más reciente pendiente por email
-    if (!invitation && userEmailLower) {
-      const { data: pendingInvites } = await supabaseAdmin
+    let invitation: any = null;
+
+    // 1) Si hay token, intentar buscar por token primero
+    if (token) {
+      const { data: tokenInvite, error: tokenError } = await supabaseAdmin
         .from("team_members")
         .select("*")
-        .eq("email", userEmailLower)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false })
-        .limit(1);
-      if (pendingInvites && pendingInvites.length === 1) {
-        invitation = pendingInvites[0];
+        .eq("invitation_token", token)
+        .maybeSingle();
+      
+      if (tokenInvite) {
+        invitation = tokenInvite;
+        console.log("[TEAM ACCEPT] Invitación encontrada por token:", invitation.id);
+      } else {
+        console.log("[TEAM ACCEPT] No se encontró invitación por token:", tokenError?.message);
       }
     }
 
-    // 3) Si existe activo con ese email, devolver success (y asociar user_id si falta)
+    // 2) Si no se encontró por token (o no hay token), buscar todas las pendientes por email
     if (!invitation && userEmailLower) {
-      const { data: activeMembers } = await supabaseAdmin
+      const { data: pendingInvites, error: pendingError } = await supabaseAdmin
         .from("team_members")
         .select("*")
-        .eq("email", userEmailLower)
+        .ilike("email", userEmailLower) // Usar ilike para comparación case-insensitive
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      
+      console.log("[TEAM ACCEPT] Búsqueda por email pendiente:", {
+        found: pendingInvites?.length || 0,
+        emails: pendingInvites?.map((p: any) => p.email),
+        error: pendingError?.message,
+      });
+
+      if (pendingInvites && pendingInvites.length > 0) {
+        // Tomar la más reciente
+        invitation = pendingInvites[0];
+        console.log("[TEAM ACCEPT] Invitación encontrada por email pendiente:", invitation.id);
+      }
+    }
+
+    // 3) Si no hay pendiente, buscar si ya es activo
+    if (!invitation && userEmailLower) {
+      const { data: activeMembers, error: activeError } = await supabaseAdmin
+        .from("team_members")
+        .select("*")
+        .ilike("email", userEmailLower)
         .eq("status", "active")
         .limit(1);
-      if (activeMembers && activeMembers.length === 1) {
+      
+      console.log("[TEAM ACCEPT] Búsqueda por email activo:", {
+        found: activeMembers?.length || 0,
+        error: activeError?.message,
+      });
+
+      if (activeMembers && activeMembers.length > 0) {
         const active = activeMembers[0];
-        if (!active.user_id) {
+        // Si ya está activo pero no tiene user_id, asociarlo
+        if (!active.user_id || active.user_id !== user.id) {
+          console.log("[TEAM ACCEPT] Asociando user_id a miembro activo existente");
           await supabaseAdmin
             .from("team_members")
             .update({
@@ -111,20 +140,72 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4) Último intento: si no hay invitación, devolver error
+    // 4) Si aún no hay invitación, hacer búsqueda más amplia (cualquier estado)
+    if (!invitation && userEmailLower) {
+      const { data: anyInvites, error: anyError } = await supabaseAdmin
+        .from("team_members")
+        .select("*")
+        .ilike("email", userEmailLower)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      
+      console.log("[TEAM ACCEPT] Búsqueda amplia por email:", {
+        found: anyInvites?.length || 0,
+        invites: anyInvites?.map((i: any) => ({
+          id: i.id,
+          email: i.email,
+          status: i.status,
+          token: i.invitation_token ? `${i.invitation_token.substring(0, 20)}...` : null,
+        })),
+        error: anyError?.message,
+      });
+
+      if (anyInvites && anyInvites.length > 0) {
+        // Intentar con la más reciente pendiente o inactive
+        const pendingOrInactive = anyInvites.find((i: any) => i.status === "pending" || i.status === "inactive");
+        if (pendingOrInactive) {
+          invitation = pendingOrInactive;
+          console.log("[TEAM ACCEPT] Usando invitación pendiente/inactiva encontrada:", invitation.id);
+        }
+      }
+    }
+
+    // 5) Si aún no hay invitación, devolver error con información de debug
     if (!invitation) {
+      console.error("[TEAM ACCEPT] ERROR: No se encontró ninguna invitación", {
+        token: token ? `${token.substring(0, 20)}...` : "NO TOKEN",
+        userEmail: user.email,
+        userEmailLower,
+      });
       return NextResponse.json(
-        { error: "Invitación no encontrada o token inválido" },
+        { 
+          error: "Invitación no encontrada o token inválido",
+          debug: {
+            hasToken: !!token,
+            userEmail: user.email,
+            suggestion: "Verifica que el email de tu cuenta coincida exactamente con el email al que se envió la invitación"
+          }
+        },
         { status: 404 }
       );
     }
 
-    // 5) Si ya está activa y con user_id, devolver success
-    if (invitation.status === "active" && invitation.user_id) {
+    console.log("[TEAM ACCEPT] Invitación encontrada:", {
+      id: invitation.id,
+      email: invitation.email,
+      status: invitation.status,
+      userId: invitation.user_id,
+      currentUserId: user.id,
+    });
+
+    // 6) Si ya está activa y con user_id, devolver success
+    if (invitation.status === "active" && invitation.user_id === user.id) {
+      console.log("[TEAM ACCEPT] Invitación ya está activa y asociada al usuario");
       return NextResponse.json({ success: true });
     }
 
-    // 6) Aceptar: asociar user y activar sin validar email para evitar bloqueos
+    // 7) Aceptar: asociar user y activar sin validar email para evitar bloqueos
+    console.log("[TEAM ACCEPT] Actualizando invitación a activa...");
     const { error: updateError } = await supabaseAdmin
       .from("team_members")
       .update({
@@ -135,12 +216,14 @@ export async function POST(request: NextRequest) {
       .eq("id", invitation.id);
 
     if (updateError) {
+      console.error("[TEAM ACCEPT] Error actualizando invitación:", updateError);
       return NextResponse.json(
         { error: "No se pudo aceptar la invitación" },
         { status: 500 }
       );
     }
 
+    console.log("[TEAM ACCEPT] ✅ Invitación aceptada exitosamente");
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("Error en aceptar invitación:", error);
