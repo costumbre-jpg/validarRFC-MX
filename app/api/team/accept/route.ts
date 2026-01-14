@@ -5,6 +5,20 @@ import { createServerClient } from "@supabase/ssr";
 // Aseguramos runtime Node (no Edge) para usar service role
 export const runtime = "nodejs";
 
+// Extraer JWT de cookies supabase (pueden venir JSON stringificado)
+const extractJwtFromCookie = (raw?: string) => {
+  if (!raw) return undefined;
+  if (raw.trim().startsWith("[")) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr[0]) return arr[0] as string;
+    } catch {
+      // ignore parse error
+    }
+  }
+  return raw;
+};
+
 // Aceptar invitación de equipo usando Service Role para evitar bloqueo por RLS
 export async function POST(request: NextRequest) {
   try {
@@ -20,9 +34,18 @@ export async function POST(request: NextRequest) {
     }
 
     const authHeader = request.headers.get("authorization") || "";
-    const jwt = authHeader.startsWith("Bearer ")
+    let jwt = authHeader.startsWith("Bearer ")
       ? authHeader.replace("Bearer ", "")
       : undefined;
+
+    // Fallback: intentar tomar token de cookies de supabase
+    if (!jwt) {
+      const cookieToken =
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
+      jwt = cookieToken || undefined;
+    }
 
     const body = await request.json().catch(() => null);
     const token = body?.token as string | undefined;
@@ -70,7 +93,10 @@ export async function POST(request: NextRequest) {
     }
 
     if (authError || !user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+      return NextResponse.json(
+        { error: "No autenticado", detail: authError?.message },
+        { status: 401 }
+      );
     }
 
     const userEmailLower = (user.email || "").toLowerCase().trim();
