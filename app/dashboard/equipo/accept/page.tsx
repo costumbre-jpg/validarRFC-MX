@@ -51,12 +51,19 @@ function AcceptInvitationPage() {
         if (!acceptResp.ok) {
           const err = await acceptResp.json().catch(() => ({}));
           setStatus("error");
+          // Mostrar el error completo con todos los detalles
+          const errorMsg = err.error || "Error al aceptar la invitación";
+          const detailMsg = err.detail ? `\n\nDetalle: ${err.detail}` : "";
+          const debugMsg = err.debug ? `\n\nDebug: ${JSON.stringify(err.debug, null, 2)}` : "";
+          const statusMsg = `\n\nStatus: ${acceptResp.status}`;
           setMessage(
-            err.error ||
-            err.detail ||
-            err.debug?.suggestion ||
+            errorMsg + detailMsg + debugMsg + statusMsg ||
             "Error al aceptar la invitación. Por favor intenta de nuevo."
           );
+          console.error("[ACCEPT] Error completo:", {
+            status: acceptResp.status,
+            error: err
+          });
           return;
         }
 
@@ -148,7 +155,9 @@ function AcceptInvitationPage() {
               </svg>
             </div>
             <h2 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-2 max-md:mb-1.5">Error al aceptar invitación</h2>
-            <p className="text-sm max-md:text-xs text-gray-600 mb-4 max-md:mb-3">{message}</p>
+            <div className="text-sm max-md:text-xs text-gray-600 mb-4 max-md:mb-3 whitespace-pre-wrap break-words bg-gray-50 p-3 rounded border border-gray-200">
+              {message}
+            </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 max-md:mb-4 text-left">
               <p className="text-xs max-md:text-[11px] text-blue-800 font-medium mb-1">💡 ¿Qué hacer?</p>
               <p className="text-xs max-md:text-[11px] text-blue-700">
