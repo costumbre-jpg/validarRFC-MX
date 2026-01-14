@@ -259,7 +259,7 @@ function EquipoPage() {
     // Modo diseño: simular eliminación
     if (userData?.id === "mock-user") {
       setTimeout(() => {
-        setTeamMembers(teamMembers.filter((m) => m.id !== memberToDelete.id));
+        setTeamMembers(teamMembers.filter((m) => (m.member_id ?? m.id) !== memberToDelete.id));
         setMemberToDelete(null);
         setDeleting(false);
       }, 500);
@@ -603,8 +603,10 @@ function EquipoPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {teamMembers.map((member) => (
-                  <tr key={member.id} className="hover:bg-gray-50 transition-colors">
+                {teamMembers.map((member) => {
+                  const rowId = member.member_id ?? member.id;
+                  return (
+                  <tr key={rowId} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2.5">
                         <div 
@@ -670,7 +672,7 @@ function EquipoPage() {
                     <td className="px-4 py-3 whitespace-nowrap text-right text-xs font-medium">
                       {member.role !== "Owner" && member.role !== "owner" && (
                         <button
-                          onClick={() => handleDeleteMember(member.id, member.email)}
+                          onClick={() => handleDeleteMember(rowId, member.email)}
                           className="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition-colors"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -681,7 +683,8 @@ function EquipoPage() {
                       )}
                     </td>
                   </tr>
-                ))}
+                );
+                })}
               </tbody>
             </table>
           </div>

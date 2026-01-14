@@ -156,6 +156,8 @@ export async function GET(request: NextRequest) {
     const allMembers = [
       {
         id: ownerData?.id,
+        member_id: null,
+        user_id: ownerData?.id,
         email: ownerData?.email,
         role: "owner",
         status: "active",
@@ -163,6 +165,8 @@ export async function GET(request: NextRequest) {
       },
       ...(members || []).map((m) => ({
         id: m.user_id || m.id,
+        member_id: m.id,
+        user_id: m.user_id,
         email: m.email,
         role: m.role,
         status: m.status,
