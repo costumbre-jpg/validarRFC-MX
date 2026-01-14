@@ -100,26 +100,56 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    // Obtener miembros del equipo donde el usuario es el dueño
-    const { data: members, error } = await supabase
+    // Buscar si el usuario es owner de algún equipo
+    const { data: ownedMembers, error: ownedError } = await supabaseAdmin
       .from("team_members")
       .select("*")
       .eq("team_owner_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error obteniendo miembros:", error);
+    // Buscar si el usuario es miembro de algún equipo (donde user_id coincide)
+    const { data: memberOf, error: memberError } = await supabaseAdmin
+      .from("team_members")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    let teamOwnerId = user.id; // Por defecto, el usuario es owner
+    let members: any[] = [];
+
+    if (ownedMembers && ownedMembers.length >= 0) {
+      // El usuario es owner de un equipo
+      members = ownedMembers;
+      teamOwnerId = user.id;
+    } else if (memberOf) {
+      // El usuario es miembro de un equipo (no owner)
+      teamOwnerId = memberOf.team_owner_id;
+      // Obtener todos los miembros de ese equipo
+      const { data: allTeamMembers, error: teamError } = await supabaseAdmin
+        .from("team_members")
+        .select("*")
+        .eq("team_owner_id", teamOwnerId)
+        .order("created_at", { ascending: false });
+      
+      if (!teamError && allTeamMembers) {
+        members = allTeamMembers;
+      }
+    }
+
+    if (ownedError && memberError) {
+      console.error("Error obteniendo miembros:", ownedError || memberError);
       return NextResponse.json(
         { error: "Error al obtener miembros del equipo" },
         { status: 500 }
       );
     }
 
-    // También incluir al dueño del equipo
-    const { data: ownerData } = await supabase
+    // Obtener datos del owner del equipo
+    const { data: ownerData } = await supabaseAdmin
       .from("users")
       .select("id, email")
-      .eq("id", user.id)
+      .eq("id", teamOwnerId)
       .single();
 
     const allMembers = [
