@@ -108,13 +108,28 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     // Buscar si el usuario es miembro de algún equipo (donde user_id coincide)
-    // Buscar si el usuario es miembro (requiere user_id poblado)
+    // Buscar si el usuario es miembro (user_id poblado). Tomar la invitación más reciente.
     const { data: memberOf, error: memberError } = await supabaseAdmin
       .from("team_members")
       .select("*")
       .eq("user_id", user.id)
-      .eq("status", "active")
+      .in("status", ["active", "pending"])
+      .order("created_at", { ascending: false })
       .maybeSingle();
+
+    // Fallback solo lectura: si no hay user_id, buscar por email activo/pendiente
+    let memberByEmail: any = null;
+    if (!memberOf) {
+      const { data: memberEmailData } = await supabaseAdmin
+        .from("team_members")
+        .select("*")
+        .ilike("email", userEmailLower)
+        .in("status", ["active", "pending"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      memberByEmail = memberEmailData || null;
+    }
 
     let teamOwnerId = user.id; // Por defecto, el usuario es owner
     let members: any[] = [];
@@ -123,9 +138,10 @@ export async function GET(request: NextRequest) {
       // El usuario es owner de un equipo
       members = ownedMembers;
       teamOwnerId = user.id;
-    } else if (memberOf) {
+    } else if (memberOf || memberByEmail) {
       // El usuario es miembro de un equipo (no owner)
-      teamOwnerId = memberOf.team_owner_id;
+      const memberRow = memberOf || memberByEmail;
+      teamOwnerId = memberRow.team_owner_id;
       // Obtener todos los miembros de ese equipo
       const { data: allTeamMembers, error: teamError } = await supabaseAdmin
         .from("team_members")
