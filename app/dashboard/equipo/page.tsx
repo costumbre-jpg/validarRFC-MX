@@ -75,9 +75,10 @@ function EquipoPage() {
       // Get team members reales
       if (dbUser && ((dbUser as any).subscription_status === "pro" || (dbUser as any).subscription_status === "business")) {
         try {
+          const token = session?.access_token;
           const response = await fetch("/api/team/members", {
             headers: {
-              ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             credentials: "include",
           });
@@ -194,11 +195,18 @@ function EquipoPage() {
 
     setInviting(true);
     try {
+      // Obtener token fresco antes de llamar al API
+      const supabase = createClient();
+      const {
+        data: { session: freshSession },
+      } = await supabase.auth.getSession();
+      const token = freshSession?.access_token || accessToken;
+
       const response = await fetch("/api/team/invite", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: "include",
         body: JSON.stringify({ email: inviteEmail }),
@@ -216,7 +224,7 @@ function EquipoPage() {
       // Recargar lista de miembros
       const membersResponse = await fetch("/api/team/members", {
         headers: {
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: "include",
       });
@@ -259,11 +267,18 @@ function EquipoPage() {
     }
 
     try {
+      // Obtener token fresco antes de eliminar
+      const supabase = createClient();
+      const {
+        data: { session: freshSession },
+      } = await supabase.auth.getSession();
+      const token = freshSession?.access_token || accessToken;
+
       const response = await fetch("/api/team/members", {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: "include",
         body: JSON.stringify({ memberId: memberToDelete.id }),
@@ -282,7 +297,7 @@ function EquipoPage() {
       // Recargar lista de miembros
       const membersResponse = await fetch("/api/team/members", {
         headers: {
-          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         credentials: "include",
       });
