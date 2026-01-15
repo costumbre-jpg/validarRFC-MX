@@ -398,7 +398,7 @@ function EquipoPage() {
       )}
 
       {/* Invitar Miembro */}
-      {canAddMembers && (
+      {canAddMembers && isOwner && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
           <div className="flex items-center gap-2.5 mb-3">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: `${brandPrimary}15` }}>
@@ -464,7 +464,7 @@ function EquipoPage() {
         </div>
       )}
 
-      {!canAddMembers && (
+      {!canAddMembers && isOwner && (
         <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-3 shadow-sm">
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
