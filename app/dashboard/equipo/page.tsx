@@ -710,8 +710,15 @@ function EquipoPage() {
                           <img
                             src={member.avatar_url}
                             alt={member.email}
-                            className="w-8 h-8 rounded-full object-cover border-2"
-                            style={{ borderColor: brandPrimary }}
+                            className="w-8 h-8 rounded-full object-cover border-2 flex-shrink-0"
+                            style={{ 
+                              borderColor: brandPrimary,
+                              imageRendering: "auto"
+                            }}
+                            width={32}
+                            height={32}
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                               // Si la imagen falla, ocultarla y mostrar iniciales
                               const img = e.target as HTMLImageElement;
