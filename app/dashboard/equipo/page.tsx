@@ -355,9 +355,9 @@ function EquipoPage() {
         .select("id")
         .eq("user_id", userData.id)
         .eq("status", "active")
-        .maybeSingle();
+        .maybeSingle<{ id: string }>();
 
-      if (!memberData) {
+      if (!memberData?.id) {
         setErrorMessage("No se encontró tu membresía en el equipo");
         setTimeout(() => setErrorMessage(null), 5000);
         setLeavingTeam(false);
