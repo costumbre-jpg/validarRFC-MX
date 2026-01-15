@@ -361,6 +361,11 @@ function EquipoPage() {
             </svg>
             <span>
               {teamMembers.length} de {maxUsers === Infinity ? "∞" : maxUsers} usuarios
+              {maxUsers !== Infinity && (
+                <span className="text-gray-500 ml-1">
+                  ({maxUsers - teamMembers.length} {maxUsers - teamMembers.length === 1 ? "disponible" : "disponibles"})
+                </span>
+              )}
             </span>
           </div>
           {!canAddMembers && maxUsers !== Infinity && (
