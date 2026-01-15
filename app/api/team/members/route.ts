@@ -108,6 +108,8 @@ export async function GET(request: NextRequest) {
       .order("created_at", { ascending: false });
 
     // Buscar si el usuario es miembro de algún equipo (donde user_id coincide)
+    const userEmailLower = (user.email || "").toLowerCase().trim();
+
     // Buscar si el usuario es miembro (user_id poblado). Tomar la invitación más reciente.
     const { data: memberOf, error: memberError } = await supabaseAdmin
       .from("team_members")
