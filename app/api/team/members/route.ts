@@ -164,12 +164,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obtener datos del owner del equipo (incluyendo subscription_status)
+    // Obtener datos del owner del equipo (incluyendo subscription_status y avatar_url)
     const { data: ownerData } = await supabaseAdmin
       .from("users")
-      .select("id, email, subscription_status")
+      .select("id, email, subscription_status, avatar_url")
       .eq("id", teamOwnerId)
       .single();
+
+    // Obtener avatar_url de los miembros que tienen user_id
+    const memberUserIds = (members || [])
+      .filter((m) => m.user_id)
+      .map((m) => m.user_id);
+    
+    let memberAvatars: Record<string, string | null> = {};
+    if (memberUserIds.length > 0) {
+      const { data: memberUsers } = await supabaseAdmin
+        .from("users")
+        .select("id, avatar_url")
+        .in("id", memberUserIds);
+      
+      if (memberUsers) {
+        memberAvatars = memberUsers.reduce((acc, u) => {
+          acc[u.id] = u.avatar_url || null;
+          return acc;
+        }, {} as Record<string, string | null>);
+      }
+    }
 
     const allMembers = [
       {
@@ -177,6 +197,7 @@ export async function GET(request: NextRequest) {
         member_id: null,
         user_id: ownerData?.id,
         email: ownerData?.email,
+        avatar_url: ownerData?.avatar_url || null,
         role: "owner",
         status: "active",
         created_at: new Date().toISOString(),
@@ -186,6 +207,7 @@ export async function GET(request: NextRequest) {
         member_id: m.id,
         user_id: m.user_id,
         email: m.email,
+        avatar_url: m.user_id ? (memberAvatars[m.user_id] || null) : null,
         role: m.role,
         status: m.status,
         created_at: m.created_at,

@@ -706,9 +706,29 @@ function EquipoPage() {
                   <tr key={rowId} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2.5">
+                        {member.avatar_url ? (
+                          <img
+                            src={member.avatar_url}
+                            alt={member.email}
+                            className="w-8 h-8 rounded-full object-cover border-2"
+                            style={{ borderColor: brandPrimary }}
+                            onError={(e) => {
+                              // Si la imagen falla, ocultarla y mostrar iniciales
+                              const img = e.target as HTMLImageElement;
+                              img.style.display = "none";
+                              const fallback = img.nextElementSibling as HTMLElement;
+                              if (fallback) {
+                                fallback.style.display = "flex";
+                              }
+                            }}
+                          />
+                        ) : null}
                         <div 
                           className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
-                          style={{ backgroundColor: brandPrimary }}
+                          style={{ 
+                            backgroundColor: brandPrimary,
+                            display: member.avatar_url ? "none" : "flex"
+                          }}
                         >
                           {getInitials(member.email)}
                         </div>
