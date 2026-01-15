@@ -15,6 +15,7 @@ function EquipoPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [memberToDelete, setMemberToDelete] = useState<{ id: string; email: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [leavingTeam, setLeavingTeam] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -328,6 +329,71 @@ function EquipoPage() {
 
   const cancelDeleteMember = () => {
     setMemberToDelete(null);
+  };
+
+  const handleLeaveTeam = async () => {
+    if (!userData || userData.id === "mock-user") {
+      setErrorMessage("No puedes salir del equipo en modo diseño");
+      setTimeout(() => setErrorMessage(null), 5000);
+      return;
+    }
+
+    setLeavingTeam(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { session: freshSession },
+      } = await supabase.auth.getSession();
+      const token = freshSession?.access_token || accessToken;
+
+      // Buscar el registro del miembro en team_members
+      const { data: memberData } = await supabase
+        .from("team_members")
+        .select("id")
+        .eq("user_id", userData.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (!memberData) {
+        setErrorMessage("No se encontró tu membresía en el equipo");
+        setTimeout(() => setErrorMessage(null), 5000);
+        setLeavingTeam(false);
+        return;
+      }
+
+      const response = await fetch("/api/team/leave", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+        body: JSON.stringify({ memberId: memberData.id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.error || "Error al salir del equipo");
+        setTimeout(() => setErrorMessage(null), 5000);
+        setLeavingTeam(false);
+        return;
+      }
+
+      // Redirigir al dashboard después de salir
+      setSuccessMessage("✅ Has salido del equipo exitosamente");
+      setTimeout(() => {
+        window.location.href = "/dashboard/equipo";
+      }, 2000);
+    } catch (error) {
+      console.error("Error saliendo del equipo:", error);
+      setErrorMessage("Error al salir del equipo. Por favor intenta de nuevo.");
+      setTimeout(() => setErrorMessage(null), 5000);
+      setLeavingTeam(false);
+    }
   };
 
   const getInitials = (email: string) => {
@@ -691,6 +757,30 @@ function EquipoPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                           Eliminar
+                        </button>
+                      )}
+                      {!isOwner && member.user_id === userData?.id && (
+                        <button
+                          onClick={handleLeaveTeam}
+                          disabled={leavingTeam}
+                          className="inline-flex items-center gap-1 text-orange-600 hover:text-orange-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {leavingTeam ? (
+                            <>
+                              <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Saliendo...
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                              </svg>
+                              Salir
+                            </>
+                          )}
                         </button>
                       )}
                     </td>
