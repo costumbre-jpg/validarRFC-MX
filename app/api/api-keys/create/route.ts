@@ -1,24 +1,108 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { generateApiKey, hashApiKey, getApiKeyPrefix } from "@/lib/api-keys";
+
+type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
+
+export const runtime = "nodejs";
+
+const extractJwtFromCookie = (raw?: string) => {
+  if (!raw) return undefined;
+  if (raw.trim().startsWith("[")) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr[0]) {
+        return arr[0] as string;
+      }
+    } catch {
+      // ignore parse error
+    }
+  }
+  return raw;
+};
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const response = NextResponse.json({ success: false }, { status: 200 });
 
-    if (!user || authError) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!serviceRoleKey) {
       return NextResponse.json(
-        { error: "Usuario no autenticado" },
-        { status: 401 }
+        { error: "Falta SUPABASE_SERVICE_ROLE_KEY en el servidor" },
+        { status: 500 }
       );
     }
 
-    // Verificar que el usuario tenga plan Pro o Enterprise
-    const { data: userData } = await supabase
+    const authHeader = request.headers.get("authorization") || "";
+    let jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      const cookieToken =
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
+      jwt = cookieToken || undefined;
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: jwt
+        ? {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        : undefined,
+    });
+
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    let user = null;
+    let authError: any = null;
+    if (jwt) {
+      const adminRes = await supabaseAdmin.auth.getUser(jwt);
+      user = adminRes.data?.user || null;
+      authError = adminRes.error;
+      if (!user) {
+        const userRes = await supabase.auth.getUser(jwt);
+        user = userRes.data?.user || null;
+        authError = authError || userRes.error;
+      }
+    } else {
+      const userRes = await supabase.auth.getUser();
+      user = userRes.data?.user || null;
+      authError = userRes.error;
+    }
+
+    if (!user || authError) {
+      return NextResponse.json({ error: "Usuario no autenticado" }, { status: 401 });
+    }
+
+    // Verificar plan del usuario (Pro o Business)
+    const { data: userData } = await supabaseAdmin
       .from("users")
       .select("subscription_status")
       .eq("id", user.id)
@@ -30,10 +114,7 @@ export async function POST(request: NextRequest) {
 
     if (!isPro) {
       return NextResponse.json(
-        {
-          error:
-            "Las API Keys están disponibles solo para planes Pro y Empresarial",
-        },
+        { error: "Las API Keys están disponibles solo para planes Pro y Business" },
         { status: 403 }
       );
     }
@@ -53,8 +134,8 @@ export async function POST(request: NextRequest) {
     const keyHash = hashApiKey(apiKey);
     const keyPrefix = getApiKeyPrefix(apiKey);
 
-    // Guardar en base de datos
-    const { error: insertError } = await supabase.from("api_keys").insert({
+    // Guardar en base de datos con service role (evita problemas de RLS)
+    const { error: insertError } = await supabaseAdmin.from("api_keys").insert({
       user_id: user.id,
       key_hash: keyHash,
       key_prefix: keyPrefix,
@@ -71,7 +152,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Retornar API Key (solo se muestra una vez)
-    return NextResponse.json({ apiKey });
+    return NextResponse.json(
+      { apiKey },
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error in create API key route:", error);
     return NextResponse.json(
