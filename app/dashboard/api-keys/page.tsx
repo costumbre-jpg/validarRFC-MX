@@ -162,8 +162,7 @@ function APIKeysPage() {
       setShowNewKey(true);
       setNewKeyName("");
       
-      // Recargar lista de API Keys
-      const supabase = createClient();
+      // Recargar lista de API Keys (usar el mismo cliente para no redeclarar)
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: keys } = await supabase
