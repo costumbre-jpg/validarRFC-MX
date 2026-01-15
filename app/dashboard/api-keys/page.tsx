@@ -31,6 +31,7 @@ function APIKeysPage() {
   const [deletingKey, setDeletingKey] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -87,6 +88,12 @@ function APIKeysPage() {
         .eq("id", user.id)
         .single();
       
+      // Guardar access token para peticiones a la API interna
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        setAccessToken(session.access_token);
+      }
+      
       // Si hay un parámetro 'plan' en la URL, sobrescribir subscription_status temporalmente
       // Esto permite el modo diseño incluso con usuarios autenticados
       const planParam = searchParams.get("plan");
@@ -126,11 +133,18 @@ function APIKeysPage() {
     setSuccessMessage(null);
     setErrorMessage(null);
     try {
+      // Refrescar token antes de llamar a la API interna
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || accessToken;
+
       const response = await fetch("/api/api-keys/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify({ name: newKeyName.trim() }),
       });
 
