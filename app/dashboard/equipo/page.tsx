@@ -19,6 +19,7 @@ function EquipoPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -86,6 +87,9 @@ function EquipoPage() {
           if (response.ok) {
             const data = await response.json();
             setTeamMembers(data.members || []);
+            if (data.ownerPlan) {
+              setOwnerPlan(data.ownerPlan);
+            }
           }
         } catch (error) {
           console.error("Error cargando miembros:", error);
@@ -105,8 +109,12 @@ function EquipoPage() {
     );
   }, [teamMembers, userData]);
 
+  // Si es miembro (no owner), usar el plan del owner para el límite del equipo
+  const effectivePlanId = (!isOwner && ownerPlan) 
+    ? (ownerPlan as PlanId) 
+    : ((userData?.subscription_status || "free") as PlanId);
   const planId = (userData?.subscription_status || "free") as PlanId;
-  const plan = getPlan(planId);
+  const plan = getPlan(effectivePlanId);
   const maxUsers = plan.features.users === -1 ? Infinity : plan.features.users;
   const canAddMembers = teamMembers.length < maxUsers;
 
@@ -239,6 +247,9 @@ function EquipoPage() {
       if (membersResponse.ok) {
         const membersData = await membersResponse.json();
         setTeamMembers(membersData.members || []);
+        if (membersData.ownerPlan) {
+          setOwnerPlan(membersData.ownerPlan);
+        }
       }
 
       setInviteEmail("");
@@ -312,6 +323,9 @@ function EquipoPage() {
       if (membersResponse.ok) {
         const membersData = await membersResponse.json();
         setTeamMembers(membersData.members || []);
+        if (membersData.ownerPlan) {
+          setOwnerPlan(membersData.ownerPlan);
+        }
       }
 
       setMemberToDelete(null);
@@ -434,6 +448,11 @@ function EquipoPage() {
               )}
             </span>
           </div>
+          {!isOwner && ownerPlan && (
+            <div className="text-[10px] max-md:text-[9px] text-gray-500 italic">
+              (Límite basado en plan {ownerPlan === "business" ? "Business" : ownerPlan === "pro" ? "Pro" : "Free"} del owner)
+            </div>
+          )}
           {!canAddMembers && maxUsers !== Infinity && (
             <span className="inline-flex items-center gap-1 px-2 max-md:px-1.5 py-0.5 rounded-full text-[10px] max-md:text-[9px] font-medium bg-amber-100 text-amber-800">
               <svg className="w-2.5 h-2.5 max-md:w-2 max-md:h-2" fill="currentColor" viewBox="0 0 20 20">

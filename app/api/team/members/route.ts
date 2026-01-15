@@ -164,10 +164,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obtener datos del owner del equipo
+    // Obtener datos del owner del equipo (incluyendo subscription_status)
     const { data: ownerData } = await supabaseAdmin
       .from("users")
-      .select("id, email")
+      .select("id, email, subscription_status")
       .eq("id", teamOwnerId)
       .single();
 
@@ -193,7 +193,10 @@ export async function GET(request: NextRequest) {
     ];
 
     return NextResponse.json(
-      { members: allMembers },
+      { 
+        members: allMembers,
+        ownerPlan: ownerData?.subscription_status || "free"
+      },
       { status: 200, headers: response.headers }
     );
   } catch (error: any) {
