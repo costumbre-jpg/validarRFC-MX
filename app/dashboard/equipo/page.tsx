@@ -710,13 +710,13 @@ function EquipoPage() {
                           <img
                             src={member.avatar_url}
                             alt={member.email}
-                            className="w-8 h-8 rounded-full object-cover border-2 flex-shrink-0"
+                            className="w-10 h-10 rounded-full object-cover border-2 flex-shrink-0"
                             style={{ 
                               borderColor: brandPrimary,
                               imageRendering: "auto"
                             }}
-                            width={32}
-                            height={32}
+                            width={40}
+                            height={40}
                             loading="lazy"
                             decoding="async"
                             onError={(e) => {
@@ -731,7 +731,7 @@ function EquipoPage() {
                           />
                         ) : null}
                         <div 
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white"
+                          className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white"
                           style={{ 
                             backgroundColor: brandPrimary,
                             display: member.avatar_url ? "none" : "flex"
