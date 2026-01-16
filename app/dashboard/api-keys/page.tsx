@@ -251,8 +251,6 @@ function APIKeysPage() {
   const apiLimit = plan.features.apiCallsPerMonth || 0;
   const apiKeysLimit = typeof plan.features.apiKeys === "number" ? plan.features.apiKeys : -1;
   const canCreateKeys = apiKeysLimit === -1 || apiKeys.length < apiKeysLimit;
-  const remainingKeys =
-    apiKeysLimit === -1 ? Infinity : Math.max(0, apiKeysLimit - apiKeys.length);
 
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {
