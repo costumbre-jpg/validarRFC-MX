@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { generateApiKey, hashApiKey, getApiKeyPrefix } from "@/lib/api-keys";
+import { getPlan, type PlanId } from "@/lib/plans";
 
 type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
 
@@ -108,15 +109,40 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    const isPro =
-      userData?.subscription_status === "pro" ||
-      userData?.subscription_status === "business";
+    const planId = (userData?.subscription_status || "free") as PlanId;
+    const isPro = planId === "pro" || planId === "business";
 
     if (!isPro) {
       return NextResponse.json(
         { error: "Las API Keys están disponibles solo para planes Pro y Business" },
         { status: 403 }
       );
+    }
+
+    const plan = getPlan(planId);
+    const maxKeys =
+      typeof plan.features.apiKeys === "number" ? plan.features.apiKeys : -1;
+
+    if (maxKeys !== -1) {
+      const { count: currentKeys, error: countError } = await supabaseAdmin
+        .from("api_keys")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+
+      if (countError) {
+        console.error("Error counting API keys:", countError);
+        return NextResponse.json(
+          { error: "No se pudo validar el límite de API Keys" },
+          { status: 500 }
+        );
+      }
+
+      if ((currentKeys || 0) >= maxKeys) {
+        return NextResponse.json(
+          { error: `Has alcanzado el límite de ${maxKeys} API Keys para tu plan` },
+          { status: 403 }
+        );
+      }
     }
 
     const body = await request.json();

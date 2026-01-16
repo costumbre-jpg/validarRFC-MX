@@ -249,6 +249,10 @@ function APIKeysPage() {
   const plan = getPlan(planId);
   const isPro = planId === "pro" || planId === "business";
   const apiLimit = plan.features.apiCallsPerMonth || 0;
+  const apiKeysLimit = typeof plan.features.apiKeys === "number" ? plan.features.apiKeys : -1;
+  const canCreateKeys = apiKeysLimit === -1 || apiKeys.length < apiKeysLimit;
+  const remainingKeys =
+    apiKeysLimit === -1 ? Infinity : Math.max(0, apiKeysLimit - apiKeys.length);
 
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {
@@ -326,11 +330,11 @@ function APIKeysPage() {
               Límite: {apiLimit === -1 ? "ilimitadas" : `${apiLimit.toLocaleString()}`} llamadas/mes
             </span>
           </div>
-          {apiKeys.length > 0 && (
-            <span className="inline-flex items-center gap-1 px-2 max-md:px-1.5 py-0.5 rounded-full text-xs max-md:text-[11px] font-medium bg-gray-100 text-gray-700">
-              {apiKeys.length} {apiKeys.length === 1 ? "API Key" : "API Keys"}
-            </span>
-          )}
+          <span className="inline-flex items-center gap-1 px-2 max-md:px-1.5 py-0.5 rounded-full text-xs max-md:text-[11px] font-medium bg-gray-100 text-gray-700">
+            {apiKeys.length}
+            {apiKeysLimit === -1 ? "" : ` / ${apiKeysLimit}`}{" "}
+            {apiKeys.length === 1 ? "API Key" : "API Keys"}
+          </span>
         </div>
       </div>
 
@@ -367,7 +371,7 @@ function APIKeysPage() {
           </div>
           <button
             onClick={handleCreateKey}
-            disabled={creating || !newKeyName.trim()}
+            disabled={creating || !newKeyName.trim() || !canCreateKeys}
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
             style={{ backgroundColor: brandPrimary }}
           >
@@ -389,6 +393,11 @@ function APIKeysPage() {
             )}
           </button>
         </div>
+        {!canCreateKeys && apiKeysLimit !== -1 && (
+          <div className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2">
+            Has alcanzado el límite de {apiKeysLimit} API Keys para tu plan. Elimina una para crear otra.
+          </div>
+        )}
       </div>
 
       {/* Mensajes de éxito/error */}

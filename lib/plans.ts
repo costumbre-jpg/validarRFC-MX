@@ -24,6 +24,7 @@ export interface PlanConfig {
     exportFormats?: string[]; // ["CSV", "Excel", "PDF"]
     api: boolean | string; // false, "Básica", "Completa", "Ilimitada"
     apiCallsPerMonth?: number;
+    apiKeys?: number; // -1 = ilimitado
     users: number; // -1 = ilimitado
     support: string;
     whiteLabel: boolean;
@@ -53,6 +54,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       history: false,
       export: false,
       api: false,
+      apiKeys: 0,
       users: 1,
       support: "FAQs",
       whiteLabel: false,
@@ -80,6 +82,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       exportFormats: ["CSV", "Excel"],
       api: "Básica",
       apiCallsPerMonth: 2000,
+      apiKeys: 5,
       users: 3,
       support: "Email (24h)",
       whiteLabel: false,
@@ -109,6 +112,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       exportFormats: ["CSV", "Excel", "PDF"],
       api: "Completa",
       apiCallsPerMonth: 10000,
+      apiKeys: 20,
       users: -1, // Ilimitado
       support: "Soporte prioritario (Próximamente)",
       whiteLabel: true,
@@ -142,6 +146,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       exportFormats: ["CSV"],
       api: "Básica",
       apiCallsPerMonth: 100,
+      apiKeys: 1,
       users: 1,
       support: "Email (48h)",
       whiteLabel: false,
@@ -166,6 +171,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       exportFormats: ["CSV", "Excel", "PDF"],
       api: "Ilimitada",
       apiCallsPerMonth: -1, // Ilimitado
+      apiKeys: -1,
       users: -1,
       support: "24/7",
       whiteLabel: true,
@@ -195,6 +201,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       export: true,
       api: "Ilimitada",
       apiCallsPerMonth: -1,
+      apiKeys: -1,
       users: -1,
       support: "Técnico dedicado",
       whiteLabel: false,
