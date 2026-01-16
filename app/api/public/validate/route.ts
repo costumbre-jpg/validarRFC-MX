@@ -213,9 +213,28 @@ export async function POST(request: NextRequest) {
       forceRefresh,
     });
 
+    // Calcular remainingCalls antes de usarlo
+    const remainingCalls = planApiLimit === -1 
+      ? -1 // Ilimitado
+      : Math.max(0, planApiLimit - apiCallsThisMonth);
+
+    // Si hay un error al consultar SAT, devolver error más claro
+    if (satResult.error || satResult.valid === null) {
+      return NextResponse.json(
+        {
+          success: false,
+          valid: false,
+          rfc: formattedRFC,
+          remaining: remainingCalls,
+          message: satResult.error || "Error al consultar el SAT. Por favor intenta de nuevo.",
+        },
+        { status: 502 }
+      );
+    }
+
     // 11. Actualizar contador mensual y registrar uso
     const newApiCallsThisMonth = (apiCallsThisMonth || 0) + 1;
-    const remainingCalls = planApiLimit === -1 
+    const newRemainingCalls = planApiLimit === -1 
       ? -1 // Ilimitado
       : Math.max(0, planApiLimit - newApiCallsThisMonth);
 
@@ -258,7 +277,7 @@ export async function POST(request: NextRequest) {
         success: satResult.success,
         valid: satResult.valid,
         rfc: formattedRFC,
-        remaining: remainingCalls,
+        remaining: newRemainingCalls,
         message: satResult.message,
         source: satResult.source,
         responseTime: satResult.responseTime,
