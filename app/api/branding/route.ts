@@ -101,6 +101,30 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
+    // Verificar que el usuario tenga plan Business
+    const { data: userData } = await supabaseAdmin
+      .from("users")
+      .select("subscription_status")
+      .eq("id", user.id)
+      .single();
+
+    const planId = (userData?.subscription_status || "free") as PlanId;
+    const plan = getPlan(planId);
+
+    if (!plan.features.whiteLabel) {
+      // Si no es Business, devolver defaults (no error, para que el layout no falle)
+      return NextResponse.json(
+        {
+          brand_name: "Tu Marca",
+          custom_logo_url: null,
+          primary_color: "#2F7E7A",
+          secondary_color: "#1F5D59",
+          hide_maflipp_brand: true,
+        },
+        { status: 200, headers: response.headers }
+      );
+    }
+
     // Cada empresa mantiene su propio branding, incluso si está en un equipo
     const { data: settings, error } = await supabaseAdmin
       .from("white_label_settings")
