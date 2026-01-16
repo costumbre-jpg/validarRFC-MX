@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
-import { getPlan, type PlanId } from "@/lib/plans";
 
 type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
 
