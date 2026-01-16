@@ -189,6 +189,13 @@ function DashboardLayoutContent({
   const primary = branding?.primary_color || "#2F7E7A";
   const secondary = branding?.secondary_color || "#1F5D59";
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const root = document.documentElement;
+    root.style.setProperty("--brand-primary", primary);
+    root.style.setProperty("--brand-secondary", secondary);
+  }, [primary, secondary]);
+
   return (
     <div
       className="min-h-screen bg-gray-50"
