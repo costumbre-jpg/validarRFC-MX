@@ -29,8 +29,17 @@ export default function EditProfileModal({
   const [emailVerificationSent, setEmailVerificationSent] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  const brandPrimary = "var(--brand-primary, #2F7E7A)";
-  const brandSecondary = "var(--brand-secondary, #1F5D59)";
+  // Get brand colors from CSS variables or use defaults
+  const getBrandColor = (varName: string, defaultValue: string) => {
+    if (typeof window === "undefined") return defaultValue;
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim();
+    return value || defaultValue;
+  };
+
+  const brandPrimary = getBrandColor("--brand-primary", "#2F7E7A");
+  const brandSecondary = getBrandColor("--brand-secondary", "#1F5D59");
 
   useEffect(() => {
     const loadSession = async () => {
