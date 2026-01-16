@@ -29,6 +29,10 @@ function APIKeysPage() {
   const [showNewKey, setShowNewKey] = useState(false);
   const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
   const [deletingKey, setDeletingKey] = useState(false);
+  const [keyToRename, setKeyToRename] = useState<ApiKey | null>(null);
+  const [newKeyNameForRename, setNewKeyNameForRename] = useState("");
+  const [renamingKey, setRenamingKey] = useState(false);
+  const [togglingKey, setTogglingKey] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -226,6 +230,141 @@ function APIKeysPage() {
   const cancelDeleteKey = () => {
     setKeyToDelete(null);
     setDeletingKey(false);
+  };
+
+  const handleToggleKey = async (keyId: string, currentStatus: boolean) => {
+    setTogglingKey(keyId);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    // Modo diseño: simular toggle
+    if (userData?.id === "mock-user") {
+      setTimeout(() => {
+        setApiKeys(apiKeys.map((k) => 
+          k.id === keyId ? { ...k, is_active: !currentStatus } : k
+        ));
+        setTogglingKey(null);
+        setSuccessMessage(`✅ API Key ${!currentStatus ? "activada" : "desactivada"}`);
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }, 500);
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || accessToken;
+
+      const response = await fetch("/api/api-keys/update", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+        body: JSON.stringify({ keyId, is_active: !currentStatus }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.error || "Error al actualizar API Key");
+        setTimeout(() => setErrorMessage(null), 5000);
+        setTogglingKey(null);
+        return;
+      }
+
+      // Actualizar lista local
+      setApiKeys(apiKeys.map((k) => 
+        k.id === keyId ? { ...k, is_active: !currentStatus } : k
+      ));
+      setTogglingKey(null);
+      setSuccessMessage(`✅ API Key ${!currentStatus ? "activada" : "desactivada"}`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error("Error toggling API key:", error);
+      setErrorMessage("Error al actualizar API Key");
+      setTimeout(() => setErrorMessage(null), 5000);
+      setTogglingKey(null);
+    }
+  };
+
+  const handleRenameKey = (key: ApiKey) => {
+    setKeyToRename(key);
+    setNewKeyNameForRename(key.name);
+  };
+
+  const confirmRenameKey = async () => {
+    if (!keyToRename || !newKeyNameForRename.trim()) {
+      setErrorMessage("El nombre no puede estar vacío");
+      setTimeout(() => setErrorMessage(null), 5000);
+      return;
+    }
+
+    setRenamingKey(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    // Modo diseño: simular rename
+    if (userData?.id === "mock-user") {
+      setTimeout(() => {
+        setApiKeys(apiKeys.map((k) => 
+          k.id === keyToRename.id ? { ...k, name: newKeyNameForRename.trim() } : k
+        ));
+        setKeyToRename(null);
+        setNewKeyNameForRename("");
+        setRenamingKey(false);
+        setSuccessMessage("✅ Nombre actualizado");
+        setTimeout(() => setSuccessMessage(null), 3000);
+      }, 500);
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || accessToken;
+
+      const response = await fetch("/api/api-keys/update", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+        body: JSON.stringify({ keyId: keyToRename.id, name: newKeyNameForRename.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.error || "Error al renombrar API Key");
+        setTimeout(() => setErrorMessage(null), 5000);
+        setRenamingKey(false);
+        return;
+      }
+
+      // Actualizar lista local
+      setApiKeys(apiKeys.map((k) => 
+        k.id === keyToRename.id ? { ...k, name: newKeyNameForRename.trim() } : k
+      ));
+      setKeyToRename(null);
+      setNewKeyNameForRename("");
+      setRenamingKey(false);
+      setSuccessMessage("✅ Nombre actualizado");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (error) {
+      console.error("Error renaming API key:", error);
+      setErrorMessage("Error al renombrar API Key");
+      setTimeout(() => setErrorMessage(null), 5000);
+      setRenamingKey(false);
+    }
+  };
+
+  const cancelRenameKey = () => {
+    setKeyToRename(null);
+    setNewKeyNameForRename("");
+    setRenamingKey(false);
   };
 
   if (loading) {
@@ -608,15 +747,51 @@ function APIKeysPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-right text-xs font-medium">
-                        <button
-                          onClick={() => handleDeleteKey(key.id)}
-                          className="inline-flex items-center gap-1 px-2 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Eliminar
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            onClick={() => handleToggleKey(key.id, key.is_active)}
+                            disabled={togglingKey === key.id}
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg transition-all ${
+                              key.is_active
+                                ? "text-amber-600 hover:text-amber-800 hover:bg-amber-50"
+                                : "text-green-600 hover:text-green-800 hover:bg-green-50"
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            title={key.is_active ? "Desactivar" : "Activar"}
+                          >
+                            {togglingKey === key.id ? (
+                              <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            ) : key.is_active ? (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                              </svg>
+                            ) : (
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleRenameKey(key)}
+                            className="inline-flex items-center gap-1 px-2 py-1 text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-all"
+                            title="Renombrar"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteKey(key.id)}
+                            className="inline-flex items-center gap-1 px-2 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all"
+                            title="Eliminar"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -688,6 +863,91 @@ function APIKeysPage() {
                     </>
                   ) : (
                     "Eliminar"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para Renombrar API Key */}
+      {keyToRename && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="fixed inset-0 bg-gray-900/60"
+            onClick={() => {
+              if (!renamingKey) {
+                cancelRenameKey();
+              }
+            }}
+          />
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <div 
+              className="bg-white rounded-lg shadow-2xl max-w-sm w-full p-4 relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <svg
+                  className="w-4 h-4 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-gray-900 text-center mb-1.5">
+                Renombrar API Key
+              </h3>
+              <p className="text-xs text-gray-600 text-center mb-4">
+                Ingresa un nuevo nombre para la API Key <strong>{keyToRename.name}</strong>
+              </p>
+              
+              <div className="mb-4">
+                <input
+                  type="text"
+                  value={newKeyNameForRename}
+                  onChange={(e) => setNewKeyNameForRename(e.target.value)}
+                  placeholder="Ej: Producción, Desarrollo..."
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" && newKeyNameForRename.trim()) {
+                      confirmRenameKey();
+                    }
+                  }}
+                  autoFocus
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <button
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={cancelRenameKey}
+                  disabled={renamingKey}
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="flex-1 px-3 py-2 border border-blue-300 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors font-medium text-xs disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                  onClick={confirmRenameKey}
+                  disabled={renamingKey || !newKeyNameForRename.trim()}
+                >
+                  {renamingKey ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Renombrando...
+                    </>
+                  ) : (
+                    "Renombrar"
                   )}
                 </button>
               </div>
