@@ -120,6 +120,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Si es miembro de un equipo, no puede subir logo
+    const { data: memberOfTeam } = await supabaseAdmin
+      .from("team_members")
+      .select("team_owner_id, status")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle();
+
+    if (memberOfTeam && memberOfTeam.team_owner_id !== user.id) {
+      return NextResponse.json(
+        { error: "Solo el propietario del equipo puede subir el logo" },
+        { status: 403 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
