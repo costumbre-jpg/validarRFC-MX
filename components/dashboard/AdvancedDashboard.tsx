@@ -318,6 +318,7 @@ export default function AdvancedDashboard({
 
     try {
       const brandRgb = hexToRgb(brandPrimary);
+      const brandSecondaryRgb = hexToRgb(brandSecondary);
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -468,7 +469,7 @@ export default function AdvancedDashboard({
         if (hourlyUsage.length > 0) {
           checkNewPage(40);
           doc.setFontSize(14);
-          doc.setTextColor(138, 43, 226); // Purple
+          doc.setTextColor(brandSecondaryRgb.r, brandSecondaryRgb.g, brandSecondaryRgb.b);
           doc.text("Análisis por Hora del Día (EXCLUSIVO BUSINESS)", margin, currentY);
           currentY += 8;
 
