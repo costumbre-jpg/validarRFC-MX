@@ -34,8 +34,6 @@ function WhiteLabelPage() {
   const [logoError, setLogoError] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [isTeamMember, setIsTeamMember] = useState(false);
-  const [teamOwnerEmail, setTeamOwnerEmail] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -110,40 +108,12 @@ function WhiteLabelPage() {
             } else {
               setPlanId(designPlan);
             }
-
-            // Verificar si es miembro de un equipo
-            const { data: teamMember } = await supabase
-              .from("team_members")
-              .select("team_owner_id, status")
-              .eq("user_id", user.id)
-              .eq("status", "active")
-              .maybeSingle();
-
-            if (teamMember && (teamMember as any).team_owner_id !== user.id) {
-              setIsTeamMember(true);
-              // Obtener email del owner para mostrar en el mensaje
-              const { data: ownerData } = await supabase
-                .from("users")
-                .select("email")
-                .eq("id", (teamMember as any).team_owner_id)
-                .single();
-              if (ownerData) {
-                setTeamOwnerEmail((ownerData as any).email);
-              }
-            } else {
-              setIsTeamMember(false);
-              setTeamOwnerEmail(null);
-            }
           } else {
             setPlanId(designPlan);
-            setIsTeamMember(false);
-            setTeamOwnerEmail(null);
           }
         } catch (e) {
-          console.error("Error obteniendo plan o equipo:", e);
+          console.error("Error obteniendo plan:", e);
           setPlanId(designPlan);
-          setIsTeamMember(false);
-          setTeamOwnerEmail(null);
         }
         setLoading(false);
       }
@@ -442,25 +412,6 @@ function WhiteLabelPage() {
           <p className="text-xs max-md:text-[11px] font-semibold text-red-800">{errorMessage}</p>
         </div>
       )}
-      {isTeamMember && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 max-md:p-2.5 flex items-start gap-2 max-md:gap-1.5">
-          <div className="w-6 max-md:w-5 h-6 max-md:h-5 bg-blue-500 rounded flex items-center justify-center flex-shrink-0 mt-0.5">
-            <svg className="w-3.5 h-3.5 max-md:w-3 max-md:h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <p className="text-xs max-md:text-[11px] font-semibold text-blue-900 mb-1 max-md:mb-0.5">
-              Estás viendo el branding del propietario del equipo
-            </p>
-            <p className="text-xs max-md:text-[11px] text-blue-700">
-              {teamOwnerEmail 
-                ? `El branding actual pertenece a ${teamOwnerEmail}. Solo el propietario puede editar estas configuraciones.`
-                : "Solo el propietario del equipo puede editar estas configuraciones."}
-            </p>
-          </div>
-        </div>
-      )}
 
       <div className="grid lg:grid-cols-3 gap-4 max-md:gap-3">
         {/* Left Column: Configuration */}
@@ -487,8 +438,7 @@ function WhiteLabelPage() {
                     setSettings({ ...settings, brand_name: e.target.value })
                   }
                   maxLength={80}
-                  disabled={isTeamMember}
-                  className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-gray-50 focus:bg-white text-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-gray-50 focus:bg-white text-gray-900"
                   placeholder="Ej: Mi Empresa S.A. de C.V."
                 />
               </div>
@@ -508,14 +458,14 @@ function WhiteLabelPage() {
                     dragActive
                       ? "border-gray-400 bg-gray-50"
                       : "border-gray-200 bg-gray-50/50"
-                  } ${uploadingLogo || isTeamMember ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:border-gray-300"}`}
+                  } ${uploadingLogo ? "opacity-50 cursor-wait" : "cursor-pointer hover:border-gray-300"}`}
                 >
                   <input
                     type="file"
                     id="logo-upload"
                     accept="image/png,image/svg+xml,image/jpeg,image/jpg"
                     onChange={handleFileInput}
-                    disabled={uploadingLogo || isTeamMember}
+                    disabled={uploadingLogo}
                     className="hidden"
                   />
                   <label
@@ -563,8 +513,7 @@ function WhiteLabelPage() {
                       setLogoError(false);
                       setSettings({ ...settings, custom_logo_url: e.target.value });
                     }}
-                    disabled={isTeamMember}
-                    className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-white disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-white"
                     placeholder="https://ejemplo.com/logo.png"
                   />
                 </div>
@@ -615,8 +564,7 @@ function WhiteLabelPage() {
                         onChange={(e) =>
                           setSettings({ ...settings, primary_color: e.target.value })
                         }
-                        disabled={isTeamMember}
-                        className="h-10 max-md:h-9 w-16 max-md:w-14 rounded-lg border border-gray-200 cursor-pointer shadow-sm hover:shadow transition-shadow disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="h-10 max-md:h-9 w-16 max-md:w-14 rounded-lg border border-gray-200 cursor-pointer shadow-sm hover:shadow transition-shadow"
                       />
                     </div>
                     <div className="flex-1">
@@ -626,8 +574,7 @@ function WhiteLabelPage() {
                         onChange={(e) =>
                           setSettings({ ...settings, primary_color: e.target.value })
                         }
-                        disabled={isTeamMember}
-                        className="w-full px-3 max-md:px-2.5 py-1.5 max-md:py-1 text-xs max-md:text-[11px] border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-gray-50 focus:bg-white font-mono text-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full px-3 max-md:px-2.5 py-1.5 max-md:py-1 text-xs max-md:text-[11px] border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-gray-50 focus:bg-white font-mono text-gray-900"
                         placeholder="#2F7E7A"
                       />
                     </div>
@@ -653,8 +600,7 @@ function WhiteLabelPage() {
                         onChange={(e) =>
                           setSettings({ ...settings, secondary_color: e.target.value })
                         }
-                        disabled={isTeamMember}
-                        className="h-10 max-md:h-9 w-16 max-md:w-14 rounded-lg border border-gray-200 cursor-pointer shadow-sm hover:shadow transition-shadow disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="h-10 max-md:h-9 w-16 max-md:w-14 rounded-lg border border-gray-200 cursor-pointer shadow-sm hover:shadow transition-shadow"
                       />
                     </div>
                     <div className="flex-1">
@@ -664,8 +610,7 @@ function WhiteLabelPage() {
                         onChange={(e) =>
                           setSettings({ ...settings, secondary_color: e.target.value })
                         }
-                        disabled={isTeamMember}
-                        className="w-full px-3 max-md:px-2.5 py-1.5 max-md:py-1 text-xs max-md:text-[11px] border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-gray-50 focus:bg-white font-mono text-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="w-full px-3 max-md:px-2.5 py-1.5 max-md:py-1 text-xs max-md:text-[11px] border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-gray-50 focus:bg-white font-mono text-gray-900"
                         placeholder="#1F5D59"
                       />
                     </div>
@@ -703,8 +648,7 @@ function WhiteLabelPage() {
                   onChange={(e) =>
                     setSettings({ ...settings, hide_maflipp_brand: e.target.checked })
                   }
-                  disabled={isTeamMember}
-                  className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-gray-600 border-gray-300 rounded focus:ring-1 focus:ring-gray-400 mt-0.5 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-gray-600 border-gray-300 rounded focus:ring-1 focus:ring-gray-400 mt-0.5 cursor-pointer"
                 />
                 <div className="flex-1">
                   <label htmlFor="hide-brand" className="text-xs max-md:text-[11px] font-semibold text-gray-900 cursor-pointer block mb-0.5">
@@ -723,7 +667,7 @@ function WhiteLabelPage() {
             <button
               type="button"
               onClick={() => setSettings(defaults)}
-              disabled={saving || isTeamMember}
+              disabled={saving}
               className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-4 max-md:px-3 py-2 max-md:py-1.5 text-xs max-md:text-[11px] font-semibold rounded-lg transition-all border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-3.5 h-3.5 max-md:w-3 max-md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -733,7 +677,7 @@ function WhiteLabelPage() {
             </button>
             <button
               onClick={handleSave}
-              disabled={saving || isTeamMember}
+              disabled={saving}
               className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-5 max-md:px-4 py-2 max-md:py-1.5 text-xs max-md:text-[11px] font-semibold text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow"
               style={{ backgroundColor: brandPrimary }}
             >

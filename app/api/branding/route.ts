@@ -101,23 +101,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    // Si el usuario es miembro de un equipo, usar el branding del owner
-    const { data: memberOfTeam } = await supabaseAdmin
-      .from("team_members")
-      .select("team_owner_id, status")
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .maybeSingle();
-
-    const brandingOwnerId =
-      memberOfTeam && memberOfTeam.team_owner_id !== user.id
-        ? memberOfTeam.team_owner_id
-        : user.id;
-
+    // Cada empresa mantiene su propio branding, incluso si está en un equipo
     const { data: settings, error } = await supabaseAdmin
       .from("white_label_settings")
       .select("*")
-      .eq("user_id", brandingOwnerId)
+      .eq("user_id", user.id)
       .single();
 
     if (error && error.code !== "PGRST116") {
@@ -238,20 +226,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Si es miembro de un equipo, no puede editar el white label del owner
-    const { data: memberOfTeam } = await supabaseAdmin
-      .from("team_members")
-      .select("team_owner_id, status")
-      .eq("user_id", user.id)
-      .eq("status", "active")
-      .maybeSingle();
-
-    if (memberOfTeam && memberOfTeam.team_owner_id !== user.id) {
-      return NextResponse.json(
-        { error: "Solo el propietario del equipo puede editar el White Label" },
-        { status: 403 }
-      );
-    }
+    // Cada empresa puede editar su propio branding, incluso si está en un equipo
 
     const body = await request.json();
     const {
