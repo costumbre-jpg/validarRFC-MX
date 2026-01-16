@@ -121,25 +121,31 @@ function DashboardLayoutContent({
         });
       }
 
-      // Branding (solo si autenticado)
-      try {
-        const accessToken = session?.access_token;
-        const res = await fetch("/api/branding", {
-          cache: "no-store",
-          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-          credentials: "include",
-        });
-        console.log("🎨 Layout: Fetching branding, status:", res.status);
-        if (res.ok) {
-          const data = await res.json();
-          console.log("🎨 Layout: Branding data:", data);
-          setBranding(data);
-        } else if (res.status === 401) {
-          console.log("🎨 Layout: No autenticado, no branding");
+      // Branding (solo si autenticado Y tiene plan Business)
+      const finalPlanId = planFromUrl || (existingUser?.subscription_status || "free");
+      if (finalPlanId === "business") {
+        try {
+          const accessToken = session?.access_token;
+          const res = await fetch("/api/branding", {
+            cache: "no-store",
+            headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+            credentials: "include",
+          });
+          console.log("🎨 Layout: Fetching branding, status:", res.status);
+          if (res.ok) {
+            const data = await res.json();
+            console.log("🎨 Layout: Branding data:", data);
+            setBranding(data);
+          } else if (res.status === 401) {
+            console.log("🎨 Layout: No autenticado, no branding");
+            setBranding(null);
+          }
+        } catch (e) {
+          console.error("🎨 Layout: Branding fetch error", e);
           setBranding(null);
         }
-      } catch (e) {
-        console.error("🎨 Layout: Branding fetch error", e);
+      } else {
+        // Si no es Business, no cargar branding
         setBranding(null);
       }
 
