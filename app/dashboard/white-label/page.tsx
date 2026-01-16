@@ -678,8 +678,7 @@ function WhiteLabelPage() {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-5 max-md:px-4 py-2 max-md:py-1.5 text-xs max-md:text-[11px] font-semibold text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow"
-              style={{ backgroundColor: brandPrimary }}
+              className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-5 max-md:px-4 py-2 max-md:py-1.5 text-xs max-md:text-[11px] font-semibold text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow bg-brand-primary hover-bg-brand-secondary"
             >
               {saving ? (
                 <>

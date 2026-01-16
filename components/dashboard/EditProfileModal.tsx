@@ -456,8 +456,7 @@ export default function EditProfileModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 max-md:px-4 py-2 max-md:py-1.5 text-sm max-md:text-xs font-semibold text-white rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ backgroundColor: brandPrimary }}
+                className="px-6 max-md:px-4 py-2 max-md:py-1.5 text-sm max-md:text-xs font-semibold text-white rounded-lg transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed bg-brand-primary hover-bg-brand-secondary"
               >
                 {loading ? "Guardando..." : "Guardar Cambios"}
               </button>

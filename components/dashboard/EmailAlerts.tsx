@@ -261,8 +261,7 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="w-full px-4 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md hover:scale-[1.01] font-semibold text-sm"
-              style={{ backgroundColor: brandPrimaryColor }}
+              className="w-full px-4 py-2 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md hover:scale-[1.01] font-semibold text-sm bg-brand-primary hover-bg-brand-secondary"
             >
               {saving ? "Guardando..." : "Guardar Cambios"}
             </button>

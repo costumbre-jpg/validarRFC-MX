@@ -509,8 +509,7 @@ function APIKeysPage() {
           <button
             onClick={handleCreateKey}
             disabled={creating || !newKeyName.trim() || !canCreateKeys}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md"
-            style={{ backgroundColor: brandPrimary }}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md bg-brand-primary hover-bg-brand-secondary"
           >
             {creating ? (
               <>
