@@ -67,8 +67,8 @@ export default function ValidationHistory({
     const normalized = hex.trim();
     const match = normalized.match(/^#?([0-9a-fA-F]{6})$/);
     const fallback = { r: 47, g: 126, b: 122 };
-    if (!match) return fallback;
-    const value = match[1];
+    const value = match?.[1];
+    if (!value) return fallback;
     return {
       r: parseInt(value.slice(0, 2), 16),
       g: parseInt(value.slice(2, 4), 16),
