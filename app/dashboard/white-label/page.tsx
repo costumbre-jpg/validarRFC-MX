@@ -279,7 +279,7 @@ function WhiteLabelPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2F7E7A]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -807,4 +807,5 @@ export default function WhiteLabelPageWrapper() {
     </Suspense>
   );
 }
+
 

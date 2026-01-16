@@ -104,7 +104,7 @@ export default function DashboardStats({
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5 max-md:h-1">
               <div
-                className="bg-[#2F7E7A] h-1.5 max-md:h-1 rounded-full transition-all"
+                className="bg-brand-primary h-1.5 max-md:h-1 rounded-full transition-all"
                 style={{ width: `${validPercentage}%` }}
               />
             </div>
@@ -165,7 +165,7 @@ export default function DashboardStats({
                   </span>
                   <div className="flex-1 bg-gray-200 rounded-full h-2 max-md:h-1.5">
                     <div
-                      className="bg-[#2F7E7A] h-2 max-md:h-1.5 rounded-full transition-all"
+                      className="bg-brand-primary h-2 max-md:h-1.5 rounded-full transition-all"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>
@@ -181,4 +181,5 @@ export default function DashboardStats({
     </div>
   );
 }
+
 

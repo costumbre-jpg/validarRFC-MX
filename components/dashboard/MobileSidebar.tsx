@@ -220,7 +220,7 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
             </div>
             <button
               type="button"
-              className="p-2 text-gray-600 hover:text-[#2F7E7A]"
+              className="p-2 text-gray-600 hover:text-brand-primary"
               onClick={() => setIsOpen(false)}
             >
               <span className="sr-only">Cerrar menú</span>
@@ -299,4 +299,5 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
     </>
   );
 }
+
 

@@ -252,7 +252,7 @@ function BillingPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7E7A] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto"></div>
           <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
       </div>
@@ -1111,7 +1111,7 @@ function BillingPage() {
                   name="name"
                   required
                   placeholder="Tu nombre completo"
-                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm transition-all"
+                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus-ring-brand-primary focus:border-transparent text-sm transition-all"
                 />
               </div>
               <div>
@@ -1124,7 +1124,7 @@ function BillingPage() {
                   name="email"
                   required
                   placeholder="tu@email.com"
-                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm transition-all"
+                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus-ring-brand-primary focus:border-transparent text-sm transition-all"
                 />
               </div>
               <div>
@@ -1136,7 +1136,7 @@ function BillingPage() {
                   id="contact-company"
                   name="company"
                   placeholder="Nombre de tu empresa"
-                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm transition-all"
+                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus-ring-brand-primary focus:border-transparent text-sm transition-all"
                 />
               </div>
               <div>
@@ -1149,7 +1149,7 @@ function BillingPage() {
                   required
                   rows={4}
                   placeholder="Cuéntanos cómo podemos ayudarte..."
-                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2F7E7A] focus:border-transparent text-sm resize-none transition-all"
+                  className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus-ring-brand-primary focus:border-transparent text-sm resize-none transition-all"
                 />
               </div>
               {contactStatus !== "idle" && contactMessage && (
@@ -1166,7 +1166,7 @@ function BillingPage() {
               <div className="flex items-center gap-3">
                 <button
                   type="submit"
-                  className="flex-1 bg-[#2F7E7A] text-white px-4 py-2.5 rounded-lg hover:bg-[#1F5D59] transition-colors font-semibold text-sm shadow-md hover:shadow-lg"
+                  className="flex-1 bg-brand-primary text-white px-4 py-2.5 rounded-lg hover-bg-brand-secondary transition-colors font-semibold text-sm shadow-md hover:shadow-lg"
                 >
                   Enviar Mensaje
                 </button>
@@ -1197,4 +1197,6 @@ export default function BillingPageWrapper() {
     </Suspense>
   );
 }
+
+
 

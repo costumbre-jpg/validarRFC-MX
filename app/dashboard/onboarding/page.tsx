@@ -117,7 +117,7 @@ function OnboardingPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2F7E7A]"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -306,7 +306,7 @@ function OnboardingPage() {
               type="checkbox"
               checked={form.sandbox}
               onChange={(e) => handleChange("sandbox", e.target.checked)}
-              className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-[#2F7E7A] border-gray-300 rounded"
+              className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-brand-primary border-gray-300 rounded"
             />
             <label htmlFor="sandbox" className="text-sm max-md:text-xs text-gray-700">
               Necesito ambiente sandbox para pruebas
@@ -391,4 +391,5 @@ export default function OnboardingPageWrapper() {
     </Suspense>
   );
 }
+
 

@@ -31,6 +31,31 @@ export default function AdvancedDashboard({
   const isBusiness = planId === "business";
   const isMock = userData?.id === "mock-user";
 
+  // Get brand colors from CSS variables or use defaults
+  const getBrandColor = (varName: string, defaultValue: string) => {
+    if (typeof window === "undefined") return defaultValue;
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim();
+    return value || defaultValue;
+  };
+
+  const hexToRgb = (hex: string) => {
+    const normalized = hex.trim();
+    const match = normalized.match(/^#?([0-9a-fA-F]{6})$/);
+    const fallback = { r: 47, g: 126, b: 122 };
+    if (!match) return fallback;
+    const value = match[1];
+    return {
+      r: parseInt(value.slice(0, 2), 16),
+      g: parseInt(value.slice(2, 4), 16),
+      b: parseInt(value.slice(4, 6), 16),
+    };
+  };
+
+  const brandPrimary = getBrandColor("--brand-primary", "#2F7E7A");
+  const brandSecondary = getBrandColor("--brand-secondary", "#1F5D59");
+
   useEffect(() => {
     const loadAdvancedData = async () => {
       // Resetear estados al cambiar datos
@@ -292,6 +317,7 @@ export default function AdvancedDashboard({
     if (!isBusiness) return;
 
     try {
+      const brandRgb = hexToRgb(brandPrimary);
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -309,7 +335,7 @@ export default function AdvancedDashboard({
 
       // Portada
       doc.setFontSize(24);
-      doc.setTextColor(47, 126, 122); // #2F7E7A
+      doc.setTextColor(brandRgb.r, brandRgb.g, brandRgb.b);
       doc.text("Reporte Analytics", pageWidth / 2, currentY, { align: "center" });
       currentY += 10;
 
@@ -333,7 +359,7 @@ export default function AdvancedDashboard({
       // Resumen Ejecutivo
       checkNewPage(30);
       doc.setFontSize(16);
-      doc.setTextColor(47, 126, 122);
+      doc.setTextColor(brandRgb.r, brandRgb.g, brandRgb.b);
       doc.text("Resumen Ejecutivo", margin, currentY);
       currentY += 8;
 
@@ -358,7 +384,7 @@ export default function AdvancedDashboard({
       if (dailyToShow.length > 0) {
         checkNewPage(40);
         doc.setFontSize(14);
-        doc.setTextColor(47, 126, 122);
+        doc.setTextColor(brandRgb.r, brandRgb.g, brandRgb.b);
         doc.text("Uso Diario (Últimos 7 días)", margin, currentY);
         currentY += 8;
 
@@ -375,7 +401,7 @@ export default function AdvancedDashboard({
         // Tabla de uso diario
         doc.setFontSize(8);
         doc.setTextColor(255, 255, 255);
-        doc.setFillColor(47, 126, 122);
+        doc.setFillColor(brandRgb.r, brandRgb.g, brandRgb.b);
         doc.rect(margin, currentY, pageWidth - (margin * 2), 6, "F");
         doc.text("Día", margin + 2, currentY + 4);
         doc.text("Validaciones", margin + 50, currentY + 4);
@@ -400,7 +426,7 @@ export default function AdvancedDashboard({
       if (monthlyToShow.length > 0) {
         checkNewPage(50);
         doc.setFontSize(14);
-        doc.setTextColor(47, 126, 122);
+        doc.setTextColor(brandRgb.r, brandRgb.g, brandRgb.b);
         doc.text("Tendencias Mensuales (Últimos 6 meses)", margin, currentY);
         currentY += 8;
 
@@ -415,7 +441,7 @@ export default function AdvancedDashboard({
         // Tabla de tendencias mensuales
         doc.setFontSize(8);
         doc.setTextColor(255, 255, 255);
-        doc.setFillColor(47, 126, 122);
+        doc.setFillColor(brandRgb.r, brandRgb.g, brandRgb.b);
         doc.rect(margin, currentY, pageWidth - (margin * 2), 6, "F");
         doc.text("Mes", margin + 2, currentY + 4);
         doc.text("Validaciones", margin + 80, currentY + 4);
@@ -458,7 +484,7 @@ export default function AdvancedDashboard({
 
           // Top 5 horas con más actividad
           doc.setFontSize(10);
-          doc.setTextColor(47, 126, 122);
+          doc.setTextColor(brandRgb.r, brandRgb.g, brandRgb.b);
           doc.text("Top 5 Horas con Mayor Actividad:", margin, currentY);
           currentY += 6;
 
@@ -568,7 +594,7 @@ export default function AdvancedDashboard({
     <div className="space-y-4">
       {/* Header con badge profesional */}
       <div>
-        <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gradient-to-r from-[#2F7E7A] to-[#1F5D59] text-white text-xs font-semibold shadow-sm mb-2">
+        <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-brand-gradient text-white text-xs font-semibold shadow-sm mb-2">
           <svg className="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
@@ -586,7 +612,7 @@ export default function AdvancedDashboard({
 
       {loading ? (
         <div className="flex items-center justify-center py-6">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#2F7E7A]"></div>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
         </div>
       ) : (
         <>
@@ -599,11 +625,11 @@ export default function AdvancedDashboard({
                 </h3>
                 <p className="text-xs text-gray-500">Tendencias de validaciones diarias</p>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-[#2F7E7A]/10 to-[#1F5D59]/10 rounded-lg">
-                <svg className="w-3.5 h-3.5 text-[#2F7E7A]" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-brand-gradient-soft rounded-lg">
+                <svg className="w-3.5 h-3.5 text-brand-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                 </svg>
-                <span className="text-xs font-semibold text-[#2F7E7A]">
+                <span className="text-xs font-semibold text-brand-primary">
                 {dailyToShow.reduce((sum, d) => sum + d.count, 0)} total
                 </span>
               </div>
@@ -704,7 +730,7 @@ export default function AdvancedDashboard({
               </div>
               <div className="text-center">
                 <p className="text-xs text-gray-500 mb-1">Máximo</p>
-                <p className="text-lg font-bold text-[#2F7E7A]">
+                <p className="text-lg font-bold text-brand-primary">
                   {dailyToShow.length > 0 ? Math.max(...dailyToShow.map(d => d.count)) : 0}
                 </p>
               </div>
@@ -726,11 +752,11 @@ export default function AdvancedDashboard({
                 </h3>
                 <p className="text-xs text-gray-500">Evolución del uso a lo largo del tiempo</p>
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gradient-to-r from-[#2F7E7A]/10 to-[#1F5D59]/10 rounded-lg">
-                <svg className="w-3.5 h-3.5 text-[#2F7E7A]" fill="currentColor" viewBox="0 0 20 20">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-brand-gradient-soft rounded-lg">
+                <svg className="w-3.5 h-3.5 text-brand-primary" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                 </svg>
-                <span className="text-xs font-semibold text-[#2F7E7A]">
+                <span className="text-xs font-semibold text-brand-primary">
                   {monthlyToShow.reduce((sum, m) => sum + m.count, 0)} total
                 </span>
               </div>
@@ -809,7 +835,7 @@ export default function AdvancedDashboard({
               </div>
               <div>
                 <p className="text-[10px] text-gray-500 mb-0.5">Tendencia</p>
-                <p className="text-base font-bold text-[#2F7E7A]">
+                <p className="text-base font-bold text-brand-primary">
                   {(() => {
                     const recent = monthlyToShow.slice(-3).reduce((sum, m) => sum + m.count, 0);
                     const older = monthlyToShow.slice(0, 3).reduce((sum, m) => sum + m.count, 0);
@@ -963,7 +989,7 @@ export default function AdvancedDashboard({
                           className={`w-full rounded-t transition-all duration-300 ${
                             isPeak 
                               ? 'bg-gradient-to-t from-purple-600 via-purple-500 to-purple-600' 
-                              : 'bg-gradient-to-t from-[#2F7E7A] via-[#2F7E7A] to-[#1F5D59]'
+                              : 'bg-brand-gradient-vertical'
                           }`}
                           style={{ 
                             height: `${Math.max(percentage * 1.5, 8)}px`,
@@ -1002,7 +1028,7 @@ export default function AdvancedDashboard({
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] max-md:text-[9px] text-gray-500 mb-0.5">Total 24h</p>
-                    <p className="text-base max-md:text-sm font-bold text-[#2F7E7A]">
+                    <p className="text-base max-md:text-sm font-bold text-brand-primary">
                       {hourlyUsage.reduce((sum, h) => sum + h.count, 0)}
                     </p>
                   </div>
@@ -1161,7 +1187,7 @@ export default function AdvancedDashboard({
               )}
 
               {/* Botón de Exportación de Reportes */}
-              <div className="bg-gradient-to-br from-[#2F7E7A] to-[#1F5D59] rounded-xl shadow-lg border border-[#1F5D59] p-6 max-md:p-4 text-white">
+              <div className="bg-brand-gradient-br rounded-xl shadow-lg border border-brand-secondary p-6 max-md:p-4 text-white">
                 <div className="flex items-center justify-between max-md:flex-col max-md:items-start max-md:gap-3">
                   <div>
                     <div className="inline-flex items-center px-3 max-md:px-2.5 py-1 max-md:py-0.5 rounded-full bg-white/20 text-white text-xs max-md:text-[10px] font-semibold mb-2 max-md:mb-1.5">
@@ -1186,7 +1212,7 @@ export default function AdvancedDashboard({
                       }
                     }}
                     disabled={exportingPDF || !isBusiness}
-                    className="px-5 max-md:px-4 py-3 max-md:py-2 bg-white text-[#2F7E7A] rounded-lg font-semibold text-sm max-md:text-xs hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 max-md:gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed w-auto max-md:w-full justify-center"
+                    className="px-5 max-md:px-4 py-3 max-md:py-2 bg-white text-brand-primary rounded-lg font-semibold text-sm max-md:text-xs hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 max-md:gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed w-auto max-md:w-full justify-center"
                   >
                     {exportingPDF ? (
                       <>
@@ -1214,4 +1240,5 @@ export default function AdvancedDashboard({
     </div>
   );
 }
+
 

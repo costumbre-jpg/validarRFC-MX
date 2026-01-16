@@ -270,10 +270,10 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
             <div className="text-right">
               <p className={`text-2xl max-md:text-xl font-bold ${
                 planLimit === -1 
-                  ? "text-[#2F7E7A]"
+                  ? "text-brand-primary"
                   : planLimit - queriesThisMonth <= 3
                   ? "text-orange-600"
-                  : "text-[#2F7E7A]"
+                  : "text-brand-primary"
               }`}>
                 {planLimit === -1 
                   ? "∞" 
@@ -291,4 +291,5 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
     </div>
   );
 }
+
 

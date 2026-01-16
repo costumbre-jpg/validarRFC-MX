@@ -88,7 +88,7 @@ function DashboardLayoutContent({
       // Obtener datos del usuario
       const { data: existingUser } = await supabase
         .from("users")
-        .select("*")
+        .select("id, email, subscription_status, rfc_queries_this_month")
         .eq("id", session.user.id)
         .single();
 
@@ -112,7 +112,7 @@ function DashboardLayoutContent({
             subscription_status: planFromUrl || "free",
             rfc_queries_this_month: 0,
           })
-          .select()
+          .select("id, email, subscription_status, rfc_queries_this_month")
           .single();
         
         setUserData(newUser || { 
@@ -121,35 +121,42 @@ function DashboardLayoutContent({
         });
       }
 
+      setLoading(false);
+
       // Branding (solo si autenticado Y tiene plan Business)
-      const finalPlanId = planFromUrl || (existingUser?.subscription_status || "free");
+      const finalPlanId =
+        planFromUrl ||
+        existingUser?.subscription_status ||
+        "free";
       if (finalPlanId === "business") {
-        try {
-          const accessToken = session?.access_token;
-          const res = await fetch("/api/branding", {
-            cache: "no-store",
-            headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
-            credentials: "include",
-          });
-          console.log("🎨 Layout: Fetching branding, status:", res.status);
-          if (res.ok) {
-            const data = await res.json();
-            console.log("🎨 Layout: Branding data:", data);
-            setBranding(data);
-          } else if (res.status === 401) {
-            console.log("🎨 Layout: No autenticado, no branding");
+        void (async () => {
+          try {
+            const accessToken = session?.access_token;
+            const res = await fetch("/api/branding", {
+              cache: "no-store",
+              headers: accessToken
+                ? { Authorization: `Bearer ${accessToken}` }
+                : undefined,
+              credentials: "include",
+            });
+            console.log("🎨 Layout: Fetching branding, status:", res.status);
+            if (res.ok) {
+              const data = await res.json();
+              console.log("🎨 Layout: Branding data:", data);
+              setBranding(data);
+            } else if (res.status === 401) {
+              console.log("🎨 Layout: No autenticado, no branding");
+              setBranding(null);
+            }
+          } catch (e) {
+            console.error("🎨 Layout: Branding fetch error", e);
             setBranding(null);
           }
-        } catch (e) {
-          console.error("🎨 Layout: Branding fetch error", e);
-          setBranding(null);
-        }
+        })();
       } else {
         // Si no es Business, no cargar branding
         setBranding(null);
       }
-
-      setLoading(false);
     };
 
     checkAuth();
@@ -159,7 +166,7 @@ function DashboardLayoutContent({
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2F7E7A] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto"></div>
           <p className="mt-4 text-gray-500">Cargando...</p>
         </div>
       </div>
@@ -214,4 +221,5 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
     </Suspense>
   );
 }
+
 

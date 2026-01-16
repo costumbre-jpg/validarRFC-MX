@@ -57,7 +57,7 @@ export default function DashboardHeader({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 max-md:gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-3 max-md:gap-2">
-            <div className="h-12 w-12 max-md:h-10 max-md:w-10 rounded-full overflow-hidden bg-[#2F7E7A]/10 text-[#2F7E7A] font-semibold flex items-center justify-center uppercase text-sm max-md:text-xs ring-2 ring-gray-100">
+            <div className="h-12 w-12 max-md:h-10 max-md:w-10 rounded-full overflow-hidden bg-brand-primary-10 text-brand-primary font-semibold flex items-center justify-center uppercase text-sm max-md:text-xs ring-2 ring-gray-100">
               {userData?.avatar_url ? (
                 <img
                   src={userData.avatar_url}
@@ -180,4 +180,5 @@ export default function DashboardHeader({
     </div>
   );
 }
+
 

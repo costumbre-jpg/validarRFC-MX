@@ -154,7 +154,7 @@ function CuentaPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-6">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#2F7E7A]"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
       </div>
     );
   }
@@ -167,7 +167,7 @@ function CuentaPage() {
 
   const planColor = 
     userData?.subscription_status === "free" ? "bg-gray-100 text-gray-800" :
-    userData?.subscription_status === "pro" ? "bg-[#2F7E7A] text-white" :
+    userData?.subscription_status === "pro" ? "bg-brand-primary text-white" :
     userData?.subscription_status === "business" ? "bg-blue-100 text-blue-800" :
     "bg-purple-100 text-purple-800";
 
@@ -653,4 +653,5 @@ export default function CuentaPageWrapper() {
     </Suspense>
   );
 }
+
 

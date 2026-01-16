@@ -279,7 +279,7 @@ export default function EditProfileModal({
                       type="button"
                       onClick={handleAvatarUpload}
                       disabled={uploadingAvatar}
-                      className="text-xs max-md:text-[11px] font-medium text-[#2F7E7A] hover:underline disabled:opacity-50"
+                      className="text-xs max-md:text-[11px] font-medium text-brand-primary hover:underline disabled:opacity-50"
                     >
                       {uploadingAvatar ? "Subiendo..." : "Subir ahora"}
                     </button>
@@ -459,4 +459,5 @@ export default function EditProfileModal({
     </div>
   );
 }
+
 

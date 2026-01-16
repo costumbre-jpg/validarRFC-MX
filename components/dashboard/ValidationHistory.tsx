@@ -53,6 +53,31 @@ export default function ValidationHistory({
   const isPro = planId === "pro" || planId === "business";
   const plan = getPlan(planId);
   const hasPDFExport = plan.features.exportFormats?.includes("PDF") || false;
+
+  // Get brand colors from CSS variables or use defaults
+  const getBrandColor = (varName: string, defaultValue: string) => {
+    if (typeof window === "undefined") return defaultValue;
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(varName)
+      .trim();
+    return value || defaultValue;
+  };
+
+  const hexToRgb = (hex: string) => {
+    const normalized = hex.trim();
+    const match = normalized.match(/^#?([0-9a-fA-F]{6})$/);
+    const fallback = { r: 47, g: 126, b: 122 };
+    if (!match) return fallback;
+    const value = match[1];
+    return {
+      r: parseInt(value.slice(0, 2), 16),
+      g: parseInt(value.slice(2, 4), 16),
+      b: parseInt(value.slice(4, 6), 16),
+    };
+  };
+
+  const brandPrimary = getBrandColor("--brand-primary", "#2F7E7A");
+  const brandSecondary = getBrandColor("--brand-secondary", "#1F5D59");
   
   // Mantener parámetro 'plan' en los links
   const planParam = searchParams.get("plan");
@@ -211,7 +236,7 @@ export default function ValidationHistory({
             <style>
               table { border-collapse: collapse; width: 100%; }
               th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-              th { background-color: #2F7E7A; color: white; font-weight: bold; }
+              th { background-color: ${brandPrimary}; color: white; font-weight: bold; }
               tr:nth-child(even) { background-color: #f2f2f2; }
             </style>
           </head>
@@ -278,6 +303,7 @@ export default function ValidationHistory({
     }
 
     try {
+      const brandRgb = hexToRgb(brandPrimary);
       // Crear nuevo documento PDF
       const doc = new jsPDF();
       
@@ -292,7 +318,7 @@ export default function ValidationHistory({
 
       // Título
       doc.setFontSize(18);
-      doc.setTextColor(47, 126, 122); // Color #2F7E7A
+      doc.setTextColor(brandRgb.r, brandRgb.g, brandRgb.b);
       doc.text("Historial de Validaciones", margin, currentY);
       currentY += 10;
 
@@ -307,7 +333,7 @@ export default function ValidationHistory({
       // Encabezados de tabla
       doc.setFontSize(11);
       doc.setTextColor(255, 255, 255);
-      doc.setFillColor(47, 126, 122); // #2F7E7A
+      doc.setFillColor(brandRgb.r, brandRgb.g, brandRgb.b);
       doc.rect(margin, currentY, pageWidth - (margin * 2), rowHeight, "F");
       
       doc.text("RFC", margin + 2, currentY + 5);
@@ -328,7 +354,7 @@ export default function ValidationHistory({
           // Reimprimir encabezados en nueva página
           doc.setFontSize(11);
           doc.setTextColor(255, 255, 255);
-          doc.setFillColor(47, 126, 122);
+          doc.setFillColor(brandRgb.r, brandRgb.g, brandRgb.b);
           doc.rect(margin, currentY, pageWidth - (margin * 2), rowHeight, "F");
           doc.text("RFC", margin + 2, currentY + 5);
           doc.text("Resultado", margin + 60, currentY + 5);
@@ -427,16 +453,6 @@ export default function ValidationHistory({
       </div>
     );
   }
-
-  // Get brand colors from CSS variables or use defaults
-  const getBrandColor = (varName: string, defaultValue: string) => {
-    if (typeof window === 'undefined') return defaultValue;
-    const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-    return value || defaultValue;
-  };
-
-  const brandPrimary = getBrandColor('--brand-primary', '#2F7E7A');
-  const brandSecondary = getBrandColor('--brand-secondary', '#1F5D59');
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -549,7 +565,7 @@ export default function ValidationHistory({
         {!showFullTable && (
           <Link
             href={`/dashboard/historial${urlSuffix}`}
-            className="text-xs font-medium text-[#2F7E7A] hover:text-[#1F5D59]"
+            className="text-xs font-medium text-brand-primary hover-text-brand-secondary"
           >
             Ver todo →
           </Link>
@@ -637,4 +653,5 @@ export default function ValidationHistory({
     </div>
   );
 }
+
 
