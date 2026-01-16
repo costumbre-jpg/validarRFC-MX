@@ -145,8 +145,8 @@ function CFDIPage() {
       <div className="bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-lg shadow-sm p-5 max-md:p-4">
         <div className="flex items-start gap-4 max-md:gap-3">
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 max-md:w-10 max-md:h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 max-md:w-5 max-md:h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+            <div className="w-10 h-10 max-md:w-10 max-md:h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 max-md:w-5 max-md:h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
               </svg>
             </div>
