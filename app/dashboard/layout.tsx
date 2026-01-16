@@ -123,7 +123,12 @@ function DashboardLayoutContent({
 
       // Branding (solo si autenticado)
       try {
-        const res = await fetch("/api/branding", { cache: 'no-store' });
+        const accessToken = session?.access_token;
+        const res = await fetch("/api/branding", {
+          cache: "no-store",
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+          credentials: "include",
+        });
         console.log("🎨 Layout: Fetching branding, status:", res.status);
         if (res.ok) {
           const data = await res.json();
