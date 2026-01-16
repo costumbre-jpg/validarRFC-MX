@@ -30,6 +30,7 @@ function WhiteLabelPage() {
   const [planId, setPlanId] = useState<PlanId>("free");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [logoError, setLogoError] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -43,8 +44,23 @@ function WhiteLabelPage() {
         ? planParam
         : "free") as PlanId;
 
+      let token: string | null = null;
       try {
-        const res = await fetch("/api/branding");
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        token = session?.access_token || null;
+        if (token) {
+          setAccessToken(token);
+        }
+      } catch (e) {
+        console.error("Error obteniendo sesión:", e);
+      }
+
+      try {
+        const res = await fetch("/api/branding", {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          credentials: "include",
+        });
         if (res.status === 401) {
           // Sin sesión: usa preview local si existe (modo diseño business)
           if (designPlan === "business" && typeof window !== "undefined") {
@@ -135,12 +151,18 @@ function WhiteLabelPage() {
     setErrorMessage(null);
 
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || accessToken;
+
       const formData = new FormData();
       formData.append("file", file);
 
       const res = await fetch("/api/branding/upload-logo", {
         method: "POST",
         body: formData,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -201,10 +223,19 @@ function WhiteLabelPage() {
     console.log("💾 Guardando configuración:", settings);
     
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || accessToken;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
       const res = await fetch("/api/branding", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(settings),
+        credentials: "include",
       });
       
       console.log("📡 Respuesta del servidor:", res.status, res.statusText);

@@ -1,20 +1,107 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { getPlan, type PlanId } from "@/lib/plans";
 
-// GET: obtener settings de white label
-export async function GET(_request: NextRequest) {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
 
-    if (!user) {
+export const runtime = "nodejs";
+
+const extractJwtFromCookie = (raw?: string) => {
+  if (!raw) return undefined;
+  if (raw.trim().startsWith("[")) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr[0]) {
+        return arr[0] as string;
+      }
+    } catch {
+      // ignore parse error
+    }
+  }
+  return raw;
+};
+
+// GET: obtener settings de white label
+export async function GET(request: NextRequest) {
+  try {
+    const response = NextResponse.json({ success: false }, { status: 200 });
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: "Falta SUPABASE_SERVICE_ROLE_KEY en el servidor" },
+        { status: 500 }
+      );
+    }
+
+    const authHeader = request.headers.get("authorization") || "";
+    let jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      const cookieToken =
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
+      jwt = cookieToken || undefined;
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: jwt
+        ? {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        : undefined,
+    });
+
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    let user = null;
+    let authError: any = null;
+    if (jwt) {
+      const adminRes = await supabaseAdmin.auth.getUser(jwt);
+      user = adminRes.data?.user || null;
+      authError = adminRes.error;
+      if (!user) {
+        const userRes = await supabase.auth.getUser(jwt);
+        user = userRes.data?.user || null;
+        authError = authError || userRes.error;
+      }
+    } else {
+      const userRes = await supabase.auth.getUser();
+      user = userRes.data?.user || null;
+      authError = userRes.error;
+    }
+
+    if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    const { data: settings, error } = await supabase
+    const { data: settings, error } = await supabaseAdmin
       .from("white_label_settings")
       .select("*")
       .eq("user_id", user.id)
@@ -31,7 +118,8 @@ export async function GET(_request: NextRequest) {
         primary_color: "#2F7E7A",
         secondary_color: "#1F5D59",
         hide_maflipp_brand: true,
-      }
+      },
+      { status: 200, headers: response.headers }
     );
   } catch (error: any) {
     console.error("Error obteniendo white label:", error);
@@ -45,16 +133,83 @@ export async function GET(_request: NextRequest) {
 // POST: guardar settings (solo Business)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const response = NextResponse.json({ success: false }, { status: 200 });
 
-    if (!user) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: "Falta SUPABASE_SERVICE_ROLE_KEY en el servidor" },
+        { status: 500 }
+      );
+    }
+
+    const authHeader = request.headers.get("authorization") || "";
+    let jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      const cookieToken =
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
+      jwt = cookieToken || undefined;
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(
+          cookiesToSet: {
+            name: string;
+            value: string;
+            options?: CookieSetOptions;
+          }[]
+        ) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          );
+        },
+      },
+      global: jwt
+        ? {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        : undefined,
+    });
+
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    let user = null;
+    let authError: any = null;
+    if (jwt) {
+      const adminRes = await supabaseAdmin.auth.getUser(jwt);
+      user = adminRes.data?.user || null;
+      authError = adminRes.error;
+      if (!user) {
+        const userRes = await supabase.auth.getUser(jwt);
+        user = userRes.data?.user || null;
+        authError = authError || userRes.error;
+      }
+    } else {
+      const userRes = await supabase.auth.getUser();
+      user = userRes.data?.user || null;
+      authError = userRes.error;
+    }
+
+    if (!user || authError) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    const { data: userData } = await supabase
+    const { data: userData } = await supabaseAdmin
       .from("users")
       .select("subscription_status")
       .eq("id", user.id)
@@ -96,7 +251,7 @@ export async function POST(request: NextRequest) {
         typeof hide_maflipp_brand === "boolean" ? hide_maflipp_brand : true,
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from("white_label_settings")
       .upsert(payload, { onConflict: "user_id" })
       .select()
@@ -107,7 +262,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, settings: data });
+    return NextResponse.json(
+      { success: true, settings: data },
+      { status: 200, headers: response.headers }
+    );
   } catch (error: any) {
     console.error("Error guardando white label:", error);
     return NextResponse.json(
