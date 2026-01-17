@@ -151,7 +151,9 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
   const brandName = canWhiteLabel ? (branding?.brand_name || "Tu Marca") : "Maflipp";
-  const showBrandName = canWhiteLabel ? (branding?.show_brand_name ?? true) : false;
+  // Si no es Business, siempre mostrar "Maflipp"
+  // Si es Business, usar show_brand_name del branding (default: true)
+  const showBrandName = canWhiteLabel ? (branding?.show_brand_name ?? true) : true;
 
   return (
     <>
