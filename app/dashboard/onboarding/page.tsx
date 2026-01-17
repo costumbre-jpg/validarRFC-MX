@@ -45,7 +45,31 @@ function OnboardingPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const [autoSaveReady, setAutoSaveReady] = useState(false);
   const searchParams = useSearchParams();
+
+  const steps = [
+    {
+      id: "empresa",
+      label: "Empresa",
+      fields: ["company_name", "industry", "team_size"] as (keyof OnboardingRequest)[],
+    },
+    {
+      id: "integracion",
+      label: "Integración",
+      fields: ["use_cases", "data_sources", "integration_preferences", "webhook_url", "sandbox"] as (keyof OnboardingRequest)[],
+    },
+    {
+      id: "contacto",
+      label: "Contacto",
+      fields: ["contact_name", "contact_email", "notes"] as (keyof OnboardingRequest)[],
+    },
+  ];
 
   useEffect(() => {
     const load = async () => {
@@ -97,21 +121,76 @@ function OnboardingPage() {
     load();
   }, [searchParams]);
 
+  useEffect(() => {
+    if (!loading) {
+      setAutoSaveReady(true);
+    }
+  }, [loading]);
+
   const isBusiness = planId === "business";
 
   const handleChange = (field: keyof OnboardingRequest, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   };
 
-  const handleSave = async () => {
+  const isValidEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  const validateFields = (fields?: (keyof OnboardingRequest)[]) => {
+    const required: (keyof OnboardingRequest)[] = [
+      "company_name",
+      "contact_name",
+      "contact_email",
+      "use_cases",
+    ];
+    const checkFields = fields ?? required;
+    const nextErrors: Record<string, string> = {};
+
+    checkFields.forEach((field) => {
+      const value = form[field];
+      if (required.includes(field) && (!value || String(value).trim() === "")) {
+        nextErrors[field] = "Este campo es obligatorio";
+      }
+    });
+
+    if ((fields ? checkFields.includes("contact_email") : true) && form.contact_email) {
+      if (!isValidEmail(form.contact_email)) {
+        nextErrors.contact_email = "Email inválido";
+      }
+    }
+
+    if (!fields) {
+      setFieldErrors(nextErrors);
+    } else if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors((prev) => ({ ...prev, ...nextErrors }));
+    }
+
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const saveOnboarding = async (
+    options: { silent?: boolean; status?: string } = {}
+  ) => {
     if (!isBusiness) {
-      setErrorMessage("Disponible solo para plan Business");
-      setTimeout(() => setErrorMessage(null), 5000);
+      if (!options.silent) {
+        setErrorMessage("Disponible solo para plan Business");
+        setTimeout(() => setErrorMessage(null), 5000);
+      }
       return;
     }
-    setSaving(true);
-    setSuccessMessage(null);
-    setErrorMessage(null);
+    if (options.silent) {
+      setAutoSaveStatus("saving");
+    } else {
+      setSaving(true);
+      setSuccessMessage(null);
+      setErrorMessage(null);
+    }
+
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -120,28 +199,92 @@ function OnboardingPage() {
       if (token) {
         headers.Authorization = `Bearer ${token}`;
       }
+
+      const payload = {
+        ...form,
+        status: options.status ?? form.status,
+      };
+
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers,
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
         credentials: "include",
       });
       const data = await res.json();
       if (!res.ok) {
-        setErrorMessage(data.error || "No se pudo guardar");
-        setTimeout(() => setErrorMessage(null), 5000);
+        if (!options.silent) {
+          setErrorMessage(data.error || "No se pudo guardar");
+          setTimeout(() => setErrorMessage(null), 5000);
+        } else {
+          setAutoSaveStatus("error");
+        }
       } else {
-        setSuccessMessage("✅ Preferencias de onboarding guardadas correctamente");
-        setTimeout(() => setSuccessMessage(null), 5000);
+        if (!options.silent) {
+          const contactEmail = form.contact_email?.trim();
+          setSuccessMessage(
+            contactEmail
+              ? `✅ Solicitud enviada. Te contactaremos en ${contactEmail}.`
+              : "✅ Preferencias de onboarding guardadas correctamente"
+          );
+          setTimeout(() => setSuccessMessage(null), 5000);
+        } else {
+          setAutoSaveStatus("saved");
+          setLastSavedAt(new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }));
+        }
       }
     } catch (e) {
       console.error(e);
-      setErrorMessage("Error al guardar. Por favor intenta de nuevo.");
-      setTimeout(() => setErrorMessage(null), 5000);
+      if (!options.silent) {
+        setErrorMessage("Error al guardar. Por favor intenta de nuevo.");
+        setTimeout(() => setErrorMessage(null), 5000);
+      } else {
+        setAutoSaveStatus("error");
+      }
     } finally {
-      setSaving(false);
+      if (!options.silent) {
+        setSaving(false);
+      }
     }
   };
+
+  const handleSave = async () => {
+    const valid = validateFields();
+    if (!valid) {
+      setErrorMessage("Revisa los campos obligatorios antes de guardar.");
+      setTimeout(() => setErrorMessage(null), 5000);
+      return;
+    }
+    await saveOnboarding();
+  };
+
+  const goNext = () => {
+    const stepFields = steps[currentStep]?.fields ?? [];
+    const valid = validateFields(stepFields);
+    if (!valid) {
+      setErrorMessage("Completa los campos obligatorios para continuar.");
+      setTimeout(() => setErrorMessage(null), 4000);
+      return;
+    }
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
+  };
+
+  const goBack = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0));
+  };
+
+  useEffect(() => {
+    if (!autoSaveEnabled || !autoSaveReady || !isBusiness) return;
+    if (saving) return;
+    if (form.contact_email && !isValidEmail(form.contact_email)) return;
+
+    setAutoSaveStatus("idle");
+    const timeout = setTimeout(() => {
+      void saveOnboarding({ silent: true, status: "borrador" });
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [form, autoSaveEnabled, autoSaveReady, isBusiness, saving]);
 
   if (loading) {
     return (
@@ -199,163 +342,237 @@ function OnboardingPage() {
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 max-md:p-3 space-y-3 max-md:space-y-2.5">
-        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Nombre de la empresa
-            </label>
-            <input
-              type="text"
-              value={form.company_name}
-              onChange={(e) => handleChange("company_name", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              placeholder="Ej. Fintech XYZ"
-              maxLength={120}
-            />
-          </div>
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Industria
-            </label>
-            <input
-              type="text"
-              value={form.industry}
-              onChange={(e) => handleChange("industry", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              placeholder="Finanzas, SaaS, Servicios, etc."
-              maxLength={120}
-            />
-          </div>
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Tamaño del equipo
-            </label>
-            <input
-              type="text"
-              value={form.team_size}
-              onChange={(e) => handleChange("team_size", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              placeholder="Ej. 5-10 usuarios"
-              maxLength={80}
-            />
-          </div>
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Email de contacto
-            </label>
-            <input
-              type="email"
-              value={form.contact_email}
-              onChange={(e) => handleChange("contact_email", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              placeholder="contacto@empresa.com"
-              maxLength={200}
-            />
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              {steps.map((step, index) => {
+                const isActive = index === currentStep;
+                const isCompleted = index < currentStep;
+                return (
+                  <div key={step.id} className="flex items-center gap-2">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
+                        isActive
+                          ? "bg-brand-primary text-white"
+                          : isCompleted
+                          ? "bg-brand-primary-10 text-brand-primary"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {index + 1}
+                    </div>
+                    <span className={`text-xs max-md:text-[11px] font-medium ${
+                      isActive ? "text-gray-900" : "text-gray-500"
+                    }`}>{step.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-3 text-xs max-md:text-[11px] text-gray-500">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={autoSaveEnabled}
+                  onChange={(e) => setAutoSaveEnabled(e.target.checked)}
+                  className="h-4 w-4 text-brand-primary border-gray-300 rounded"
+                />
+                Auto-guardado
+              </label>
+              <span>
+                {autoSaveStatus === "saving" && "Guardando borrador..."}
+                {autoSaveStatus === "saved" && `Guardado ${lastSavedAt ?? ""}`}
+                {autoSaveStatus === "error" && "Error al guardar borrador"}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Nombre de contacto
-            </label>
-            <input
-              type="text"
-              value={form.contact_name}
-              onChange={(e) => handleChange("contact_name", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              placeholder="Nombre y rol (ej. Operaciones)"
-              maxLength={120}
-            />
+        {currentStep === 0 && (
+          <div className="space-y-3 max-md:space-y-2.5">
+            <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Nombre de la empresa <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.company_name}
+                  onChange={(e) => handleChange("company_name", e.target.value)}
+                  className={`w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border rounded-lg focus:outline-none focus:ring-1 transition-all ${
+                    fieldErrors.company_name ? "border-red-300 focus:ring-red-200" : "border-gray-200 focus:ring-gray-300"
+                  }`}
+                  placeholder="Ej. Fintech XYZ"
+                  maxLength={120}
+                />
+                {fieldErrors.company_name && (
+                  <p className="text-[11px] text-red-600 mt-1">{fieldErrors.company_name}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Industria
+                </label>
+                <input
+                  type="text"
+                  value={form.industry}
+                  onChange={(e) => handleChange("industry", e.target.value)}
+                  className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
+                  placeholder="Finanzas, SaaS, Servicios, etc."
+                  maxLength={120}
+                />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Tamaño del equipo
+                </label>
+                <input
+                  type="text"
+                  value={form.team_size}
+                  onChange={(e) => handleChange("team_size", e.target.value)}
+                  className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
+                  placeholder="Ej. 5-10 usuarios"
+                  maxLength={80}
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Objetivo del onboarding / casos de uso
-            </label>
-            <textarea
-              value={form.use_cases}
-              onChange={(e) => handleChange("use_cases", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              rows={3}
-              placeholder="Ej. Alta masiva de clientes, screening recurrente, monitoreo de RFCs..."
-              maxLength={800}
-            />
-          </div>
-        </div>
+        )}
 
-        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Fuentes de datos / integraciones
-            </label>
-            <textarea
-              value={form.data_sources}
-              onChange={(e) => handleChange("data_sources", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              rows={3}
-              placeholder="CRMs, core bancario, ERP, csv, API interna..."
-              maxLength={800}
-            />
+        {currentStep === 1 && (
+          <div className="space-y-3 max-md:space-y-2.5">
+            <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Objetivo del onboarding / casos de uso <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={form.use_cases}
+                  onChange={(e) => handleChange("use_cases", e.target.value)}
+                  className={`w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border rounded-lg focus:outline-none focus:ring-1 transition-all ${
+                    fieldErrors.use_cases ? "border-red-300 focus:ring-red-200" : "border-gray-200 focus:ring-gray-300"
+                  }`}
+                  rows={3}
+                  placeholder="Ej. Alta masiva de clientes, screening recurrente, monitoreo de RFCs..."
+                  maxLength={800}
+                />
+                {fieldErrors.use_cases && (
+                  <p className="text-[11px] text-red-600 mt-1">{fieldErrors.use_cases}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Fuentes de datos / integraciones
+                </label>
+                <textarea
+                  value={form.data_sources}
+                  onChange={(e) => handleChange("data_sources", e.target.value)}
+                  className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
+                  rows={3}
+                  placeholder="CRMs, core bancario, ERP, csv, API interna..."
+                  maxLength={800}
+                />
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Preferencias de integración
+                </label>
+                <textarea
+                  value={form.integration_preferences}
+                  onChange={(e) => handleChange("integration_preferences", e.target.value)}
+                  className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
+                  rows={3}
+                  placeholder="API, Webhooks, carga masiva, validaciones batch, roles de acceso..."
+                  maxLength={800}
+                />
+              </div>
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Webhook de notificaciones (opcional)
+                </label>
+                <input
+                  type="url"
+                  value={form.webhook_url}
+                  onChange={(e) => handleChange("webhook_url", e.target.value)}
+                  className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all text-gray-900"
+                  placeholder="https://tuapp.com/webhooks/rfc"
+                  maxLength={240}
+                />
+                <div className="flex items-center gap-2 max-md:gap-1.5 mt-3">
+                  <input
+                    id="sandbox"
+                    type="checkbox"
+                    checked={form.sandbox}
+                    onChange={(e) => handleChange("sandbox", e.target.checked)}
+                    className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-brand-primary border-gray-300 rounded"
+                  />
+                  <label htmlFor="sandbox" className="text-sm max-md:text-xs text-gray-700">
+                    Necesito ambiente sandbox para pruebas
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Preferencias de integración
-            </label>
-            <textarea
-              value={form.integration_preferences}
-              onChange={(e) => handleChange("integration_preferences", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all"
-              rows={3}
-              placeholder="API, Webhooks, carga masiva, validaciones batch, roles de acceso..."
-              maxLength={800}
-            />
-          </div>
-        </div>
+        )}
 
-        <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
-          <div>
-            <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-              Webhook de notificaciones (opcional)
-            </label>
-            <input
-              type="url"
-              value={form.webhook_url}
-              onChange={(e) => handleChange("webhook_url", e.target.value)}
-              className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all text-gray-900"
-              placeholder="https://tuapp.com/webhooks/rfc"
-              maxLength={240}
-            />
+        {currentStep === 2 && (
+          <div className="space-y-3 max-md:space-y-2.5">
+            <div className="grid md:grid-cols-2 gap-3 max-md:gap-2.5">
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Nombre de contacto <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={form.contact_name}
+                  onChange={(e) => handleChange("contact_name", e.target.value)}
+                  className={`w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border rounded-lg focus:outline-none focus:ring-1 transition-all ${
+                    fieldErrors.contact_name ? "border-red-300 focus:ring-red-200" : "border-gray-200 focus:ring-gray-300"
+                  }`}
+                  placeholder="Nombre y rol (ej. Operaciones)"
+                  maxLength={120}
+                />
+                {fieldErrors.contact_name && (
+                  <p className="text-[11px] text-red-600 mt-1">{fieldErrors.contact_name}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                  Email de contacto <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={form.contact_email}
+                  onChange={(e) => handleChange("contact_email", e.target.value)}
+                  className={`w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border rounded-lg focus:outline-none focus:ring-1 transition-all ${
+                    fieldErrors.contact_email ? "border-red-300 focus:ring-red-200" : "border-gray-200 focus:ring-gray-300"
+                  }`}
+                  placeholder="contacto@empresa.com"
+                  maxLength={200}
+                />
+                {fieldErrors.contact_email && (
+                  <p className="text-[11px] text-red-600 mt-1">{fieldErrors.contact_email}</p>
+                )}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
+                Notas adicionales
+              </label>
+              <textarea
+                value={form.notes}
+                onChange={(e) => handleChange("notes", e.target.value)}
+                className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all text-gray-900"
+                rows={3}
+                placeholder="Tiempos deseados, restricciones de seguridad, compliance, SLA interno..."
+                maxLength={1000}
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-2 max-md:gap-1.5 mt-6 max-md:mt-4">
-            <input
-              id="sandbox"
-              type="checkbox"
-              checked={form.sandbox}
-              onChange={(e) => handleChange("sandbox", e.target.checked)}
-              className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-brand-primary border-gray-300 rounded"
-            />
-            <label htmlFor="sandbox" className="text-sm max-md:text-xs text-gray-700">
-              Necesito ambiente sandbox para pruebas
-            </label>
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-xs max-md:text-[11px] font-semibold text-gray-700 mb-1.5 max-md:mb-1">
-            Notas adicionales
-          </label>
-          <textarea
-            value={form.notes}
-            onChange={(e) => handleChange("notes", e.target.value)}
-            className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-300 transition-all text-gray-900"
-            rows={3}
-            placeholder="Tiempos deseados, restricciones de seguridad, compliance, SLA interno..."
-            maxLength={1000}
-          />
-        </div>
+        )}
 
         {/* Mensajes de éxito/error */}
         {successMessage && (
@@ -384,28 +601,48 @@ function OnboardingPage() {
               Configuración de cuenta, roles, webhooks, guías de integración y walkthrough inicial.
             </p>
           </div>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-5 max-md:px-4 py-2 max-md:py-1.5 text-xs max-md:text-[11px] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold shadow-sm hover:shadow bg-brand-primary hover-bg-brand-secondary"
-          >
-            {saving ? (
-              <>
-                <svg className="animate-spin h-3.5 max-md:h-3 w-3.5 max-md:w-3" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Guardando
-              </>
+          <div className="flex items-center gap-2 max-md:gap-1.5">
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={currentStep === 0}
+              className="inline-flex items-center justify-center gap-1.5 px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-xs max-md:text-[11px] font-semibold rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            {currentStep < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                className="inline-flex items-center justify-center gap-1.5 px-4 max-md:px-3 py-2 max-md:py-1.5 text-xs max-md:text-[11px] text-white rounded-lg transition-all font-semibold shadow-sm hover:shadow bg-brand-primary hover-bg-brand-secondary"
+              >
+                Siguiente
+              </button>
             ) : (
-              <>
-                <svg className="w-3.5 max-md:w-3 h-3.5 max-md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Guardar
-              </>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-5 max-md:px-4 py-2 max-md:py-1.5 text-xs max-md:text-[11px] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold shadow-sm hover:shadow bg-brand-primary hover-bg-brand-secondary"
+              >
+                {saving ? (
+                  <>
+                    <svg className="animate-spin h-3.5 max-md:h-3 w-3.5 max-md:w-3" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Guardando
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-3.5 max-md:w-3 h-3.5 max-md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Guardar
+                  </>
+                )}
+              </button>
             )}
-          </button>
+          </div>
         </div>
       </div>
     </div>
