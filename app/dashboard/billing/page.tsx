@@ -225,26 +225,30 @@ function BillingPage() {
     try {
       const response = await fetch("/api/stripe/customer-portal", {
         method: "POST",
+        credentials: "include",
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         setErrorMessage(data.error || "Error al crear sesión del portal");
-        setProcessing(false);
         setTimeout(() => setErrorMessage(null), 5000);
         return;
       }
 
       // Redirigir a Stripe Customer Portal
-      if (data.url) {
-        window.location.href = data.url;
+      if (!data?.url) {
+        setErrorMessage("No se pudo abrir el portal de Stripe. Intenta de nuevo.");
+        setTimeout(() => setErrorMessage(null), 5000);
+        return;
       }
+      window.location.href = data.url;
     } catch (error) {
       console.error("Error:", error);
       setErrorMessage("Ocurrió un error. Por favor intenta de nuevo.");
-      setProcessing(false);
       setTimeout(() => setErrorMessage(null), 5000);
+    } finally {
+      setProcessing(false);
     }
   };
 
