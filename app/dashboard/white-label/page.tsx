@@ -655,7 +655,10 @@ function WhiteLabelPage() {
                     Ocultar marca Maflipp en el dashboard
                   </label>
                   <p className="text-xs max-md:text-[11px] text-gray-500 leading-relaxed">
-                    Se eliminarán todas las referencias a la marca original.
+                    {settings.custom_logo_url 
+                      ? "Reemplazará 'Maflipp' por tu marca en PDFs y textos. El logo ya está personalizado."
+                      : "Ocultará el logo de Maflipp (mostrará un círculo) y reemplazará 'Maflipp' por tu marca en PDFs y textos."
+                    }
                   </p>
                 </div>
               </div>
