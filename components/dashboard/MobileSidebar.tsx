@@ -149,6 +149,7 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
   const canWhiteLabel = planId === "business";
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
+  const brandName = canWhiteLabel ? (branding?.brand_name || "Tu Marca") : "Maflipp";
 
   return (
     <>
@@ -189,6 +190,9 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
               ) : (
                 <Logo size="md" showText={false} />
               )}
+              <span className="truncate text-sm font-semibold text-gray-900">
+                {brandName}
+              </span>
             </div>
       </div>
 
@@ -202,7 +206,7 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
         />
         <div className={`fixed inset-y-0 left-0 z-50 w-1/2 max-w-xs overflow-y-auto bg-white shadow-2xl border-r border-gray-200 px-4 max-md:px-3 pb-4 transition-transform duration-200 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <div className="flex justify-between items-center p-4 max-md:p-3">
-            <div>
+            <div className="flex flex-col gap-1">
               {showCustomLogo ? (
                 <img
                   src={branding?.custom_logo_url || ""}
@@ -217,6 +221,9 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
               ) : (
                 <Logo size="md" showText={false} />
               )}
+              <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[140px]">
+                {brandName}
+              </span>
             </div>
             <button
               type="button"
