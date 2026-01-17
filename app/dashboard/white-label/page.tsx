@@ -210,6 +210,21 @@ function WhiteLabelPage() {
     }
   };
 
+  const handleRemoveLogo = () => {
+    setSettings((prev) => ({
+      ...prev,
+      custom_logo_url: null,
+    }));
+  };
+
+  const handleRestoreMaflipp = () => {
+    setSettings((prev) => ({
+      ...prev,
+      custom_logo_url: null,
+      hide_maflipp_brand: false,
+    }));
+  };
+
   const handleSave = async () => {
     if (!isBusiness) {
       setErrorMessage("White label está disponible solo para plan Business");
@@ -522,7 +537,7 @@ function WhiteLabelPage() {
                 {settings.custom_logo_url && (
                   <div className="mt-3 max-md:mt-2 p-3 max-md:p-2.5 bg-gray-50 rounded-lg border border-gray-200">
                     <p className="text-xs max-md:text-[11px] font-medium text-gray-700 mb-2 max-md:mb-1.5">Vista previa:</p>
-                    <div className="flex items-center justify-center p-3 max-md:p-2.5 bg-white rounded border border-gray-200">
+                    <div className="flex items-center justify-center p-3 max-md:p-2.5 bg-white rounded border border-gray-200 mb-2 max-md:mb-1.5">
                       {logoError ? (
                         <p className="text-xs max-md:text-[11px] text-red-600">Error al cargar el logo</p>
                       ) : (
@@ -534,6 +549,32 @@ function WhiteLabelPage() {
                         />
                       )}
                     </div>
+                    <div className="flex gap-2 max-md:gap-1.5">
+                      <button
+                        onClick={handleRemoveLogo}
+                        className="flex-1 px-3 max-md:px-2 py-1.5 max-md:py-1 text-xs max-md:text-[11px] font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-300"
+                      >
+                        Eliminar Logo
+                      </button>
+                      <button
+                        onClick={handleRestoreMaflipp}
+                        className="flex-1 px-3 max-md:px-2 py-1.5 max-md:py-1 text-xs max-md:text-[11px] font-medium text-white rounded-lg transition-colors shadow-sm hover:shadow"
+                        style={{ backgroundColor: brandPrimary }}
+                      >
+                        Restaurar Maflipp
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {!settings.custom_logo_url && settings.hide_maflipp_brand && (
+                  <div className="mt-2 max-md:mt-1.5">
+                    <button
+                      onClick={handleRestoreMaflipp}
+                      className="w-full px-3 max-md:px-2 py-1.5 max-md:py-1 text-xs max-md:text-[11px] font-medium text-white rounded-lg transition-colors shadow-sm hover:shadow"
+                      style={{ backgroundColor: brandPrimary }}
+                    >
+                      Restaurar Logo de Maflipp
+                    </button>
                   </div>
                 )}
               </div>
