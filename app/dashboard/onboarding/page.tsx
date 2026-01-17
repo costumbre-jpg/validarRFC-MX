@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { type PlanId } from "@/lib/plans";
+import { createClient } from "@/lib/supabase/client";
 
 interface OnboardingRequest {
   company_name: string;
@@ -43,6 +44,7 @@ function OnboardingPage() {
   const [planId, setPlanId] = useState<PlanId>("free");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -52,8 +54,27 @@ function OnboardingPage() {
         ? planParam
         : "business") as PlanId;
 
+      let token: string | null = null;
       try {
-        const res = await fetch("/api/onboarding");
+        const supabase = createClient();
+        const { data: { session } } = await supabase.auth.getSession();
+        token = session?.access_token || null;
+        if (token) {
+          setAccessToken(token);
+        }
+      } catch (e) {
+        console.error("Error obteniendo sesión:", e);
+      }
+
+      try {
+        const headers: Record<string, string> = {};
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        const res = await fetch("/api/onboarding", {
+          headers,
+          credentials: "include",
+        });
         if (res.status === 401) {
           setPlanId(designPlan);
           setForm(defaults);
@@ -92,10 +113,18 @@ function OnboardingPage() {
     setSuccessMessage(null);
     setErrorMessage(null);
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || accessToken;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
       const res = await fetch("/api/onboarding", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(form),
+        credentials: "include",
       });
       const data = await res.json();
       if (!res.ok) {
