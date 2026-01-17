@@ -15,7 +15,6 @@ interface MobileSidebarProps {
     brand_name?: string;
     custom_logo_url?: string | null;
     hide_maflipp_brand?: boolean;
-    show_brand_name?: boolean;
   };
 }
 
@@ -151,9 +150,6 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
   const brandName = canWhiteLabel ? (branding?.brand_name || "Tu Marca") : "Maflipp";
-  // Si no es Business, siempre mostrar "Maflipp"
-  // Si es Business, usar show_brand_name del branding (default: true)
-  const showBrandName = canWhiteLabel ? (branding?.show_brand_name ?? true) : true;
 
   return (
     <>
@@ -194,11 +190,9 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
               ) : (
                 <Logo size="md" showText={false} />
               )}
-              {showBrandName && (
-                <span className="truncate text-sm font-semibold text-gray-900">
-                  {brandName}
-                </span>
-              )}
+              <span className="truncate text-sm font-semibold text-gray-900">
+                {brandName}
+              </span>
             </div>
       </div>
 
@@ -227,11 +221,9 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
               ) : (
                 <Logo size="md" showText={false} />
               )}
-              {showBrandName && (
-                <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[140px]">
-                  {brandName}
-                </span>
-              )}
+              <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[140px]">
+                {brandName}
+              </span>
             </div>
             <button
               type="button"

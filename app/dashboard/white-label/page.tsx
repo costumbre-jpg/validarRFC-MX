@@ -13,7 +13,6 @@ interface WhiteLabelSettings {
   primary_color: string;
   secondary_color: string;
   hide_maflipp_brand: boolean;
-  show_brand_name: boolean;
 }
 
 const defaults: WhiteLabelSettings = {
@@ -22,7 +21,6 @@ const defaults: WhiteLabelSettings = {
   primary_color: "#2F7E7A",
   secondary_color: "#1F5D59",
   hide_maflipp_brand: true,
-  show_brand_name: true,
 };
 
 function WhiteLabelPage() {
@@ -458,23 +456,6 @@ function WhiteLabelPage() {
                   className="w-full px-3 max-md:px-2.5 py-2 max-md:py-1.5 text-sm max-md:text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition-all bg-gray-50 focus:bg-white text-gray-900"
                   placeholder="Ej: Mi Empresa S.A. de C.V."
                 />
-              </div>
-              <div className="flex items-center gap-2 max-md:gap-1.5">
-                <input
-                  id="show-brand-name"
-                  type="checkbox"
-                  checked={settings.show_brand_name}
-                  onChange={(e) =>
-                    setSettings({ ...settings, show_brand_name: e.target.checked })
-                  }
-                  className="h-4 max-md:h-3.5 w-4 max-md:w-3.5 text-brand-primary border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="show-brand-name"
-                  className="text-xs max-md:text-[11px] text-gray-700"
-                >
-                  Mostrar el nombre debajo del logo
-                </label>
               </div>
               
               <div>

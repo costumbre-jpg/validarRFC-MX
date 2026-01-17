@@ -15,7 +15,6 @@ interface SidebarProps {
     brand_name?: string;
     custom_logo_url?: string | null;
     hide_maflipp_brand?: boolean;
-    show_brand_name?: boolean;
   };
 }
 
@@ -160,9 +159,6 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
   const brandName = canWhiteLabel ? (branding?.brand_name || "Tu Marca") : "Maflipp";
-  // Si no es Business, siempre mostrar "Maflipp"
-  // Si es Business, usar show_brand_name del branding (default: true)
-  const showBrandName = canWhiteLabel ? (branding?.show_brand_name ?? true) : true;
 
   // Lógica: 
   // 1. Si hay logo personalizado → mostrar logo personalizado
@@ -174,8 +170,8 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
     <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 px-6 pb-4">
         <div className="flex h-20 shrink-0 items-center gap-3">
-          {(() => {
-            const logoNode = showCustomLogo ? (
+          <div className="flex flex-col items-start gap-1">
+            {showCustomLogo ? (
               <img
                 src={branding?.custom_logo_url || ""}
                 alt={branding?.brand_name || "Logo"}
@@ -188,21 +184,11 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
               />
             ) : (
               <Logo size="lg" showText={false} />
-            );
-
-            if (!showBrandName) {
-              return logoNode;
-            }
-
-            return (
-              <div className="flex flex-col items-start gap-1">
-                {logoNode}
-                <span className="text-xs font-semibold text-gray-700 truncate max-w-[160px]">
-                  {brandName}
-                </span>
-              </div>
-            );
-          })()}
+            )}
+            <span className="text-xs font-semibold text-gray-700 truncate max-w-[160px]">
+              {brandName}
+            </span>
+          </div>
         </div>
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
