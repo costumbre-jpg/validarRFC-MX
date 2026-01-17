@@ -5,6 +5,7 @@ export const dynamic = "force-dynamic";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { type PlanId } from "@/lib/plans";
 import Sidebar from "@/components/dashboard/Sidebar";
 import MobileSidebar from "@/components/dashboard/MobileSidebar";
 
@@ -95,13 +96,20 @@ function DashboardLayoutContent({
       // Si hay un parámetro 'plan' en la URL, sobrescribir subscription_status temporalmente
       // Esto permite el modo diseño incluso con usuarios autenticados
       const planParam = searchParams.get("plan");
-      const planFromUrl = planParam && ["pro", "business"].includes(planParam) ? planParam : null;
+      // Si la URL tiene ?plan=free o no tiene plan, usar "free"
+      // Si tiene ?plan=pro o ?plan=business, usar ese plan
+      const planFromUrl: PlanId | null = planParam 
+        ? (["free", "pro", "business"].includes(planParam) ? (planParam as PlanId) : null)
+        : null;
+      
+      // Si hay plan en la URL, usarlo. Si no, usar el de la BD
+      const finalPlanIdForUserData = planFromUrl || existingUser?.subscription_status || "free";
       
       if (existingUser) {
-        setUserData(planFromUrl 
-          ? { ...existingUser, subscription_status: planFromUrl }
-          : existingUser
-        );
+        setUserData({ 
+          ...existingUser, 
+          subscription_status: finalPlanIdForUserData 
+        });
       } else {
         // Crear usuario si no existe
         const { data: newUser } = await supabase
@@ -109,7 +117,7 @@ function DashboardLayoutContent({
           .insert({
             id: session.user.id,
             email: session.user.email || "",
-            subscription_status: planFromUrl || "free",
+            subscription_status: finalPlanIdForUserData,
             rfc_queries_this_month: 0,
           })
           .select("id, email, subscription_status, rfc_queries_this_month")
@@ -117,17 +125,15 @@ function DashboardLayoutContent({
         
         setUserData(newUser || { 
           email: session.user.email, 
-          subscription_status: planFromUrl || "free" 
+          subscription_status: finalPlanIdForUserData
         });
       }
 
       setLoading(false);
 
       // Branding (solo si autenticado Y tiene plan Business)
-      const finalPlanId =
-        planFromUrl ||
-        existingUser?.subscription_status ||
-        "free";
+      // Usar el plan de la URL si existe, si no el de la BD, si no "free"
+      const finalPlanId = planFromUrl || existingUser?.subscription_status || "free";
       if (finalPlanId === "business") {
         void (async () => {
           try {
