@@ -102,53 +102,8 @@ function CuentaPage() {
   };
 
   const handleAvatarClick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-
-      // Validar tipo
-      if (!file.type.startsWith("image/")) {
-        // Mostrar mensaje de error sin alert
-        return;
-      }
-
-      // Validar tamaño (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        // Mostrar mensaje de error sin alert
-        return;
-      }
-
-      setUploadingAvatar(true);
-
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await fetch("/api/profile/upload-avatar", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || "Error al subir la imagen");
-        }
-
-        // Recargar datos del usuario
-        await handleProfileUpdate();
-        // El avatar se actualizará automáticamente al recargar los datos
-      } catch (err: any) {
-        // Error silencioso - el avatar no se actualizará si hay error
-        console.error("Error al subir avatar:", err);
-      } finally {
-        setUploadingAvatar(false);
-      }
-    };
-    input.click();
+    // Abrir el modal de editar perfil al hacer clic en la cámara
+    setShowEditModal(true);
   };
 
   if (loading) {
