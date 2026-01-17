@@ -95,6 +95,10 @@ function WhiteLabelPage() {
         try {
           const supabase = createClient();
           const { data: { user } } = await supabase.auth.getUser();
+          const planParam = searchParams.get("plan");
+          const planFromUrl = planParam && ["free", "pro", "business"].includes(planParam)
+            ? (planParam as PlanId)
+            : null;
           if (user) {
             const { data: userData } = await supabase
               .from("users")
@@ -103,13 +107,15 @@ function WhiteLabelPage() {
               .single();
             
             const subscriptionStatus = (userData as any)?.subscription_status;
-            if (subscriptionStatus && ["free", "pro", "business"].includes(subscriptionStatus)) {
+            if (planFromUrl) {
+              setPlanId(planFromUrl);
+            } else if (subscriptionStatus && ["free", "pro", "business"].includes(subscriptionStatus)) {
               setPlanId(subscriptionStatus as PlanId);
             } else {
               setPlanId(designPlan);
             }
           } else {
-            setPlanId(designPlan);
+            setPlanId(planFromUrl || designPlan);
           }
         } catch (e) {
           console.error("Error obteniendo plan:", e);
