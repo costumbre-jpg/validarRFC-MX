@@ -120,6 +120,7 @@ export async function GET(request: NextRequest) {
           primary_color: "#2F7E7A",
           secondary_color: "#1F5D59",
           hide_maflipp_brand: true,
+          show_brand_name: true,
         },
         { status: 200, headers: response.headers }
       );
@@ -143,6 +144,7 @@ export async function GET(request: NextRequest) {
         primary_color: "#2F7E7A",
         secondary_color: "#1F5D59",
         hide_maflipp_brand: true,
+        show_brand_name: true,
       },
       { status: 200, headers: response.headers }
     );
@@ -259,6 +261,7 @@ export async function POST(request: NextRequest) {
       primary_color,
       secondary_color,
       hide_maflipp_brand,
+      show_brand_name,
     } = body;
 
     if (brand_name && typeof brand_name !== "string") {
@@ -276,6 +279,8 @@ export async function POST(request: NextRequest) {
       secondary_color: secondary_color || "#1F5D59",
       hide_maflipp_brand:
         typeof hide_maflipp_brand === "boolean" ? hide_maflipp_brand : true,
+      show_brand_name:
+        typeof show_brand_name === "boolean" ? show_brand_name : true,
     };
 
     const { data, error } = await supabaseAdmin
