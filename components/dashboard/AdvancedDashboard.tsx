@@ -40,6 +40,14 @@ export default function AdvancedDashboard({
     return value || defaultValue;
   };
 
+  const getBrandMeta = () => {
+    if (typeof window === "undefined") return { name: "Maflipp", hide: false };
+    const styles = getComputedStyle(document.documentElement);
+    const name = styles.getPropertyValue("--brand-name").trim() || "Maflipp";
+    const hide = styles.getPropertyValue("--hide-maflipp-brand").trim() === "1";
+    return { name, hide };
+  };
+
   const hexToRgb = (hex: string) => {
     const normalized = hex.trim();
     const match = normalized.match(/^#?([0-9a-fA-F]{6})$/);
@@ -55,6 +63,7 @@ export default function AdvancedDashboard({
 
   const brandPrimary = getBrandColor("--brand-primary", "#2F7E7A");
   const brandSecondary = getBrandColor("--brand-secondary", "#1F5D59");
+  const { name: brandName, hide: hideMaflipp } = getBrandMeta();
 
   useEffect(() => {
     const loadAdvancedData = async () => {
@@ -570,7 +579,7 @@ export default function AdvancedDashboard({
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
         doc.text(
-          `Página ${i} de ${totalPages} - Maflipp - Plan Business`,
+          `Página ${i} de ${totalPages} - ${hideMaflipp ? brandName : "Maflipp"} - Plan Business`,
           pageWidth / 2,
           pageHeight - 10,
           { align: "center" }

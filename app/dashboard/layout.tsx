@@ -170,7 +170,12 @@ function DashboardLayoutContent({
     const root = document.documentElement;
     root.style.setProperty("--brand-primary", primary);
     root.style.setProperty("--brand-secondary", secondary);
-  }, [primary, secondary]);
+    root.style.setProperty("--brand-name", branding?.brand_name || "Maflipp");
+    root.style.setProperty(
+      "--hide-maflipp-brand",
+      branding?.hide_maflipp_brand ? "1" : "0"
+    );
+  }, [primary, secondary, branding?.brand_name, branding?.hide_maflipp_brand]);
 
   if (loading) {
     return (

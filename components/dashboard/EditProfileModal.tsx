@@ -38,8 +38,17 @@ export default function EditProfileModal({
     return value || defaultValue;
   };
 
+  const getBrandMeta = () => {
+    if (typeof window === "undefined") return { name: "Maflipp", hide: false };
+    const styles = getComputedStyle(document.documentElement);
+    const name = styles.getPropertyValue("--brand-name").trim() || "Maflipp";
+    const hide = styles.getPropertyValue("--hide-maflipp-brand").trim() === "1";
+    return { name, hide };
+  };
+
   const brandPrimary = getBrandColor("--brand-primary", "#2F7E7A");
   const brandSecondary = getBrandColor("--brand-secondary", "#1F5D59");
+  const { name: brandName, hide: hideMaflipp } = getBrandMeta();
 
   useEffect(() => {
     const loadSession = async () => {
@@ -395,7 +404,7 @@ export default function EditProfileModal({
                 <span className="text-sm max-md:text-xs font-medium text-gray-700">México</span>
               </div>
               <p className="text-xs max-md:text-[11px] text-gray-500 mt-1 max-md:mt-0.5">
-                Maflipp está disponible actualmente en México.
+                {hideMaflipp ? brandName : "Maflipp"} está disponible actualmente en México.
               </p>
             </div>
 
