@@ -65,6 +65,7 @@ function DashboardLayoutContent({
                 primary_color: "#2F7E7A",
                 secondary_color: "#1F5D59",
                 hide_maflipp_brand: true,
+                show_brand_name: true,
               });
             }
           } catch (e) {
@@ -75,6 +76,7 @@ function DashboardLayoutContent({
               primary_color: "#2F7E7A",
               secondary_color: "#1F5D59",
               hide_maflipp_brand: true,
+              show_brand_name: true,
             });
           }
         } else {
