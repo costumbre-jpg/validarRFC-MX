@@ -1,16 +1,87 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { getStripe } from "@/lib/stripe";
 
-export async function POST() {
+const extractJwtFromCookie = (raw?: string) => {
+  if (!raw) return undefined;
+  if (raw.trim().startsWith("[")) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr[0]) {
+        return arr[0] as string;
+      }
+    } catch {
+      // ignore parse error
+    }
+  }
+  return raw;
+};
+
+export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
-    // 1. Verificar autenticación
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceRoleKey) {
+      return NextResponse.json(
+        { error: "Falta SUPABASE_SERVICE_ROLE_KEY en el servidor" },
+        { status: 500 }
+      );
+    }
+
+    const authHeader = request.headers.get("authorization") || "";
+    let jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      const cookieToken =
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
+      jwt = cookieToken || undefined;
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // no-op for API route response
+        },
+      },
+      global: jwt
+        ? {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        : undefined,
+    });
+
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    let user = null;
+    let authError: any = null;
+    if (jwt) {
+      const adminRes = await supabaseAdmin.auth.getUser(jwt);
+      user = adminRes.data?.user || null;
+      authError = adminRes.error;
+      if (!user) {
+        const userRes = await supabase.auth.getUser(jwt);
+        user = userRes.data?.user || null;
+        authError = authError || userRes.error;
+      }
+    } else {
+      const userRes = await supabase.auth.getUser();
+      user = userRes.data?.user || null;
+      authError = userRes.error;
+    }
 
     if (!user || authError) {
       return NextResponse.json(
@@ -20,7 +91,7 @@ export async function POST() {
     }
 
     // 2. Obtener stripe_customer_id
-    const { data: userData } = await supabase
+    const { data: userData } = await supabaseAdmin
       .from("users")
       .select("stripe_customer_id")
       .eq("id", user.id)
