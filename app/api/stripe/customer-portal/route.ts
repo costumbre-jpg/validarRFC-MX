@@ -18,6 +18,26 @@ const extractJwtFromCookie = (raw?: string) => {
   return raw;
 };
 
+const getSupabaseJwtFromCookies = (cookies: ReturnType<NextRequest["cookies"]["getAll"]>) => {
+  const known =
+    extractJwtFromCookie(
+      cookies.find((cookie) => cookie.name === "sb-access-token")?.value
+    ) ||
+    extractJwtFromCookie(
+      cookies.find((cookie) => cookie.name === "supabase-auth-token")?.value
+    ) ||
+    extractJwtFromCookie(
+      cookies.find((cookie) => cookie.name === "sb:token")?.value
+    );
+  if (known) return known;
+
+  const dynamic = cookies.find(
+    (cookie) =>
+      cookie.name.startsWith("sb-") && cookie.name.endsWith("-auth-token")
+  );
+  return extractJwtFromCookie(dynamic?.value);
+};
+
 export async function POST(request: NextRequest) {
   try {
     const stripe = getStripe();
@@ -37,10 +57,7 @@ export async function POST(request: NextRequest) {
       : undefined;
 
     if (!jwt) {
-      const cookieToken =
-        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
-        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
-        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
+      const cookieToken = getSupabaseJwtFromCookies(request.cookies.getAll());
       jwt = cookieToken || undefined;
     }
 
