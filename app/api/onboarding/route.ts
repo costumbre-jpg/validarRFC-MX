@@ -369,7 +369,7 @@ export async function POST(request: NextRequest) {
               .card { background-color: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(15,23,42,0.08); }
               .header { border-bottom: 1px solid #e5e7eb; padding-bottom: 16px; margin-bottom: 16px; text-align: center; }
               .content { color: #4b5563; }
-              .button { display: inline-block; background-color: #2F7E7A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+              .button { display: inline-block; background-color: #2F7E7A !important; color: #ffffff !important; font-weight: 600; font-size: 14px; padding: 14px 28px; text-decoration: none; border-radius: 6px; margin-top: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
             </style>
           </head>
           <body>
@@ -386,8 +386,8 @@ export async function POST(request: NextRequest) {
                   <p>Hemos recibido tu solicitud de onboarding personalizado para <strong>${payload.company_name || ""}</strong>.</p>
                   <p>Nuestro equipo revisará tu solicitud y se pondrá en contacto contigo pronto para configurar tu cuenta según tus necesidades.</p>
                   <p>Si tienes alguna pregunta adicional, no dudes en contactarnos.</p>
-                  <p style="margin-top: 24px;">
-                    <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/dashboard/onboarding" class="button">
+                  <p style="margin-top: 24px; text-align: center;">
+                    <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/dashboard/onboarding" class="button" style="background-color: #2F7E7A !important; color: #ffffff !important; font-weight: 600; font-size: 14px; padding: 14px 28px; text-decoration: none; border-radius: 6px; display: inline-block;">
                       Ver mi solicitud
                     </a>
                   </p>
