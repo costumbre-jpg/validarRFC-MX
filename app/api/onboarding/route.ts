@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { getPlan, type PlanId } from "@/lib/plans";
+import { sendEmail } from "@/lib/email";
 
 type CookieSetOptions = Parameters<NextResponse["cookies"]["set"]>[2];
 
@@ -262,6 +263,162 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error("Error guardando onboarding:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Enviar emails solo cuando el status es "pendiente" (no para borradores)
+    if (payload.status === "pendiente" && payload.contact_email) {
+      // Email a soporte con todos los datos
+      const supportEmailHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charSet="utf-8" />
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; background-color: #f3f4f6; }
+              .container { max-width: 600px; margin: 0 auto; padding: 24px; }
+              .card { background-color: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(15,23,42,0.08); }
+              .header { border-bottom: 1px solid #e5e7eb; padding-bottom: 16px; margin-bottom: 16px; text-align: left; }
+              .pill { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; background-color: #ecfdf5; color: #047857; font-size: 12px; font-weight: 600; }
+              .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; margin-bottom: 4px; }
+              .value { font-size: 14px; color: #111827; }
+              .field { margin-bottom: 12px; }
+              .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; background-color: #dbeafe; color: #1e40af; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="card">
+                <div class="header">
+                  <div style="margin-bottom: 16px; text-align: center;">
+                    <img src="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/imagencorreo.jpg" alt="Maflipp Logo" style="height: 60px; width: auto; display: block; margin: 0 auto; border-radius: 8px; background-color: #f3f4f6; padding: 8px;" />
+                  </div>
+                  <div class="pill">Nueva solicitud de onboarding personalizado</div>
+                  <p style="margin-top: 12px; font-size: 14px; color: #4b5563;">
+                    Se ha recibido una nueva solicitud de onboarding personalizado desde el dashboard.
+                  </p>
+                </div>
+                <div>
+                  <div class="field">
+                    <div class="label">Empresa</div>
+                    <div class="value"><strong>${payload.company_name || "—"}</strong></div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Industria</div>
+                    <div class="value">${payload.industry || "—"}</div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Tamaño del equipo</div>
+                    <div class="value">${payload.team_size || "—"}</div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Contacto</div>
+                    <div class="value"><strong>${payload.contact_name || "—"}</strong></div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Email de contacto</div>
+                    <div class="value">${payload.contact_email || "—"}</div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Casos de uso</div>
+                    <div class="value" style="white-space: pre-wrap;">${payload.use_cases || "—"}</div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Fuentes de datos</div>
+                    <div class="value" style="white-space: pre-wrap;">${payload.data_sources || "—"}</div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Preferencias de integración</div>
+                    <div class="value" style="white-space: pre-wrap;">${payload.integration_preferences || "—"}</div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Webhook URL</div>
+                    <div class="value">${payload.webhook_url || "—"}</div>
+                  </div>
+                  <div class="field">
+                    <div class="label">Requisitos especiales</div>
+                    <div class="value">
+                      ${payload.sandbox ? '<span class="badge">Necesita ambiente sandbox</span>' : "No"}
+                    </div>
+                  </div>
+                  ${payload.notes ? `
+                  <div class="field" style="margin-top: 16px;">
+                    <div class="label">Notas adicionales</div>
+                    <div class="value" style="white-space: pre-wrap;">${payload.notes}</div>
+                  </div>
+                  ` : ''}
+                  <div class="field" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
+                    <div class="label">Usuario ID</div>
+                    <div class="value" style="font-size: 11px; color: #6b7280; font-family: monospace;">${user.id}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      // Email de confirmación al cliente
+      const clientEmailHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charSet="utf-8" />
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #111827; background-color: #f3f4f6; }
+              .container { max-width: 600px; margin: 0 auto; padding: 24px; }
+              .card { background-color: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 25px rgba(15,23,42,0.08); }
+              .header { border-bottom: 1px solid #e5e7eb; padding-bottom: 16px; margin-bottom: 16px; text-align: center; }
+              .content { color: #4b5563; }
+              .button { display: inline-block; background-color: #2F7E7A; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="card">
+                <div class="header">
+                  <div style="margin-bottom: 16px;">
+                    <img src="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/imagencorreo.jpg" alt="Maflipp Logo" style="height: 60px; width: auto; display: block; margin: 0 auto; border-radius: 8px; background-color: #f3f4f6; padding: 8px;" />
+                  </div>
+                  <h1 style="margin: 0; color: #111827; font-size: 24px;">Solicitud recibida</h1>
+                </div>
+                <div class="content">
+                  <p>Hola <strong>${payload.contact_name || ""}</strong>,</p>
+                  <p>Hemos recibido tu solicitud de onboarding personalizado para <strong>${payload.company_name || ""}</strong>.</p>
+                  <p>Nuestro equipo revisará tu solicitud y se pondrá en contacto contigo pronto para configurar tu cuenta según tus necesidades.</p>
+                  <p>Si tienes alguna pregunta adicional, no dudes en contactarnos.</p>
+                  <p style="margin-top: 24px;">
+                    <a href="${process.env.NEXT_PUBLIC_SITE_URL || "https://maflipp.com"}/dashboard/onboarding" class="button">
+                      Ver mi solicitud
+                    </a>
+                  </p>
+                  <p style="margin-top: 30px; font-size: 12px; color: #6b7280;">
+                    Saludos,<br />
+                    El equipo de Maflipp
+                  </p>
+                </div>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      // Enviar email a soporte (no bloquea si falla)
+      sendEmail({
+        to: "soporte@maflipp.com",
+        subject: `Nueva solicitud de onboarding - ${payload.company_name || "Sin empresa"}`,
+        html: supportEmailHtml,
+      }).catch((err) => {
+        console.error("❌ Error enviando email a soporte:", err);
+      });
+
+      // Enviar confirmación al cliente (no bloquea si falla)
+      sendEmail({
+        to: payload.contact_email,
+        subject: "Solicitud de onboarding recibida - Maflipp",
+        html: clientEmailHtml,
+      }).catch((err) => {
+        console.error("❌ Error enviando email de confirmación al cliente:", err);
+      });
     }
 
     return NextResponse.json({ success: true, onboarding: data });
