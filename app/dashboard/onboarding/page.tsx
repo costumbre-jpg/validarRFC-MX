@@ -53,6 +53,28 @@ function OnboardingPage() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    try {
+      const stored = localStorage.getItem("maflipp_onboarding_autosave");
+      if (stored !== null) {
+        setAutoSaveEnabled(stored === "1");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        "maflipp_onboarding_autosave",
+        autoSaveEnabled ? "1" : "0"
+      );
+    } catch {
+      // ignore
+    }
+  }, [autoSaveEnabled]);
+
+  useEffect(() => {
     const load = async () => {
       const planParam = searchParams.get("plan");
       const designPlan = (planParam && ["pro", "business"].includes(planParam)
@@ -228,7 +250,7 @@ function OnboardingPage() {
       setTimeout(() => setErrorMessage(null), 5000);
       return;
     }
-    await saveOnboarding();
+    await saveOnboarding({ status: "pendiente" });
   };
 
   useEffect(() => {
