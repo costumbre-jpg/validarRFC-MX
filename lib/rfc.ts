@@ -237,7 +237,16 @@ export async function validateRFC(
   } else if (satResult.valid === false) {
     message = "RFC no existe o no está registrado en el padrón del SAT";
   } else {
-    message = satResult.error || "Error al consultar SAT";
+    const rawMessage = satResult.error || "Error al consultar SAT";
+    const normalized = rawMessage.toLowerCase();
+    message =
+      normalized.includes("fetch failed") ||
+      normalized.includes("enotfound") ||
+      normalized.includes("econnreset") ||
+      normalized.includes("econnrefused") ||
+      normalized.includes("network")
+        ? "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos."
+        : rawMessage;
   }
 
   const result: ValidateRFCResult = {
@@ -247,7 +256,10 @@ export async function validateRFC(
     source: satResult.valid === null ? "error" : "sat",
     responseTime: Math.round(responseTime),
     message,
-    error: satResult.source === "error" ? satResult.error : undefined,
+    error:
+      satResult.source === "error"
+        ? message
+        : undefined,
     name: satResult.source === "sat" ? satResult.name : undefined,
     regime: satResult.source === "sat" ? satResult.regime : undefined,
     startDate: satResult.source === "sat" ? satResult.startDate : undefined,

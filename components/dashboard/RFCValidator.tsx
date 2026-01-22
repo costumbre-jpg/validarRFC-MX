@@ -69,13 +69,21 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Error al validar el RFC");
+        const rawMessage = data.message || "Error al validar el RFC";
+        const friendlyMessage = typeof rawMessage === "string" && rawMessage.toLowerCase().includes("fetch failed")
+          ? "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos."
+          : rawMessage;
+        setError(friendlyMessage);
         setLoading(false);
         return;
       }
 
       if (!data.success) {
-        setError(data.message || "Error al validar el RFC");
+        const rawMessage = data.message || "Error al validar el RFC";
+        const friendlyMessage = typeof rawMessage === "string" && rawMessage.toLowerCase().includes("fetch failed")
+          ? "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos."
+          : rawMessage;
+        setError(friendlyMessage);
         setLoading(false);
         return;
       }
