@@ -21,6 +21,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
     name?: string;
     regime?: string;
     startDate?: string;
+    isDemo?: boolean;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,10 +71,11 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
       message: "Resultado demo temporal (SAT sin respuesta).",
       rfc: currentRfc,
       responseTime: 0,
-      cached: true,
+      cached: false,
       name: demo.name,
       regime: demo.regime,
       startDate: demo.startDate,
+      isDemo: true,
     });
     setError(null);
     return true;
@@ -158,6 +160,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
         name: data.name,
         regime: data.regime,
         startDate: data.startDate,
+        isDemo: data.source === "demo",
       });
 
       // Actualizar datos sin recargar la página
@@ -314,15 +317,28 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>
-                      {result.cached ? "Respuesta desde caché" : "Consulta al SAT"} · {result.responseTime ?? 0} ms
+                      {result.isDemo
+                        ? "Modo demo: SAT sin respuesta"
+                        : result.cached
+                        ? "Respuesta desde caché"
+                        : "Consulta al SAT"}{" "}
+                      · {result.responseTime ?? 0} ms
                     </span>
                   </div>
-                  {result.isValid && (
+                  {result.isValid && !result.isDemo && (
                     <div className="flex items-center gap-2 max-md:gap-1.5 text-xs max-md:text-[11px] text-green-700 bg-green-100 px-2 max-md:px-1.5 py-1 max-md:py-0.5 rounded">
                       <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                       <span>RFC verificado y activo en el SAT</span>
+                    </div>
+                  )}
+                  {result.isValid && result.isDemo && (
+                    <div className="flex items-center gap-2 max-md:gap-1.5 text-xs max-md:text-[11px] text-emerald-700 bg-emerald-50 px-2 max-md:px-1.5 py-1 max-md:py-0.5 rounded">
+                      <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>Resultado demo para pruebas</span>
                     </div>
                   )}
                 </div>
