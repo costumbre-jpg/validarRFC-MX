@@ -237,7 +237,8 @@ function HistorialPage() {
   const brandPrimary = getBrandColor('--brand-primary', '#2F7E7A');
   const brandSecondary = getBrandColor('--brand-secondary', '#1F5D59');
 
-  if (!planHasFeature(planId, "history")) {
+  // Solo mostrar el mensaje de plan Free si ya terminó de cargar Y realmente es plan Free
+  if (!loading && userData && !planHasFeature(planId, "history")) {
     return (
       <div className="space-y-8 max-md:space-y-4">
         <div>
