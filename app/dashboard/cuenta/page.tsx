@@ -463,7 +463,21 @@ function CuentaPage() {
                       <p className="text-xs max-md:text-[11px] font-semibold text-gray-700">Total validaciones</p>
                     </div>
                     <p className="text-2xl max-md:text-xl font-bold mb-0.5" style={{ color: brandPrimaryColor }}>
-                      {userData?.total_validations || 0}
+                      {(() => {
+                        const dbTotal = userData?.total_validations || 0;
+                        let demoCount = 0;
+                        try {
+                          if (typeof window !== "undefined") {
+                            const stored = localStorage.getItem("maflipp_demo_validations");
+                            if (stored) {
+                              demoCount = JSON.parse(stored).length;
+                            }
+                          }
+                        } catch (e) {
+                          // Ignore
+                        }
+                        return dbTotal + demoCount;
+                      })()}
                     </p>
                     <p className="text-[10px] max-md:text-[9px] text-gray-500">Historial completo</p>
                   </div>
