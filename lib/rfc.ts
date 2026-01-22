@@ -226,6 +226,21 @@ export async function validateRFC(
   const satResult = await validateRFCWithSAT(normalizedRFC);
   const responseTime = performance.now() - start;
 
+  // Si el SAT falla, intentar devolver un resultado en caché (aunque esté vencido)
+  if (satResult.valid === null && useCache) {
+    const stale = satCache.get(normalizedRFC);
+    if (stale?.result) {
+      return {
+        ...stale.result,
+        cached: true,
+        source: "cache",
+        success: true,
+        message:
+          "El SAT no respondió. Mostrando el último resultado disponible en caché.",
+      };
+    }
+  }
+
   // Construir mensaje más descriptivo
   let message: string;
   if (satResult.valid === true) {
