@@ -27,8 +27,19 @@ export default function DashboardHeader({
   const planId = planFromUrl 
     ? (planFromUrl as PlanId) 
     : ((userData?.subscription_status || "free") as PlanId);
+  
+  // Incluir validaciones demo desde localStorage
+  let demoCount = 0;
+  try {
+    if (typeof window !== "undefined") {
+      demoCount = parseInt(localStorage.getItem("maflipp_demo_validations_count") || "0", 10);
+    }
+  } catch (e) {
+    // Ignore
+  }
+  
   const queriesThisMonth =
-    (userData?.rfc_queries_this_month || 0) + (demoValidationCount || 0);
+    (userData?.rfc_queries_this_month || 0) + (demoValidationCount || 0) + demoCount;
   const planLimit = getPlanValidationLimit(planId);
   const plan = getPlan(planId);
   const isPro = planId === "pro" || planId === "business";
