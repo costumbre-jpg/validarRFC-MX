@@ -255,7 +255,11 @@ export default function DashboardPage() {
       <div className="space-y-4 max-md:space-y-3">
         {/* Validador Principal - Ancho completo */}
         <div>
-          <RFCValidator userData={userData} onValidationComplete={handleValidationComplete} />
+          <RFCValidator 
+            userData={userData} 
+            onValidationComplete={handleValidationComplete}
+            demoValidationCount={demoValidationsCount}
+          />
         </div>
 
 
