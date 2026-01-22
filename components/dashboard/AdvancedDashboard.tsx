@@ -253,7 +253,14 @@ export default function AdvancedDashboard({
             .gte("created_at", new Date(lastYear, currentMonth, 1).toISOString())
             .lt("created_at", new Date(lastYear, currentMonth + 1, 1).toISOString());
 
-          const currentCount = currentMonthValidations?.length || 0;
+          // Incluir validaciones demo del mes actual
+          const currentMonthStart = new Date(currentYear, currentMonth, 1);
+          const currentMonthEnd = new Date(currentYear, currentMonth + 1, 1);
+          const propCurrentMonth = (validations || []).filter((v: any) => {
+            const date = new Date(v.created_at);
+            return date >= currentMonthStart && date < currentMonthEnd;
+          });
+          const currentCount = (currentMonthValidations?.length || 0) + propCurrentMonth.length;
           const lastYearCount = lastYearValidations?.length || 0;
           const change = currentCount - lastYearCount;
           const changePercent = lastYearCount > 0 ? ((change / lastYearCount) * 100).toFixed(1) : '0';
@@ -273,20 +280,33 @@ export default function AdvancedDashboard({
             .eq("user_id", userId)
             .gte("created_at", sevenDaysAgo.toISOString())
             .limit(1000);
-          const allValidations = (allValidationsData ?? []) as {
+          const dbValidations = (allValidationsData ?? []) as {
             is_valid: boolean;
             created_at: string;
             response_time?: number | null;
           }[];
-
+          
+          // Combinar con validaciones demo de los últimos 7 días
+          const propValidationsForMetrics = (validations || []).filter((v: any) => {
+            const date = new Date(v.created_at);
+            return date >= sevenDaysAgo;
+          }).map((v: any) => ({
+            is_valid: v.is_valid ?? true,
+            created_at: v.created_at,
+            response_time: 0, // Demo no tiene response_time real
+          }));
+          
+          const allValidations = [...dbValidations, ...propValidationsForMetrics];
           const total = allValidations?.length || 0;
           const valid = allValidations?.filter(v => v.is_valid).length || 0;
           const invalid = total - valid;
           const errorRate = total > 0 ? ((invalid / total) * 100).toFixed(2) : '0';
           
           // Calcular tiempo promedio de respuesta real (convertir de ms a segundos)
-          const avgResponseTime = total > 0 && allValidations
-            ? (allValidations.reduce((sum, v) => sum + (v.response_time || 0), 0) / total / 1000).toFixed(2)
+          // Solo contar response_time de validaciones reales (no demo)
+          const validationsWithTime = allValidations.filter(v => v.response_time && v.response_time > 0);
+          const avgResponseTime = validationsWithTime.length > 0
+            ? (validationsWithTime.reduce((sum, v) => sum + (v.response_time || 0), 0) / validationsWithTime.length / 1000).toFixed(2)
             : '0';
 
           setEfficiencyMetrics({
