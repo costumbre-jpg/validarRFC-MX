@@ -16,19 +16,6 @@ export async function POST(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          success: false,
-          valid: false,
-          rfc: "",
-          remaining: 0,
-          message: "Usuario no autenticado",
-        },
-        { status: 401 }
-      );
-    }
-
     // 2. Parsear body
     let body;
     try {
@@ -47,6 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { rfc, forceRefresh = false } = body;
+    const isDesignMode = !user; // Modo diseño si no hay usuario autenticado
 
     // 3. Validar que RFC esté presente
     if (!rfc || typeof rfc !== "string") {
@@ -79,69 +67,79 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6. Rate limiting
-    const rate = await rateLimit({
-      key: `validate:${user.id}`,
-      limit: RATE_LIMIT,
-      windowSeconds: RATE_LIMIT_WINDOW_SECONDS,
-      fallbackMap: rateLimitMap,
-    });
-    if (!rate.allowed) {
-      return NextResponse.json(
-        {
-          success: false,
-          valid: false,
-          rfc: formattedRFC,
-          remaining: 0,
-          message: "Límite de solicitudes excedido. Intenta de nuevo en un minuto.",
-        },
-        {
-          status: 429,
-          headers: {
-            "X-RateLimit-Limit": RATE_LIMIT.toString(),
-            "X-RateLimit-Remaining": "0",
-            "Retry-After": rate.resetSeconds.toString(),
+    // 6. Rate limiting (solo para usuarios autenticados)
+    let rate = { allowed: true, remaining: RATE_LIMIT, resetSeconds: 0 };
+    if (!isDesignMode) {
+      rate = await rateLimit({
+        key: `validate:${user.id}`,
+        limit: RATE_LIMIT,
+        windowSeconds: RATE_LIMIT_WINDOW_SECONDS,
+        fallbackMap: rateLimitMap,
+      });
+      if (!rate.allowed) {
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: formattedRFC,
+            remaining: 0,
+            message: "Límite de solicitudes excedido. Intenta de nuevo en un minuto.",
           },
-        }
-      );
+          {
+            status: 429,
+            headers: {
+              "X-RateLimit-Limit": RATE_LIMIT.toString(),
+              "X-RateLimit-Remaining": "0",
+              "Retry-After": rate.resetSeconds.toString(),
+            },
+          }
+        );
+      }
     }
 
-    // 7. Verificar límite mensual del usuario
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("subscription_status, rfc_queries_this_month")
-      .eq("id", user.id)
-      .single();
+    // 7. Verificar límite mensual del usuario (solo si no es modo diseño)
+    let plan: PlanId = "free";
+    let planLimit = getPlanValidationLimit(plan);
+    let queriesThisMonth = 0;
+    let remaining = -1;
 
-    if (userError) {
-      console.error("Error fetching user data:", userError);
-      return NextResponse.json(
-        {
-          success: false,
-          valid: false,
-          rfc: formattedRFC,
-          remaining: 0,
-          message: "Error al verificar límite de usuario",
-        },
-        { status: 500 }
-      );
-    }
+    if (!isDesignMode) {
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("subscription_status, rfc_queries_this_month")
+        .eq("id", user.id)
+        .single();
 
-    const plan = (userData?.subscription_status || "free") as PlanId;
-    const planLimit = getPlanValidationLimit(plan);
-    const queriesThisMonth = userData?.rfc_queries_this_month || 0;
+      if (userError) {
+        console.error("Error fetching user data:", userError);
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: formattedRFC,
+            remaining: 0,
+            message: "Error al verificar límite de usuario",
+          },
+          { status: 500 }
+        );
+      }
 
-    if (planLimit !== -1 && queriesThisMonth >= planLimit) {
-      return NextResponse.json(
-        {
-          success: false,
-          valid: false,
-          rfc: formattedRFC,
-          remaining: 0,
-          message: `Has alcanzado el límite de ${planLimit} validaciones este mes. Mejora tu plan para obtener más.`,
-        },
-        { status: 403 }
-      );
+      plan = (userData?.subscription_status || "free") as PlanId;
+      planLimit = getPlanValidationLimit(plan);
+      queriesThisMonth = userData?.rfc_queries_this_month || 0;
+
+      if (planLimit !== -1 && queriesThisMonth >= planLimit) {
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: formattedRFC,
+            remaining: 0,
+            message: `Has alcanzado el límite de ${planLimit} validaciones este mes. Mejora tu plan para obtener más.`,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     // 8. Consultar SAT (con caché)
@@ -150,51 +148,56 @@ export async function POST(request: NextRequest) {
       forceRefresh,
     });
 
-    // 9. Guardar en base de datos
-    const { error: insertError } = await supabase
-      .from("validations")
-      .insert({
-        user_id: user.id,
-        rfc: formattedRFC,
-        is_valid: satResult.valid,
-        response_time: satResult.responseTime,
-      });
+    // 9. Guardar en base de datos (solo si no es modo diseño)
+    if (!isDesignMode) {
+      const { error: insertError } = await supabase
+        .from("validations")
+        .insert({
+          user_id: user.id,
+          rfc: formattedRFC,
+          is_valid: satResult.valid,
+          response_time: satResult.responseTime,
+        });
 
-    if (insertError) {
-      console.error("Error saving validation:", insertError);
+      if (insertError) {
+        console.error("Error saving validation:", insertError);
+      }
+
+      // Actualizar contador del usuario
+      const { data: currentUserData } = await supabase
+        .from("users")
+        .select("rfc_queries_this_month")
+        .eq("id", user.id)
+        .single();
+
+      const newCount = (currentUserData?.rfc_queries_this_month || 0) + 1;
+
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ rfc_queries_this_month: newCount })
+        .eq("id", user.id);
+
+      if (updateError) {
+        console.error("Error updating user count:", updateError);
+      }
+
+      // Obtener límite restante
+      const { data: updatedUserData } = await supabase
+        .from("users")
+        .select("subscription_status, rfc_queries_this_month")
+        .eq("id", user.id)
+        .single();
+
+      const planAfter = (updatedUserData?.subscription_status || "free") as PlanId;
+      const planLimitAfter = getPlanValidationLimit(planAfter);
+      remaining =
+        planLimitAfter === -1
+          ? -1
+          : planLimitAfter - (updatedUserData?.rfc_queries_this_month || 0);
+    } else {
+      // En modo diseño, simular límite restante
+      remaining = planLimit === -1 ? -1 : Math.max(0, planLimit - queriesThisMonth);
     }
-
-    // Actualizar contador del usuario
-    const { data: currentUserData } = await supabase
-      .from("users")
-      .select("rfc_queries_this_month")
-      .eq("id", user.id)
-      .single();
-
-    const newCount = (currentUserData?.rfc_queries_this_month || 0) + 1;
-
-    const { error: updateError } = await supabase
-      .from("users")
-      .update({ rfc_queries_this_month: newCount })
-      .eq("id", user.id);
-
-    if (updateError) {
-      console.error("Error updating user count:", updateError);
-    }
-
-    // Obtener límite restante
-    const { data: updatedUserData } = await supabase
-      .from("users")
-      .select("subscription_status, rfc_queries_this_month")
-      .eq("id", user.id)
-      .single();
-
-    const planAfter = (updatedUserData?.subscription_status || "free") as PlanId;
-    const planLimitAfter = getPlanValidationLimit(planAfter);
-    const remaining =
-      planLimitAfter === -1
-        ? -1
-        : planLimitAfter - (updatedUserData?.rfc_queries_this_month || 0);
 
     return NextResponse.json(
       {

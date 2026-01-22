@@ -160,7 +160,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
           <div className="mt-3 max-md:mt-2">
             <p className="text-xs max-md:text-[11px] text-gray-500 mb-2 max-md:mb-1.5">Prueba con ejemplos:</p>
             <div className="flex flex-wrap gap-2 max-md:gap-1.5">
-              {["XAXX010101000", "COSC8001137NA", "GODE561231GR8"].map((example) => (
+              {["XAXX010101000", "GODE561231GR8", "COSC8001137NA"].map((example) => (
                 <button
                   key={example}
                   onClick={() => setRfc(example)}
