@@ -14,6 +14,7 @@ function HistorialPage() {
   const [validations, setValidations] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
   const searchParams = useSearchParams();
 
@@ -23,7 +24,10 @@ function HistorialPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     // Paginación del servidor: solo cargar 10 registros de la página actual
     const from = (page - 1) * itemsPerPage;
@@ -38,11 +42,13 @@ function HistorialPage() {
 
     if (error) {
       console.error("Error loading validations:", error);
+      setLoading(false);
       return;
     }
 
     setValidations(dbValidations || []);
     setTotalCount(count || 0);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -153,6 +159,7 @@ function HistorialPage() {
           setValidations([]);
           setTotalCount(0);
         }
+        setLoading(false);
         return;
       }
 
@@ -175,6 +182,7 @@ function HistorialPage() {
   // Recargar cuando cambia la página
   useEffect(() => {
     if (userData && currentPage > 0) {
+      setLoading(true);
       // Si es modo diseño, recargar validaciones mock paginadas
       if (userData.id === "mock-user") {
         const planParam = searchParams.get("plan");
@@ -203,10 +211,12 @@ function HistorialPage() {
           setTimeout(() => {
             setValidations(paginatedValidations);
             setTotalCount(allMockValidations.length);
+            setLoading(false);
           }, 300); // Simular carga
         } else {
           setValidations([]);
           setTotalCount(0);
+          setLoading(false);
         }
       } else {
         // Usuario real: cargar desde servidor
@@ -261,6 +271,28 @@ function HistorialPage() {
               </svg>
               Mejorar Plan
             </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-8 max-md:space-y-4">
+        <div>
+          <div className="flex items-center gap-2 flex-wrap mb-4 max-md:mb-3">
+            <span
+              className="inline-flex items-center px-4 max-md:px-3 py-2 max-md:py-1.5 rounded-full text-lg max-md:text-base font-bold"
+              style={{ backgroundColor: `${brandPrimary}15`, color: brandSecondary }}
+            >
+              Historial de Validaciones
+            </span>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 max-md:p-4">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: brandPrimary }}></div>
           </div>
         </div>
       </div>
