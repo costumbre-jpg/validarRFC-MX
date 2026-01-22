@@ -74,7 +74,7 @@ function CuentaPage() {
           .eq("user_id", user.id);
         
         if (apiKeys && apiKeys.length > 0) {
-          const totalApiCalls = apiKeys.reduce((sum, key) => sum + (key.api_calls_this_month || 0), 0);
+          const totalApiCalls = apiKeys.reduce((sum: number, key: any) => sum + (key?.api_calls_this_month || 0), 0);
           if (totalApiCalls > 0) {
             (dbUser as any).api_calls_this_month = totalApiCalls;
             // Actualizar en BD para futuras consultas
