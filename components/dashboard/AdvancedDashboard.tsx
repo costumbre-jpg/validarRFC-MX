@@ -104,7 +104,22 @@ export default function AdvancedDashboard({
           .eq("user_id", userId)
           .gte("created_at", sevenDaysAgo.toISOString())
           .order("created_at", { ascending: true });
-        const recentValidations = (recentValidationsData ?? []) as { created_at: string }[];
+        
+        // Combinar validaciones de BD con las pasadas como prop (incluye demo)
+        const propValidations = (validations || []).filter((v: any) => {
+          const date = new Date(v.created_at);
+          return date >= sevenDaysAgo;
+        }).map((v: any) => ({ created_at: v.created_at }));
+        
+        const dbValidations = (recentValidationsData ?? []) as { created_at: string }[];
+        // Combinar y eliminar duplicados (priorizar prop si hay duplicados)
+        const allRecent = [...propValidations, ...dbValidations];
+        const uniqueRecent = Array.from(
+          new Map(allRecent.map(v => [v.created_at, v])).values()
+        );
+        const recentValidations = uniqueRecent.sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
 
         // Agrupar por día
         const dailyCounts: Record<string, number> = {};
@@ -145,7 +160,22 @@ export default function AdvancedDashboard({
           .eq("user_id", userId)
           .gte("created_at", sixMonthsAgo.toISOString())
           .order("created_at", { ascending: true });
-        const monthlyValidations = (monthlyValidationsData ?? []) as { created_at: string }[];
+        
+        // Combinar validaciones de BD con las pasadas como prop (incluye demo)
+        const propMonthlyValidations = (validations || []).filter((v: any) => {
+          const date = new Date(v.created_at);
+          return date >= sixMonthsAgo;
+        }).map((v: any) => ({ created_at: v.created_at }));
+        
+        const dbMonthlyValidations = (monthlyValidationsData ?? []) as { created_at: string }[];
+        // Combinar y eliminar duplicados
+        const allMonthly = [...propMonthlyValidations, ...dbMonthlyValidations];
+        const uniqueMonthly = Array.from(
+          new Map(allMonthly.map(v => [v.created_at, v])).values()
+        );
+        const monthlyValidations = uniqueMonthly.sort((a, b) => 
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
 
         // Agrupar por mes
         const monthlyCounts: Record<string, number> = {};
