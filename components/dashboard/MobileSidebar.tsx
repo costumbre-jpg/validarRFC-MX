@@ -192,11 +192,6 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
               ) : (
                 <Logo size="md" showText={false} />
               )}
-              {showBrandName && (
-                <span className="truncate text-sm font-semibold text-gray-900">
-                  {brandName}
-                </span>
-              )}
             </div>
       </div>
 
@@ -210,27 +205,20 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
         />
         <div className={`fixed inset-y-0 left-0 z-50 w-1/2 max-w-xs overflow-y-auto bg-white shadow-2xl border-r border-gray-200 px-4 max-md:px-3 pb-4 transition-transform duration-200 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <div className="flex justify-between items-center p-4 max-md:p-3">
-            <div className="flex flex-col gap-1">
-              {showCustomLogo ? (
-                <img
-                  src={branding?.custom_logo_url || ""}
-                  alt={branding?.brand_name || "Logo"}
-                  className="h-10 max-md:h-8 w-auto object-contain"
-                />
-              ) : hideMaflipp ? (
-                <div
-                  className="w-10 max-md:w-8 h-10 max-md:h-8 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
-                  aria-hidden
-                />
-              ) : (
-                <Logo size="md" showText={false} />
-              )}
-              {showBrandName && (
-                <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[140px]">
-                  {brandName}
-                </span>
-              )}
-            </div>
+            {showCustomLogo ? (
+              <img
+                src={branding?.custom_logo_url || ""}
+                alt={branding?.brand_name || "Logo"}
+                className="h-10 max-md:h-8 w-auto object-contain"
+              />
+            ) : hideMaflipp ? (
+              <div
+                className="w-10 max-md:w-8 h-10 max-md:h-8 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
+                aria-hidden
+              />
+            ) : (
+              <Logo size="md" showText={false} />
+            )}
             <button
               type="button"
               className="p-2 text-gray-600 hover:text-brand-primary"
