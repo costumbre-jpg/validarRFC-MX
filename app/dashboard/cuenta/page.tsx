@@ -66,6 +66,26 @@ function CuentaPage() {
         }
       }
       
+      // Si api_calls_this_month no está disponible, calcularlo desde api_keys
+      if (dbUser && (!(dbUser as any).api_calls_this_month || (dbUser as any).api_calls_this_month === 0)) {
+        const { data: apiKeys } = await supabase
+          .from("api_keys")
+          .select("api_calls_this_month")
+          .eq("user_id", user.id);
+        
+        if (apiKeys && apiKeys.length > 0) {
+          const totalApiCalls = apiKeys.reduce((sum, key) => sum + (key.api_calls_this_month || 0), 0);
+          if (totalApiCalls > 0) {
+            (dbUser as any).api_calls_this_month = totalApiCalls;
+            // Actualizar en BD para futuras consultas
+            await supabase
+              .from("users")
+              .update({ api_calls_this_month: totalApiCalls })
+              .eq("id", user.id);
+          }
+        }
+      }
+      
       setSafeUser(user);
       setUserData(dbUser);
       setLoading(false);
