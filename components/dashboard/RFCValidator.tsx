@@ -6,7 +6,11 @@ import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 
 interface RFCValidatorProps {
   userData: any;
-  onValidationComplete?: () => void;
+  onValidationComplete?: (options?: {
+    isDemo?: boolean;
+    valid?: boolean;
+    rfc?: string;
+  }) => void;
 }
 
 export default function RFCValidator({ userData, onValidationComplete }: RFCValidatorProps) {
@@ -77,6 +81,9 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
       startDate: demo.startDate,
       isDemo: true,
     });
+    if (onValidationComplete) {
+      onValidationComplete({ isDemo: true, valid: true, rfc: currentRfc });
+    }
     setError(null);
     return true;
   };
@@ -166,8 +173,12 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
       // Actualizar datos sin recargar la página
       if (onValidationComplete) {
         setTimeout(() => {
-          onValidationComplete();
-        }, 500);
+          onValidationComplete({
+            isDemo: data.source === "demo",
+            valid: data.valid,
+            rfc: data.rfc,
+          });
+        }, 200);
       }
     } catch (err) {
       const fallbackMessage =

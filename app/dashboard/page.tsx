@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<any>(null);
   const [allValidationsForStats, setAllValidationsForStats] = useState<any[]>([]); // Para estadísticas y gráfico
   const [stats, setStats] = useState({ total: 0, valid: 0, invalid: 0 });
+  const [demoValidationsCount, setDemoValidationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0); // Para forzar actualización
   const searchParams = useSearchParams();
@@ -150,6 +151,34 @@ export default function DashboardPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleValidationComplete = (options?: {
+    isDemo?: boolean;
+    valid?: boolean;
+    rfc?: string;
+  }) => {
+    if (options?.isDemo) {
+      setDemoValidationsCount((prev) => prev + 1);
+      const isValid = options.valid ?? true;
+      setStats((prev) => ({
+        total: prev.total + 1,
+        valid: prev.valid + (isValid ? 1 : 0),
+        invalid: prev.invalid + (isValid ? 0 : 1),
+      }));
+      setAllValidationsForStats((prev) => [
+        {
+          id: `demo-${Date.now()}`,
+          is_valid: isValid,
+          created_at: new Date().toISOString(),
+          rfc: options.rfc || "DEMO",
+        },
+        ...prev,
+      ]);
+      return;
+    }
+
+    refreshData();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -170,7 +199,11 @@ export default function DashboardPage() {
   return (
     <Suspense fallback={null}>
       <div className="space-y-4">
-      <DashboardHeader user={user} userData={userData} />
+      <DashboardHeader
+        user={user}
+        userData={userData}
+        demoValidationCount={demoValidationsCount}
+      />
 
       {/* Demo (diseño): Banner de fin de prueba */}
       {searchParams.get("trialEnded") === "1" && !trialBannerDismissed && (
@@ -222,7 +255,7 @@ export default function DashboardPage() {
       <div className="space-y-4 max-md:space-y-3">
         {/* Validador Principal - Ancho completo */}
         <div>
-          <RFCValidator userData={userData} onValidationComplete={refreshData} />
+          <RFCValidator userData={userData} onValidationComplete={handleValidationComplete} />
         </div>
 
 

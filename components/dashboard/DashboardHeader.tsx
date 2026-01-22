@@ -6,11 +6,13 @@ import { getPlan, getPlanValidationLimit, type PlanId } from "@/lib/plans";
 interface DashboardHeaderProps {
   user: User;
   userData: any;
+  demoValidationCount?: number;
 }
 
 export default function DashboardHeader({
   user,
   userData,
+  demoValidationCount = 0,
 }: DashboardHeaderProps) {
   const searchParams = useSearchParams();
   const planParam = searchParams.get("plan");
@@ -25,7 +27,8 @@ export default function DashboardHeader({
   const planId = planFromUrl 
     ? (planFromUrl as PlanId) 
     : ((userData?.subscription_status || "free") as PlanId);
-  const queriesThisMonth = userData?.rfc_queries_this_month || 0;
+  const queriesThisMonth =
+    (userData?.rfc_queries_this_month || 0) + (demoValidationCount || 0);
   const planLimit = getPlanValidationLimit(planId);
   const plan = getPlan(planId);
   const isPro = planId === "pro" || planId === "business";
