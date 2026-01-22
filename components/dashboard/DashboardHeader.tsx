@@ -62,7 +62,7 @@ export default function DashboardHeader({
   };
 
   const remaining = planLimit === -1 ? Infinity : planLimit - queriesThisMonth;
-  const usagePercentage = planLimit === -1 ? 0 : (queriesThisMonth / planLimit) * 100;
+  const usagePercentage = planLimit === -1 ? 0 : Math.min(100, (queriesThisMonth / planLimit) * 100);
   const isNearLimit = planLimit !== -1 && remaining <= 3 && remaining > 0;
   const isAtLimit = planLimit !== -1 && remaining === 0;
 
