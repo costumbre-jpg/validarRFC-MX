@@ -157,7 +157,24 @@ export default function DashboardPage() {
     rfc?: string;
   }) => {
     if (options?.isDemo) {
-      setDemoValidationsCount((prev) => prev + 1);
+      const newCount = demoValidationsCount + 1;
+      setDemoValidationsCount(newCount);
+      
+      // Guardar en localStorage para que otras páginas puedan leerlo
+      try {
+        localStorage.setItem("maflipp_demo_validations_count", String(newCount));
+        const demoValidation = {
+          id: `demo-${Date.now()}`,
+          is_valid: options.valid ?? true,
+          created_at: new Date().toISOString(),
+          rfc: options.rfc || "DEMO",
+        };
+        const existing = JSON.parse(localStorage.getItem("maflipp_demo_validations") || "[]");
+        localStorage.setItem("maflipp_demo_validations", JSON.stringify([demoValidation, ...existing]));
+      } catch (e) {
+        // Ignore localStorage errors
+      }
+      
       const isValid = options.valid ?? true;
       setStats((prev) => ({
         total: prev.total + 1,

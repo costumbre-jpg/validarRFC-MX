@@ -426,7 +426,14 @@ function CuentaPage() {
           const planLimit = plan.validationsPerMonth;
           const isPro = planId === "pro" || planId === "business";
           const apiLimit = plan.features.apiCallsPerMonth || 0;
-          const queriesThisMonth = userData?.rfc_queries_this_month || 0;
+          // Incluir validaciones demo desde localStorage
+          let demoCount = 0;
+          try {
+            demoCount = parseInt(localStorage.getItem("maflipp_demo_validations_count") || "0", 10);
+          } catch (e) {
+            // Ignore
+          }
+          const queriesThisMonth = (userData?.rfc_queries_this_month || 0) + demoCount;
           
           return (
             <div className={`grid gap-4 max-md:gap-3 ${isPro ? 'md:grid-cols-4' : 'md:grid-cols-3'}`}>

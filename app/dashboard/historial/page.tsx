@@ -46,8 +46,26 @@ function HistorialPage() {
       return;
     }
 
-    setValidations(dbValidations || []);
-    setTotalCount(count || 0);
+    // Incluir validaciones demo desde localStorage
+    let demoValidations: any[] = [];
+    try {
+      const stored = localStorage.getItem("maflipp_demo_validations");
+      if (stored) {
+        demoValidations = JSON.parse(stored);
+      }
+    } catch (e) {
+      // Ignore
+    }
+
+    // Combinar validaciones de BD con demo (solo para la página actual)
+    const allValidations = [...(dbValidations || []), ...demoValidations]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    
+    // Aplicar paginación manual a las combinadas
+    const paginated = allValidations.slice(from, from + itemsPerPage);
+    
+    setValidations(paginated);
+    setTotalCount((count || 0) + demoValidations.length);
     setLoading(false);
   };
 
