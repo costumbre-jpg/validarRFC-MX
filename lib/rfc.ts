@@ -2,13 +2,13 @@ import { formatRFC } from "./utils";
 import { getRedis } from "./redis";
 
 type SatResult =
-  | { 
-      valid: boolean; 
-      source: "sat"; 
+  | {
+      valid: boolean;
+      source: "sat";
       name?: string;
       regime?: string;
       startDate?: string;
-      error?: undefined 
+      error?: undefined;
     }
   | { valid: null; source: "error"; error: string };
 
@@ -16,7 +16,7 @@ export interface ValidateRFCResult {
   success: boolean;
   valid: boolean;
   rfc: string;
-  source: "sat" | "cache" | "error";
+  source: "sat" | "cache" | "error" | "demo";
   responseTime: number;
   message?: string;
   error?: string;
@@ -237,6 +237,41 @@ export async function validateRFC(
         success: true,
         message:
           "El SAT no respondió. Mostrando el último resultado disponible en caché.",
+      };
+    }
+  }
+
+  // Si el SAT falla, usar resultados demo para RFCs de ejemplo
+  if (satResult.valid === null) {
+    const demoMap: Record<string, { name: string; regime: string; startDate: string }> = {
+      XAXX010101000: {
+        name: "RFC Genérico Público",
+        regime: "Régimen General",
+        startDate: "01/01/2001",
+      },
+      GODE561231GR8: {
+        name: "Demo Persona Física",
+        regime: "Sueldos y Salarios",
+        startDate: "31/12/1956",
+      },
+      COSC8001137NA: {
+        name: "Demo Persona Física",
+        regime: "Régimen de Incorporación Fiscal",
+        startDate: "13/01/1980",
+      },
+    };
+    const demo = demoMap[normalizedRFC];
+    if (demo) {
+      return {
+        success: true,
+        valid: true,
+        rfc: normalizedRFC,
+        source: "demo",
+        responseTime: Math.round(responseTime),
+        message: "Resultado demo temporal (SAT sin respuesta).",
+        name: demo.name,
+        regime: demo.regime,
+        startDate: demo.startDate,
       };
     }
   }
