@@ -41,10 +41,17 @@ function WhiteLabelPage() {
   useEffect(() => {
     const load = async () => {
       // Modo diseño: permitir plan por query
+      // SIEMPRE leer el plan de la URL primero para priorizarlo
       const planParam = searchParams.get("plan");
-      const designPlan = (planParam && ["pro", "business"].includes(planParam)
-        ? planParam
-        : "free") as PlanId;
+      const planFromUrl = planParam && ["free", "pro", "business"].includes(planParam)
+        ? (planParam as PlanId)
+        : null;
+      const designPlan = planFromUrl || "free";
+      
+      // Establecer el plan inmediatamente si viene de la URL
+      if (planFromUrl) {
+        setPlanId(planFromUrl);
+      }
 
       let token: string | null = null;
       try {
@@ -65,7 +72,13 @@ function WhiteLabelPage() {
         });
         if (res.status === 401) {
           // Sin sesión: usa preview local si existe (modo diseño business)
-          if (designPlan === "business" && typeof window !== "undefined") {
+          // Verificar nuevamente el plan de la URL para asegurar que se respete
+          const currentPlanParam = searchParams.get("plan");
+          const currentPlanFromUrl = currentPlanParam && ["free", "pro", "business"].includes(currentPlanParam)
+            ? (currentPlanParam as PlanId)
+            : designPlan;
+          
+          if (currentPlanFromUrl === "business" && typeof window !== "undefined") {
             const stored = window.localStorage.getItem("branding_preview");
             if (stored) {
               try {
@@ -79,7 +92,7 @@ function WhiteLabelPage() {
           } else {
             setSettings(defaults);
           }
-          setPlanId(designPlan);
+          setPlanId(currentPlanFromUrl);
           setLoading(false);
           return;
         }
@@ -101,7 +114,11 @@ function WhiteLabelPage() {
           const planFromUrl = planParam && ["free", "pro", "business"].includes(planParam)
             ? (planParam as PlanId)
             : null;
-          if (user) {
+          
+          // SIEMPRE priorizar el plan de la URL si existe (para modo diseño)
+          if (planFromUrl) {
+            setPlanId(planFromUrl);
+          } else if (user) {
             const { data: userData } = await supabase
               .from("users")
               .select("subscription_status")
@@ -109,19 +126,22 @@ function WhiteLabelPage() {
               .single();
             
             const subscriptionStatus = (userData as any)?.subscription_status;
-            if (planFromUrl) {
-              setPlanId(planFromUrl);
-            } else if (subscriptionStatus && ["free", "pro", "business"].includes(subscriptionStatus)) {
+            if (subscriptionStatus && ["free", "pro", "business"].includes(subscriptionStatus)) {
               setPlanId(subscriptionStatus as PlanId);
             } else {
               setPlanId(designPlan);
             }
           } else {
-            setPlanId(planFromUrl || designPlan);
+            setPlanId(designPlan);
           }
         } catch (e) {
           console.error("Error obteniendo plan:", e);
-          setPlanId(designPlan);
+          // En caso de error, priorizar plan de URL o usar designPlan
+          const planParam = searchParams.get("plan");
+          const planFromUrl = planParam && ["free", "pro", "business"].includes(planParam)
+            ? (planParam as PlanId)
+            : null;
+          setPlanId(planFromUrl || designPlan);
         }
         setLoading(false);
       }
