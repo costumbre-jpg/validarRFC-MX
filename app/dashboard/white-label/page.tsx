@@ -253,6 +253,60 @@ function WhiteLabelPage() {
     }));
   };
 
+  const handleReset = async () => {
+    if (!isBusiness) {
+      setErrorMessage("White label está disponible solo para plan Business");
+      setTimeout(() => setErrorMessage(null), 5000);
+      return;
+    }
+    
+    // Restablecer a valores por defecto
+    setSettings(defaults);
+    
+    // Guardar los valores restablecidos
+    setSaving(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+    
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || accessToken;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const res = await fetch("/api/branding", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(defaults),
+        credentials: "include",
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        setErrorMessage(data.error || "No se pudo restablecer");
+        setTimeout(() => setErrorMessage(null), 5000);
+      } else {
+        setSuccessMessage("✅ Configuración restablecida correctamente");
+        setTimeout(() => setSuccessMessage(null), 5000);
+        
+        // Recargar la página para que el layout actualice el branding
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } catch (e: any) {
+      console.error("❌ Error en handleReset:", e);
+      setErrorMessage(`Error al restablecer: ${e?.message || "Error desconocido"}`);
+      setTimeout(() => setErrorMessage(null), 5000);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!isBusiness) {
       setErrorMessage("White label está disponible solo para plan Business");
@@ -755,14 +809,14 @@ function WhiteLabelPage() {
           <div className="flex flex-col sm:flex-row gap-2.5 max-md:gap-2 justify-end pt-3 max-md:pt-2">
             <button
               type="button"
-              onClick={() => setSettings(defaults)}
+              onClick={handleReset}
               disabled={saving}
               className="inline-flex items-center justify-center gap-1.5 max-md:gap-1 px-4 max-md:px-3 py-2 max-md:py-1.5 text-xs max-md:text-[11px] font-semibold rounded-lg transition-all border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg className="w-3.5 h-3.5 max-md:w-3 max-md:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Restablecer
+              {saving ? "Restableciendo..." : "Restablecer"}
             </button>
             <button
               onClick={handleSave}
