@@ -80,7 +80,7 @@ function CuentaPage() {
             // Actualizar en BD para futuras consultas
             await supabase
               .from("users")
-              .update({ api_calls_this_month: totalApiCalls })
+                .update({ api_calls_this_month: totalApiCalls } as any)
               .eq("id", user.id);
           }
         }
