@@ -45,23 +45,30 @@ export function isValidRFCFormatStrict(rfc: string): boolean {
 
 async function validateRFCWithSAT(rfc: string): Promise<SatResult> {
   const url = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=${rfc}_`;
+  const urlNoUnderscore = `https://siat.sat.gob.mx/app/qr/faces/pages/mobile/validadorqr.jsf?D1=10&D2=1&D3=${rfc}`;
+  const urlsToTry = [url, urlNoUnderscore];
 
   try {
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
+    let lastError: any;
+    for (const targetUrl of urlsToTry) {
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        try {
+          const response = await fetch(targetUrl, {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "es-MX,es;q=0.9,en;q=0.8",
+              "Referer": "https://siat.sat.gob.mx/",
+            },
+            signal: AbortSignal.timeout(12000),
+          });
 
-    if (!response.ok) {
-      throw new Error(`SAT respondió ${response.status}`);
-    }
+          if (!response.ok) {
+            throw new Error(`SAT respondió ${response.status}`);
+          }
 
-    const html = await response.text();
-    const lower = html.toLowerCase();
+          const html = await response.text();
+          const lower = html.toLowerCase();
 
     // Detectar si el RFC no existe o es inválido
     const invalidIndicators = [
@@ -136,9 +143,19 @@ async function validateRFCWithSAT(rfc: string): Promise<SatResult> {
       };
     }
 
-    // Si no hay indicadores claros, considerar inválido por seguridad
-    // (es mejor ser conservador y marcar como inválido si no hay certeza)
-    return { valid: false, source: "sat" };
+          // Si no hay indicadores claros, considerar inválido por seguridad
+          // (es mejor ser conservador y marcar como inválido si no hay certeza)
+          return { valid: false, source: "sat" };
+        } catch (error: any) {
+          lastError = error;
+          if (attempt < 1) {
+            await new Promise((resolve) => setTimeout(resolve, 400));
+          }
+        }
+      }
+    }
+
+    throw lastError || new Error("No se pudo conectar con el SAT");
 
   } catch (error: any) {
     // Si es timeout, dar un error más específico
@@ -153,7 +170,9 @@ async function validateRFCWithSAT(rfc: string): Promise<SatResult> {
     return {
       valid: null,
       source: "error",
-      error: error?.message || "Error desconocido al consultar SAT",
+      error: error?.message?.includes("SAT respondió")
+        ? "El SAT respondió con un error. Intenta nuevamente."
+        : "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos.",
     };
   }
 }
