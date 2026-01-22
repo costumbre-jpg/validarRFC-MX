@@ -150,6 +150,8 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
   const canWhiteLabel = planId === "business";
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
+  const brandName = canWhiteLabel && branding?.brand_name ? branding.brand_name : null;
+  const showBrandName = canWhiteLabel && branding?.show_brand_name && brandName;
 
   return (
     <>
@@ -176,20 +178,27 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
           </svg>
         </button>
             <div className="flex-1 text-sm font-semibold leading-6 text-gray-900 flex items-center gap-2 min-w-0">
-              {showCustomLogo ? (
-                <img
-                  src={branding?.custom_logo_url || ""}
-                  alt={branding?.brand_name || "Logo"}
-                  className="h-10 w-auto object-contain"
-                />
-              ) : hideMaflipp ? (
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
-                  aria-hidden
-                />
-              ) : (
-                <Logo size="md" showText={false} />
-              )}
+              <div className="flex flex-col items-start gap-0.5">
+                {showCustomLogo ? (
+                  <img
+                    src={branding?.custom_logo_url || ""}
+                    alt={branding?.brand_name || "Logo"}
+                    className="h-10 w-auto object-contain"
+                  />
+                ) : hideMaflipp ? (
+                  <div
+                    className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
+                    aria-hidden
+                  />
+                ) : (
+                  <Logo size="md" showText={false} />
+                )}
+                {showBrandName && (
+                  <span className="truncate text-xs font-semibold text-gray-900">
+                    {brandName}
+                  </span>
+                )}
+              </div>
             </div>
       </div>
 
@@ -203,20 +212,27 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
         />
         <div className={`fixed inset-y-0 left-0 z-50 w-1/2 max-w-xs overflow-y-auto bg-white shadow-2xl border-r border-gray-200 px-4 max-md:px-3 pb-4 transition-transform duration-200 ease-out ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
           <div className="flex justify-between items-center p-4 max-md:p-3">
-            {showCustomLogo ? (
-              <img
-                src={branding?.custom_logo_url || ""}
-                alt={branding?.brand_name || "Logo"}
-                className="h-10 max-md:h-8 w-auto object-contain"
-              />
-            ) : hideMaflipp ? (
-              <div
-                className="w-10 max-md:w-8 h-10 max-md:h-8 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
-                aria-hidden
-              />
-            ) : (
-              <Logo size="md" showText={false} />
-            )}
+            <div className="flex flex-col items-start gap-0.5">
+              {showCustomLogo ? (
+                <img
+                  src={branding?.custom_logo_url || ""}
+                  alt={branding?.brand_name || "Logo"}
+                  className="h-10 max-md:h-8 w-auto object-contain"
+                />
+              ) : hideMaflipp ? (
+                <div
+                  className="w-10 max-md:w-8 h-10 max-md:h-8 rounded-full flex items-center justify-center shadow-sm bg-transparent border-2 border-gray-300"
+                  aria-hidden
+                />
+              ) : (
+                <Logo size="md" showText={false} />
+              )}
+              {showBrandName && (
+                <span className="text-[11px] font-semibold text-gray-700 truncate max-w-[140px]">
+                  {brandName}
+                </span>
+              )}
+            </div>
             <button
               type="button"
               className="p-2 text-gray-600 hover:text-brand-primary"

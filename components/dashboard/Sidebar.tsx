@@ -159,6 +159,8 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
   const canWhiteLabel = planId === "business";
   const showCustomLogo = canWhiteLabel && branding?.custom_logo_url;
   const hideMaflipp = canWhiteLabel && branding?.hide_maflipp_brand;
+  const brandName = canWhiteLabel && branding?.brand_name ? branding.brand_name : null;
+  const showBrandName = canWhiteLabel && branding?.show_brand_name && brandName;
 
   // Lógica: 
   // 1. Si hay logo personalizado → mostrar logo personalizado
@@ -170,20 +172,27 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
     <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
       <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white border-r border-gray-200 px-6 pb-4">
         <div className="flex h-20 shrink-0 items-center gap-3">
-          {showCustomLogo ? (
-            <img
-              src={branding?.custom_logo_url || ""}
-              alt={branding?.brand_name || "Logo"}
-              className="h-14 w-auto object-contain"
-            />
-          ) : hideMaflipp ? (
-            <div
-              className="w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-transparent border-2 border-gray-300"
-              aria-hidden
-            />
-          ) : (
-            <Logo size="lg" showText={false} />
-          )}
+          <div className="flex flex-col items-start gap-1">
+            {showCustomLogo ? (
+              <img
+                src={branding?.custom_logo_url || ""}
+                alt={branding?.brand_name || "Logo"}
+                className="h-14 w-auto object-contain"
+              />
+            ) : hideMaflipp ? (
+              <div
+                className="w-14 h-14 rounded-full flex items-center justify-center shadow-md bg-transparent border-2 border-gray-300"
+                aria-hidden
+              />
+            ) : (
+              <Logo size="lg" showText={false} />
+            )}
+            {showBrandName && (
+              <span className="text-xs font-semibold text-gray-700 truncate max-w-[160px]">
+                {brandName}
+              </span>
+            )}
+          </div>
         </div>
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
