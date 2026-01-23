@@ -78,9 +78,10 @@ function CuentaPage() {
           if (totalApiCalls > 0) {
             (dbUser as any).api_calls_this_month = totalApiCalls;
             // Actualizar en BD para futuras consultas
-            await supabase
+            const supabaseAny = supabase as any;
+            await supabaseAny
               .from("users")
-                .update({ api_calls_this_month: totalApiCalls } as any)
+              .update({ api_calls_this_month: totalApiCalls })
               .eq("id", user.id);
           }
         }
