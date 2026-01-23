@@ -224,7 +224,7 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
             </div>
             <div className="mt-2 pt-2 border-t border-gray-200">
               <p className="text-[10px] font-medium text-gray-600">
-                Uso actual: <span className="font-bold" style={{ color: brandPrimaryColor }}>{usagePercentage.toFixed(1)}%</span> ({queriesThisMonth.toLocaleString()}/{planLimit === -1 ? "∞" : planLimit.toLocaleString()})
+                Uso actual: <span className="font-bold" style={{ color: brandPrimaryColor }}>{usagePercentage < 0.1 ? usagePercentage.toFixed(2) : usagePercentage.toFixed(1)}%</span> ({queriesThisMonth.toLocaleString()}/{planLimit === -1 ? "∞" : planLimit.toLocaleString()})
               </p>
             </div>
           </div>

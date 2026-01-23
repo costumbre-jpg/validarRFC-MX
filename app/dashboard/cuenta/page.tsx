@@ -66,8 +66,8 @@ function CuentaPage() {
         }
       }
       
-      // Si api_calls_this_month no está disponible, calcularlo desde api_keys
-      if (dbUser && (!(dbUser as any).api_calls_this_month || (dbUser as any).api_calls_this_month === 0)) {
+      // Siempre calcular api_calls_this_month desde api_keys (más preciso)
+      if (dbUser) {
         const { data: apiKeys } = await supabase
           .from("api_keys")
           .select("api_calls_this_month")
@@ -75,15 +75,18 @@ function CuentaPage() {
         
         if (apiKeys && apiKeys.length > 0) {
           const totalApiCalls = apiKeys.reduce((sum: number, key: any) => sum + (key?.api_calls_this_month || 0), 0);
-          if (totalApiCalls > 0) {
-            (dbUser as any).api_calls_this_month = totalApiCalls;
-            // Actualizar en BD para futuras consultas
+          (dbUser as any).api_calls_this_month = totalApiCalls;
+          // Actualizar en BD para futuras consultas (solo si cambió)
+          if (totalApiCalls !== ((dbUser as any).api_calls_this_month || 0)) {
             const supabaseAny = supabase as any;
             await supabaseAny
               .from("users")
               .update({ api_calls_this_month: totalApiCalls })
               .eq("id", user.id);
           }
+        } else {
+          // Si no hay API keys, asegurar que sea 0
+          (dbUser as any).api_calls_this_month = 0;
         }
       }
       
