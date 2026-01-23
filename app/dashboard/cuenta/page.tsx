@@ -15,6 +15,7 @@ function CuentaPage() {
   const [safeUser, setSafeUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [apiKeysCount, setApiKeysCount] = useState(0);
   const searchParams = useSearchParams();
 
   // Combinar userData con email del usuario autenticado para el modal
@@ -43,6 +44,7 @@ function CuentaPage() {
           subscription_status: designPlan, // Usar plan de la URL o 'free' por defecto
           created_at: new Date().toISOString(),
         });
+        setApiKeysCount(0);
         setLoading(false);
         return;
       }
@@ -88,6 +90,17 @@ function CuentaPage() {
           // Si no hay API keys, asegurar que sea 0
           (dbUser as any).api_calls_this_month = 0;
         }
+      }
+
+      // Contar API Keys creadas
+      try {
+        const { count: apiKeysTotal } = await supabase
+          .from("api_keys")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        setApiKeysCount(apiKeysTotal || 0);
+      } catch {
+        setApiKeysCount(0);
       }
       
       setSafeUser(user);
@@ -512,13 +525,13 @@ function CuentaPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                         </svg>
                       </div>
-                      <p className="text-xs max-md:text-[11px] font-semibold text-gray-700">Llamadas API</p>
+                      <p className="text-xs max-md:text-[11px] font-semibold text-gray-700">Claves API</p>
                     </div>
                     <p className="text-2xl max-md:text-xl font-bold mb-0.5" style={{ color: brandPrimaryColor }}>
-                      {userData?.api_calls_this_month || 0}
+                      {apiKeysCount}
                     </p>
                     <p className="text-[10px] max-md:text-[9px] text-gray-500">
-                      {apiLimit === -1 ? "Ilimitadas" : `de ${apiLimit.toLocaleString()}/mes`}
+                      {apiKeysCount === 1 ? "creada" : "creadas"}
                     </p>
                   </div>
                 </>
