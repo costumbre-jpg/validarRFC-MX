@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +30,15 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
     isDemo?: boolean;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!result && !error) return;
+    const timer = setTimeout(() => {
+      setResult(null);
+      setError(null);
+    }, 7000);
+    return () => clearTimeout(timer);
+  }, [result, error]);
 
   const planId = (userData?.subscription_status || "free") as PlanId;
   const queriesThisMonth = (userData?.rfc_queries_this_month || 0) + demoValidationCount;
