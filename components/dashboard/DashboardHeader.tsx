@@ -37,16 +37,24 @@ export default function DashboardHeader({
   if (!hasRealValidations) {
     try {
       if (typeof window !== "undefined") {
-        demoCount = parseInt(localStorage.getItem("maflipp_demo_validations_count") || "0", 10);
+        const storedDemo = localStorage.getItem("maflipp_demo_validations");
+        if (storedDemo) {
+          const parsed = JSON.parse(storedDemo);
+          demoCount = Array.isArray(parsed) ? parsed.length : 0;
+        } else {
+          demoCount = parseInt(
+            localStorage.getItem("maflipp_demo_validations_count") || "0",
+            10
+          );
+        }
       }
     } catch (e) {
       // Ignore
     }
   }
   
-  // Usar el prop demoValidationCount si está disponible, sino usar demoCount de localStorage
-  // Pero nunca sumar ambos para evitar duplicación
-  const finalDemoCount = demoValidationCount || demoCount;
+  // Usar el mayor entre estado y localStorage para evitar desfasajes
+  const finalDemoCount = Math.max(demoValidationCount || 0, demoCount);
   
   const queriesThisMonth =
     (userData?.rfc_queries_this_month || 0) + finalDemoCount;

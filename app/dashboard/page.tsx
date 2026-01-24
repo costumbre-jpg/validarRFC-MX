@@ -124,17 +124,28 @@ export default function DashboardPage() {
         const dbValidations = allValidations || [];
         const dbTotal = dbValidations.length;
 
-        // Fallback: usar validaciones locales si la BD está vacía
+        // Fallback: usar validaciones locales o demo si la BD está vacía
         let fallbackValidations: any[] = [];
         if (dbTotal === 0 && typeof window !== "undefined") {
           try {
-            const stored = localStorage.getItem("maflipp_local_validations");
-            if (stored) {
-              const parsed = JSON.parse(stored);
-              const startOfMonthIso = startOfMonth.toISOString();
-              fallbackValidations = parsed.filter(
+            const startOfMonthIso = startOfMonth.toISOString();
+
+            const localStored = localStorage.getItem("maflipp_local_validations");
+            if (localStored) {
+              const localParsed = JSON.parse(localStored);
+              fallbackValidations = localParsed.filter(
                 (v: any) => v?.created_at && v.created_at >= startOfMonthIso
               );
+            }
+
+            if (fallbackValidations.length === 0) {
+              const demoStored = localStorage.getItem("maflipp_demo_validations");
+              if (demoStored) {
+                const demoParsed = JSON.parse(demoStored);
+                fallbackValidations = demoParsed.filter(
+                  (v: any) => v?.created_at && v.created_at >= startOfMonthIso
+                );
+              }
             }
           } catch (e) {
             // Ignore
@@ -245,39 +256,41 @@ export default function DashboardPage() {
     rfc?: string;
   }) => {
     if (options?.isDemo) {
-      const newCount = demoValidationsCount + 1;
-      setDemoValidationsCount(newCount);
-      
+      const demoValidation = {
+        id: `demo-${Date.now()}`,
+        is_valid: options.valid ?? true,
+        created_at: new Date().toISOString(),
+        rfc: options.rfc || "DEMO",
+      };
+
       // Guardar en localStorage para que otras páginas puedan leerlo
+      let updatedDemoList = [demoValidation];
       try {
-        localStorage.setItem("maflipp_demo_validations_count", String(newCount));
-        const demoValidation = {
-          id: `demo-${Date.now()}`,
-          is_valid: options.valid ?? true,
-          created_at: new Date().toISOString(),
-          rfc: options.rfc || "DEMO",
-        };
-        const existing = JSON.parse(localStorage.getItem("maflipp_demo_validations") || "[]");
-        localStorage.setItem("maflipp_demo_validations", JSON.stringify([demoValidation, ...existing]));
+        const existing = JSON.parse(
+          localStorage.getItem("maflipp_demo_validations") || "[]"
+        );
+        updatedDemoList = [demoValidation, ...existing];
+        localStorage.setItem(
+          "maflipp_demo_validations",
+          JSON.stringify(updatedDemoList)
+        );
+        localStorage.setItem(
+          "maflipp_demo_validations_count",
+          String(updatedDemoList.length)
+        );
       } catch (e) {
         // Ignore localStorage errors
       }
-      
+
+      setDemoValidationsCount((prev) => Math.max(prev + 1, updatedDemoList.length));
+
       const isValid = options.valid ?? true;
       setStats((prev) => ({
         total: prev.total + 1,
         valid: prev.valid + (isValid ? 1 : 0),
         invalid: prev.invalid + (isValid ? 0 : 1),
       }));
-      setAllValidationsForStats((prev) => [
-        {
-          id: `demo-${Date.now()}`,
-          is_valid: isValid,
-          created_at: new Date().toISOString(),
-          rfc: options.rfc || "DEMO",
-        },
-        ...prev,
-      ]);
+      setAllValidationsForStats((prev) => [demoValidation, ...prev]);
       return;
     }
 
