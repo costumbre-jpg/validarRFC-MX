@@ -462,7 +462,7 @@ function CuentaPage() {
           const plan = getPlan(planId);
           const planLimit = plan.validationsPerMonth;
           const isPro = planId === "pro" || planId === "business";
-          const apiLimit = plan.features.apiCallsPerMonth || 0;
+          // const apiLimit = plan.features.apiCallsPerMonth || 0;
           // Incluir validaciones demo desde localStorage
           let demoCount = 0;
           try {
