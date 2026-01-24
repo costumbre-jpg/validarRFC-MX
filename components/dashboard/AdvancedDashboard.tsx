@@ -409,6 +409,32 @@ export default function AdvancedDashboard({
     monthlyToShow.length > 0 ? Math.max(...monthlyToShow.map((m) => m.count), 1) : 1
   );
 
+  // Totales del mes actual basados en validaciones (reales + demo)
+  const currentMonthStart = new Date();
+  currentMonthStart.setDate(1);
+  currentMonthStart.setHours(0, 0, 0, 0);
+  const currentMonthEnd = new Date(currentMonthStart);
+  currentMonthEnd.setMonth(currentMonthEnd.getMonth() + 1);
+
+  const monthValidations = (validations || []).filter((v: any) => {
+    const date = new Date(v.created_at);
+    return date >= currentMonthStart && date < currentMonthEnd;
+  });
+  const currentMonthTotal = monthValidations.length;
+  const activeDaysSet = new Set(
+    monthValidations.map((v: any) => {
+      const date = new Date(v.created_at);
+      date.setHours(0, 0, 0, 0);
+      return date.toISOString();
+    })
+  );
+  const activeDays = activeDaysSet.size;
+  const today = new Date();
+  const daysElapsed = today.getDate();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const avgPerDay = currentMonthTotal > 0 ? (currentMonthTotal / Math.max(activeDays, 1)) : 0;
+  const projection = currentMonthTotal > 0 ? Math.round((currentMonthTotal / Math.max(daysElapsed, 1)) * daysInMonth) : 0;
+
   if (isMock) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-600">
@@ -991,14 +1017,17 @@ export default function AdvancedDashboard({
             </div>
           </div>
           <p className="text-2xl max-md:text-xl font-bold text-gray-900 mb-1.5 max-md:mb-1">
-            {queriesThisMonth > 0 ? (queriesThisMonth / Math.max(1, new Date().getDate())).toFixed(1) : 0}
+            {avgPerDay.toFixed(1)}
           </p>
           <p className="text-xs max-md:text-[11px] text-gray-600">
-            Validaciones por día este mes
+            Promedio en días con actividad
           </p>
           <div className="mt-3 max-md:mt-2 pt-3 max-md:pt-2 border-t border-gray-200">
             <p className="text-xs max-md:text-[11px] text-gray-500">
-              Total del mes: <span className="font-semibold text-blue-700">{queriesThisMonth}</span>
+              Total del mes: <span className="font-semibold text-blue-700">{currentMonthTotal}</span>
+            </p>
+            <p className="text-xs max-md:text-[11px] text-gray-500 mt-1">
+              Días con actividad: <span className="font-semibold text-blue-700">{activeDays}</span>
             </p>
           </div>
         </div>
@@ -1014,17 +1043,15 @@ export default function AdvancedDashboard({
             </div>
           </div>
           <p className="text-2xl max-md:text-xl font-bold text-gray-900 mb-1.5 max-md:mb-1">
-            {queriesThisMonth > 0 
-              ? Math.round((queriesThisMonth / Math.max(1, new Date().getDate())) * 30).toLocaleString()
-              : 0}
+            {projection.toLocaleString()}
           </p>
           <p className="text-xs max-md:text-[11px] text-gray-600">
             Basado en uso actual
           </p>
-          {planLimit !== -1 && queriesThisMonth > 0 && (
+          {planLimit !== -1 && currentMonthTotal > 0 && (
             <div className="mt-3 max-md:mt-2 pt-3 max-md:pt-2 border-t border-gray-200">
               <p className="text-xs max-md:text-[11px] text-gray-500">
-                {Math.round((queriesThisMonth / Math.max(1, new Date().getDate())) * 30) > planLimit ? (
+                {projection > planLimit ? (
                   <span className="text-red-600 font-semibold">⚠️ Excederás tu límite</span>
                 ) : (
                   <span className="text-green-600 font-semibold">✓ Dentro del límite</span>
