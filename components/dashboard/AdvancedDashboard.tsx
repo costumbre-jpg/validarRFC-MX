@@ -1009,7 +1009,17 @@ export default function AdvancedDashboard({
         {/* Promedio Diario */}
         <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-lg border border-gray-200 p-6 max-md:p-4 hover:shadow-xl transition-all hover:scale-105 max-md:hover:scale-100">
           <div className="flex items-center justify-between mb-4 max-md:mb-3">
-            <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Promedio Diario</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Promedio Diario</h3>
+              <span className="group relative inline-flex items-center">
+                <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
+                </svg>
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-56 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                  Total del mes ÷ días con actividad.
+                </span>
+              </span>
+            </div>
             <div className="p-2.5 max-md:p-2 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 shadow-sm">
               <svg className="w-5 h-5 max-md:w-4 max-md:h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
@@ -1035,7 +1045,17 @@ export default function AdvancedDashboard({
         {/* Proyección Mensual */}
         <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl shadow-lg border border-gray-200 p-6 max-md:p-4 hover:shadow-xl transition-all hover:scale-105 max-md:hover:scale-100">
           <div className="flex items-center justify-between mb-4 max-md:mb-3">
-            <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Proyección Mensual</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Proyección Mensual</h3>
+              <span className="group relative inline-flex items-center">
+                <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
+                </svg>
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-60 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                  (Total del mes ÷ días transcurridos) × días del mes.
+                </span>
+              </span>
+            </div>
             <div className="p-2.5 max-md:p-2 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 shadow-sm">
               <svg className="w-5 h-5 max-md:w-4 max-md:h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
@@ -1064,7 +1084,17 @@ export default function AdvancedDashboard({
         {/* Día con Más Uso */}
         <div className="bg-gradient-to-br from-white to-amber-50 rounded-xl shadow-lg border border-gray-200 p-6 max-md:p-4 hover:shadow-xl transition-all hover:scale-105 max-md:hover:scale-100">
           <div className="flex items-center justify-between mb-4 max-md:mb-3">
-            <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Día Pico</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Día Pico</h3>
+              <span className="group relative inline-flex items-center">
+                <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
+                </svg>
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-52 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                  Día con más validaciones en los últimos 7 días.
+                </span>
+              </span>
+            </div>
             <div className="p-2.5 max-md:p-2 rounded-xl bg-gradient-to-br from-amber-100 to-amber-200 shadow-sm">
               <svg className="w-5 h-5 max-md:w-4 max-md:h-4 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
