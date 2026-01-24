@@ -983,7 +983,17 @@ export default function AdvancedDashboard({
         {/* Tasa de Éxito */}
         <div className="bg-gradient-to-br from-white to-green-50 rounded-xl shadow-lg border border-gray-200 p-6 max-md:p-4 hover:shadow-xl transition-all hover:scale-105 max-md:hover:scale-100">
           <div className="flex items-center justify-between mb-4 max-md:mb-3">
-            <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Tasa de Éxito</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm max-md:text-xs font-semibold text-gray-700">Tasa de Éxito</h3>
+              <span className="group relative inline-flex items-center">
+                <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
+                </svg>
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-64 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                  Porcentaje de RFC válidos sobre el total del mes actual.
+                </span>
+              </span>
+            </div>
             <div className="p-2.5 max-md:p-2 rounded-xl bg-gradient-to-br from-green-100 to-green-200 shadow-sm">
               <svg className="w-5 h-5 max-md:w-4 max-md:h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -1015,8 +1025,8 @@ export default function AdvancedDashboard({
                 <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
                 </svg>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-56 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
-                  Total del mes ÷ días con actividad.
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-72 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                  Rango: mes actual. Cálculo: total del mes ÷ días con actividad.
                 </span>
               </span>
             </div>
@@ -1051,8 +1061,8 @@ export default function AdvancedDashboard({
                 <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
                 </svg>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-60 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
-                  (Total del mes ÷ días transcurridos) × días del mes.
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-72 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                  Rango: mes actual. Cálculo: (total del mes ÷ días transcurridos) × días del mes.
                 </span>
               </span>
             </div>
@@ -1090,8 +1100,8 @@ export default function AdvancedDashboard({
                 <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
                 </svg>
-                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-52 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
-                  Día con más validaciones en los últimos 7 días.
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-64 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                  Rango: últimos 7 días. Muestra el día con más validaciones.
                 </span>
               </span>
             </div>
