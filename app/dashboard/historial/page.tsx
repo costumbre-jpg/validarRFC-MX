@@ -46,26 +46,42 @@ function HistorialPage() {
       return;
     }
 
-    // Incluir validaciones demo desde localStorage
+    const hasRealValidations = (count || 0) > 0;
+
+    // Incluir validaciones demo SOLO si no hay reales
     let demoValidations: any[] = [];
-    try {
-      const stored = localStorage.getItem("maflipp_demo_validations");
-      if (stored) {
-        demoValidations = JSON.parse(stored);
+    if (!hasRealValidations) {
+      try {
+        const stored = localStorage.getItem("maflipp_demo_validations");
+        if (stored) {
+          demoValidations = JSON.parse(stored);
+        }
+      } catch (e) {
+        // Ignore
       }
-    } catch (e) {
-      // Ignore
+    } else if (typeof window !== "undefined") {
+      try {
+        // Limpiar demo cuando ya hay validaciones reales
+        localStorage.removeItem("maflipp_demo_validations");
+        localStorage.removeItem("maflipp_demo_validations_count");
+      } catch (e) {
+        // Ignore
+      }
     }
 
-    // Combinar validaciones de BD con demo (solo para la página actual)
-    const allValidations = [...(dbValidations || []), ...demoValidations]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    
-    // Aplicar paginación manual a las combinadas
-    const paginated = allValidations.slice(from, from + itemsPerPage);
-    
-    setValidations(paginated);
-    setTotalCount((count || 0) + demoValidations.length);
+    if (hasRealValidations) {
+      // Solo mostrar validaciones reales (paginación ya aplicada por el servidor)
+      setValidations(dbValidations || []);
+      setTotalCount(count || 0);
+    } else {
+      // Solo demo: ordenar y paginar en cliente
+      const allDemo = [...demoValidations].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const paginated = allDemo.slice(from, from + itemsPerPage);
+      setValidations(paginated);
+      setTotalCount(allDemo.length);
+    }
     setLoading(false);
   };
 
