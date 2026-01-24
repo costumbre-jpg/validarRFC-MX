@@ -175,6 +175,15 @@ function APIKeysPage() {
           .eq("user_id", user.id)
           .order("created_at", { ascending: false });
         setApiKeys(keys || []);
+        
+        // Disparar evento para actualizar contador en "Mi Cuenta"
+        if (typeof window !== "undefined") {
+          // Evento personalizado para la misma pestaña
+          window.dispatchEvent(new Event("maflipp_api_keys_updated"));
+          // Evento de storage para otras pestañas
+          localStorage.setItem("maflipp_api_keys_updated", Date.now().toString());
+          localStorage.removeItem("maflipp_api_keys_updated"); // Limpiar inmediatamente
+        }
       }
     } catch (error) {
       console.error("Error creating API key:", error);

@@ -109,6 +109,26 @@ function CuentaPage() {
     };
 
     loadData();
+
+    // Escuchar cambios en localStorage para actualizar contador de claves API automáticamente
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "maflipp_api_keys_updated") {
+        loadData();
+      }
+    };
+
+    // Escuchar evento personalizado para actualización en la misma pestaña
+    const handleApiKeysUpdate = () => {
+      loadData();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("maflipp_api_keys_updated", handleApiKeysUpdate);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("maflipp_api_keys_updated", handleApiKeysUpdate);
+    };
   }, [searchParams]);
 
   const handleProfileUpdate = async () => {
