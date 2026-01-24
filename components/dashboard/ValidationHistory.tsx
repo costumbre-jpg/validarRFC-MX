@@ -94,9 +94,17 @@ export default function ValidationHistory({
 
   // Si es paginación del servidor, mostrar todas las validaciones recibidas
   // Si es paginación del cliente, hacer slice
+  const serverPageValidations =
+    validations.length > itemsPerPage
+      ? validations.slice(
+          (currentPage - 1) * itemsPerPage,
+          currentPage * itemsPerPage
+        )
+      : validations;
+
   const displayedValidations = showFullTable
     ? (isServerPagination 
-        ? validations // Ya vienen paginadas del servidor
+        ? serverPageValidations
         : validations.slice(
             (currentPage - 1) * itemsPerPage,
             currentPage * itemsPerPage
