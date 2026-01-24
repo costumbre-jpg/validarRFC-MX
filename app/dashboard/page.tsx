@@ -26,6 +26,11 @@ export default function DashboardPage() {
   useEffect(() => {
     try {
       setTrialBannerDismissed(localStorage.getItem("maflipp_trialEnded_dismissed") === "1");
+      // Cargar contador de demo validations desde localStorage al inicio
+      const storedCount = localStorage.getItem("maflipp_demo_validations_count");
+      if (storedCount) {
+        setDemoValidationsCount(parseInt(storedCount, 10));
+      }
     } catch {
       // ignore
     }
@@ -123,6 +128,17 @@ export default function DashboardPage() {
             .length || 0;
         setStats({ total, valid, invalid: total - valid });
 
+        // Si hay validaciones reales en la BD, limpiar contador de demo para evitar duplicación
+        if (total > 0 && typeof window !== "undefined") {
+          try {
+            localStorage.removeItem("maflipp_demo_validations_count");
+            localStorage.removeItem("maflipp_demo_validations");
+            setDemoValidationsCount(0);
+          } catch (e) {
+            // Ignore
+          }
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("🔴 Dashboard: error en loadData, usando mock:", error);
@@ -193,6 +209,36 @@ export default function DashboardPage() {
       return;
     }
 
+    // Para validaciones reales: limpiar demo validations y actualizar inmediatamente
+    if (typeof window !== "undefined") {
+      try {
+        // Limpiar demo validations cuando se hace una validación real
+        localStorage.removeItem("maflipp_demo_validations_count");
+        localStorage.removeItem("maflipp_demo_validations");
+        setDemoValidationsCount(0);
+      } catch (e) {
+        // Ignore
+      }
+    }
+    
+    // Actualizar inmediatamente el contador y luego refrescar datos
+    setUserData((prev: any) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        rfc_queries_this_month: (prev.rfc_queries_this_month || 0) + 1,
+      };
+    });
+    
+    // También actualizar stats inmediatamente
+    const isValid = options?.valid ?? true;
+    setStats((prev) => ({
+      total: prev.total + 1,
+      valid: prev.valid + (isValid ? 1 : 0),
+      invalid: prev.invalid + (isValid ? 0 : 1),
+    }));
+    
+    // Refrescar datos completos desde la BD para asegurar sincronización
     refreshData();
   };
 

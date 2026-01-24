@@ -28,18 +28,28 @@ export default function DashboardHeader({
     ? (planFromUrl as PlanId) 
     : ((userData?.subscription_status || "free") as PlanId);
   
-  // Incluir validaciones demo desde localStorage
+  // Incluir validaciones demo desde localStorage SOLO si no hay validaciones reales
+  // Esto evita duplicar contadores cuando hay validaciones reales en la BD
   let demoCount = 0;
-  try {
-    if (typeof window !== "undefined") {
-      demoCount = parseInt(localStorage.getItem("maflipp_demo_validations_count") || "0", 10);
+  const hasRealValidations = (userData?.rfc_queries_this_month || 0) > 0;
+  
+  // Solo contar demo si NO hay validaciones reales (para modo demo puro)
+  if (!hasRealValidations) {
+    try {
+      if (typeof window !== "undefined") {
+        demoCount = parseInt(localStorage.getItem("maflipp_demo_validations_count") || "0", 10);
+      }
+    } catch (e) {
+      // Ignore
     }
-  } catch (e) {
-    // Ignore
   }
   
+  // Usar el prop demoValidationCount si está disponible, sino usar demoCount de localStorage
+  // Pero nunca sumar ambos para evitar duplicación
+  const finalDemoCount = demoValidationCount || demoCount;
+  
   const queriesThisMonth =
-    (userData?.rfc_queries_this_month || 0) + (demoValidationCount || 0) + demoCount;
+    (userData?.rfc_queries_this_month || 0) + finalDemoCount;
   const planLimit = getPlanValidationLimit(planId);
   const plan = getPlan(planId);
   const isPro = planId === "pro" || planId === "business";
