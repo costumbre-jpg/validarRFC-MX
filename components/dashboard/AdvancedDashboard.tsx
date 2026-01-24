@@ -1079,7 +1079,9 @@ export default function AdvancedDashboard({
                     <h3 className="text-sm max-md:text-xs font-semibold text-gray-900 mb-0.5">
                       Análisis por Hora del Día
                     </h3>
-                    <p className="text-xs max-md:text-[11px] text-gray-500">Identifica tus horas pico de actividad</p>
+                    <p className="text-xs max-md:text-[11px] text-gray-500">
+                      Hoy · Identifica tus horas pico de actividad
+                    </p>
                   </div>
                 </div>
                 
