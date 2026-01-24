@@ -18,6 +18,50 @@ function HistorialPage() {
   const itemsPerPage = 10;
   const searchParams = useSearchParams();
 
+  const loadMockPage = (page: number) => {
+    const planParam = searchParams.get("plan");
+    const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
+
+    if (designPlan === "pro" || designPlan === "business") {
+      const allMockValidations = [
+        { id: "1", rfc: "ABC123456789", is_valid: true, created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+        { id: "2", rfc: "XYZ987654321", is_valid: false, created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
+        { id: "3", rfc: "DEF456789012", is_valid: true, created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
+        { id: "4", rfc: "GHI789012345", is_valid: true, created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "5", rfc: "JKL012345678", is_valid: false, created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "6", rfc: "MNO345678901", is_valid: true, created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "7", rfc: "PQR678901234", is_valid: true, created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "8", rfc: "STU901234567", is_valid: false, created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "9", rfc: "VWX234567890", is_valid: true, created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "10", rfc: "YZA567890123", is_valid: true, created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "11", rfc: "BCD890123456", is_valid: true, created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString() },
+        { id: "12", rfc: "EFG123456789", is_valid: false, created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
+      ];
+
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage;
+      const paginatedValidations = allMockValidations.slice(from, to);
+
+      setValidations(paginatedValidations);
+      setTotalCount(allMockValidations.length);
+    } else {
+      setValidations([]);
+      setTotalCount(0);
+    }
+    setLoading(false);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    if (!userData) return;
+    setLoading(true);
+    if (userData.id === "mock-user") {
+      loadMockPage(page);
+    } else {
+      loadValidations(page);
+    }
+  };
+
   const loadValidations = async (page: number) => {
     const supabase = createClient();
     const {
@@ -138,94 +182,7 @@ function HistorialPage() {
         });
         
         // Datos de ejemplo para visualizar el diseño (solo en modo diseño y planes Pro/Business)
-        if (designPlan === "pro" || designPlan === "business") {
-          const allMockValidations = [
-            {
-              id: "1",
-              rfc: "ABC123456789",
-              is_valid: true,
-              created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // Hace 2 horas
-            },
-            {
-              id: "2",
-              rfc: "XYZ987654321",
-              is_valid: false,
-              created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // Hace 5 horas
-            },
-            {
-              id: "3",
-              rfc: "DEF456789012",
-              is_valid: true,
-              created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Hace 1 día
-            },
-            {
-              id: "4",
-              rfc: "GHI789012345",
-              is_valid: true,
-              created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // Hace 2 días
-            },
-            {
-              id: "5",
-              rfc: "JKL012345678",
-              is_valid: false,
-              created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // Hace 3 días
-            },
-            {
-              id: "6",
-              rfc: "MNO345678901",
-              is_valid: true,
-              created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // Hace 4 días
-            },
-            {
-              id: "7",
-              rfc: "PQR678901234",
-              is_valid: true,
-              created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // Hace 5 días
-            },
-            {
-              id: "8",
-              rfc: "STU901234567",
-              is_valid: false,
-              created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(), // Hace 6 días
-            },
-            {
-              id: "9",
-              rfc: "VWX234567890",
-              is_valid: true,
-              created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // Hace 7 días
-            },
-            {
-              id: "10",
-              rfc: "YZA567890123",
-              is_valid: true,
-              created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(), // Hace 8 días
-            },
-            {
-              id: "11",
-              rfc: "BCD890123456",
-              is_valid: true,
-              created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(), // Hace 9 días
-            },
-            {
-              id: "12",
-              rfc: "EFG123456789",
-              is_valid: false,
-              created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // Hace 10 días
-            },
-          ];
-          
-          // Paginar las validaciones mock (solo mostrar 10 por página)
-          const from = (currentPage - 1) * itemsPerPage;
-          const to = from + itemsPerPage;
-          const paginatedValidations = allMockValidations.slice(from, to);
-          
-          setValidations(paginatedValidations);
-          setTotalCount(allMockValidations.length);
-        } else {
-          setValidations([]);
-          setTotalCount(0);
-        }
-        setLoading(false);
+        loadMockPage(1);
         return;
       }
 
@@ -245,51 +202,7 @@ function HistorialPage() {
     loadData();
   }, [searchParams]);
 
-  // Recargar cuando cambia la página
-  useEffect(() => {
-    if (userData && currentPage > 0) {
-      setLoading(true);
-      // Si es modo diseño, recargar validaciones mock paginadas
-      if (userData.id === "mock-user") {
-        const planParam = searchParams.get("plan");
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        if (designPlan === "pro" || designPlan === "business") {
-          const allMockValidations = [
-            { id: "1", rfc: "ABC123456789", is_valid: true, created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-            { id: "2", rfc: "XYZ987654321", is_valid: false, created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-            { id: "3", rfc: "DEF456789012", is_valid: true, created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-            { id: "4", rfc: "GHI789012345", is_valid: true, created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "5", rfc: "JKL012345678", is_valid: false, created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "6", rfc: "MNO345678901", is_valid: true, created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "7", rfc: "PQR678901234", is_valid: true, created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "8", rfc: "STU901234567", is_valid: false, created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "9", rfc: "VWX234567890", is_valid: true, created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "10", rfc: "YZA567890123", is_valid: true, created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "11", rfc: "BCD890123456", is_valid: true, created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString() },
-            { id: "12", rfc: "EFG123456789", is_valid: false, created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
-          ];
-          
-          const from = (currentPage - 1) * itemsPerPage;
-          const to = from + itemsPerPage;
-          const paginatedValidations = allMockValidations.slice(from, to);
-          
-          setTimeout(() => {
-            setValidations(paginatedValidations);
-            setTotalCount(allMockValidations.length);
-            setLoading(false);
-          }, 300); // Simular carga
-        } else {
-          setValidations([]);
-          setTotalCount(0);
-          setLoading(false);
-        }
-      } else {
-        // Usuario real: cargar desde servidor
-        loadValidations(currentPage);
-      }
-    }
-  }, [currentPage, userData, searchParams]);
+  // Recargar cuando cambia la página: ahora lo maneja handlePageChange
 
   const planId = (userData?.subscription_status || "free") as PlanId;
   
@@ -385,7 +298,7 @@ function HistorialPage() {
         totalCount={totalCount}
         currentPage={currentPage}
         itemsPerPage={itemsPerPage}
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
       />
     </div>
   );
