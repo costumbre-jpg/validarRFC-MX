@@ -88,9 +88,13 @@ function HistorialPage() {
     }
 
     if (hasDbValidations) {
-      // Solo mostrar validaciones reales (paginación ya aplicada por el servidor)
-      setValidations(dbValidations || []);
-      setTotalCount(count || 0);
+      // Asegurar paginación correcta aunque el backend devuelva más registros
+      const shouldSliceDb = (dbValidations?.length || 0) > itemsPerPage;
+      const pageRows = shouldSliceDb
+        ? (dbValidations || []).slice(from, from + itemsPerPage)
+        : (dbValidations || []);
+      setValidations(pageRows);
+      setTotalCount(count || (dbValidations?.length || 0));
     } else if (hasLocalValidations) {
       const allLocal = [...localValidations].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
