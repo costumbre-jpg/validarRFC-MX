@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({ total: 0, valid: 0, invalid: 0 });
   const [demoValidationsCount, setDemoValidationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [resetting, setResetting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Para forzar actualización
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -191,6 +192,53 @@ export default function DashboardPage() {
     setRefreshKey((prev) => prev + 1);
   };
 
+  const handleResetValidations = async () => {
+    if (typeof window !== "undefined") {
+      const confirmed = window.confirm(
+        "Esto eliminará todas tus validaciones y reiniciará el contador mensual. ¿Deseas continuar?"
+      );
+      if (!confirmed) return;
+    }
+
+    setResetting(true);
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      await fetch("/api/validate/reset", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        credentials: "include",
+      });
+
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("maflipp_demo_validations_count");
+          localStorage.removeItem("maflipp_demo_validations");
+          localStorage.removeItem("maflipp_local_validations");
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      setDemoValidationsCount(0);
+      setAllValidationsForStats([]);
+      setStats({ total: 0, valid: 0, invalid: 0 });
+      setUserData((prev: any) =>
+        prev ? { ...prev, rfc_queries_this_month: 0 } : prev
+      );
+      refreshData();
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const handleValidationComplete = (options?: {
     isDemo?: boolean;
     valid?: boolean;
@@ -348,6 +396,19 @@ export default function DashboardPage() {
             demoValidationCount={demoValidationsCount}
           />
         </div>
+
+        {userData && userData.id !== "mock-user" && (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleResetValidations}
+              disabled={resetting}
+              className="inline-flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {resetting ? "Reiniciando..." : "Reiniciar validaciones"}
+            </button>
+          </div>
+        )}
 
 
         {/* Estadísticas - Abajo del validador, en grid de 3 columnas */}
