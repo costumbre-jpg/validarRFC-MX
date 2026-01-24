@@ -88,6 +88,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Intentar reiniciar total_validations si existe (ignorar error si no)
+    try {
+      await supabaseAdmin
+        .from("users")
+        .update({ total_validations: 0 })
+        .eq("id", userId);
+    } catch {
+      // ignore
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Reset validations error:", error);
