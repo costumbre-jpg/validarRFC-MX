@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     // 6. Rate limiting (solo para usuarios autenticados)
     let rate = { allowed: true, remaining: RATE_LIMIT, resetSeconds: 0 };
-    if (!isDesignMode) {
+    if (!isDesignMode && user) {
       rate = await rateLimit({
         key: `validate:${user.id}`,
         limit: RATE_LIMIT,
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     let queriesThisMonth = 0;
     let remaining = -1;
 
-    if (!isDesignMode) {
+    if (!isDesignMode && user) {
       const { data: userData, error: userError } = await supabaseAdmin
         .from("users")
         .select("subscription_status, rfc_queries_this_month")
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 9. Guardar en base de datos (solo si no es modo diseño)
-    if (!isDesignMode) {
+    if (!isDesignMode && user) {
       if (!satResult.success) {
         return NextResponse.json(
           {
