@@ -180,6 +180,26 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
         isDemo: data.source === "demo",
       });
 
+      // Guardar validaciones reales en localStorage como respaldo UI
+      if (typeof window !== "undefined" && data.source !== "demo") {
+        try {
+          const stored = localStorage.getItem("maflipp_local_validations");
+          const parsed = stored ? JSON.parse(stored) : [];
+          const newItem = {
+            id: `local-${Date.now()}`,
+            rfc: data.rfc,
+            is_valid: data.valid,
+            created_at: new Date().toISOString(),
+          };
+          localStorage.setItem(
+            "maflipp_local_validations",
+            JSON.stringify([newItem, ...parsed])
+          );
+        } catch (e) {
+          // Ignore
+        }
+      }
+
       // Actualizar datos sin recargar la página
       if (onValidationComplete) {
         setTimeout(() => {

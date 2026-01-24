@@ -120,19 +120,43 @@ export default function DashboardPage() {
           .eq("user_id", session.user.id)
           .gte("created_at", startOfMonth.toISOString());
 
-        setAllValidationsForStats(allValidations || []);
+        const dbValidations = allValidations || [];
+        const dbTotal = dbValidations.length;
 
-        const total = allValidations?.length || 0;
+        // Fallback: usar validaciones locales si la BD está vacía
+        let fallbackValidations: any[] = [];
+        if (dbTotal === 0 && typeof window !== "undefined") {
+          try {
+            const stored = localStorage.getItem("maflipp_local_validations");
+            if (stored) {
+              const parsed = JSON.parse(stored);
+              const startOfMonthIso = startOfMonth.toISOString();
+              fallbackValidations = parsed.filter(
+                (v: any) => v?.created_at && v.created_at >= startOfMonthIso
+              );
+            }
+          } catch (e) {
+            // Ignore
+          }
+        }
+
+        const finalValidations =
+          dbTotal > 0 ? dbValidations : fallbackValidations;
+
+        setAllValidationsForStats(finalValidations);
+
+        const total = finalValidations.length;
         const valid =
-          allValidations?.filter((v: { is_valid: boolean }) => v.is_valid)
+          finalValidations?.filter((v: { is_valid: boolean }) => v.is_valid)
             .length || 0;
         setStats({ total, valid, invalid: total - valid });
 
-        // Si hay validaciones reales en la BD, limpiar contador de demo para evitar duplicación
-        if (total > 0 && typeof window !== "undefined") {
+        // Si hay validaciones reales en la BD, limpiar contador de demo/local para evitar duplicación
+        if (dbTotal > 0 && typeof window !== "undefined") {
           try {
             localStorage.removeItem("maflipp_demo_validations_count");
             localStorage.removeItem("maflipp_demo_validations");
+            localStorage.removeItem("maflipp_local_validations");
             setDemoValidationsCount(0);
           } catch (e) {
             // Ignore

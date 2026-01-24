@@ -46,10 +46,26 @@ function HistorialPage() {
       return;
     }
 
-    const hasRealValidations =
-      (count || 0) > 0 || (userData?.rfc_queries_this_month || 0) > 0;
+    const hasDbValidations = (count || 0) > 0;
+    const monthlyCount = userData?.rfc_queries_this_month || 0;
 
-    // Incluir validaciones demo SOLO si no hay reales
+    // Fallback: validaciones locales si no hay datos en BD
+    let localValidations: any[] = [];
+    if (!hasDbValidations && typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("maflipp_local_validations");
+        if (stored) {
+          localValidations = JSON.parse(stored);
+        }
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    const hasLocalValidations = localValidations.length > 0;
+    const hasRealValidations = hasDbValidations || hasLocalValidations || monthlyCount > 0;
+
+    // Incluir validaciones demo SOLO si no hay reales ni locales
     let demoValidations: any[] = [];
     if (!hasRealValidations) {
       try {
@@ -70,10 +86,17 @@ function HistorialPage() {
       }
     }
 
-    if (hasRealValidations) {
+    if (hasDbValidations) {
       // Solo mostrar validaciones reales (paginación ya aplicada por el servidor)
       setValidations(dbValidations || []);
       setTotalCount(count || 0);
+    } else if (hasLocalValidations) {
+      const allLocal = [...localValidations].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const paginated = allLocal.slice(from, from + itemsPerPage);
+      setValidations(paginated);
+      setTotalCount(allLocal.length);
     } else {
       // Solo demo: ordenar y paginar en cliente
       const allDemo = [...demoValidations].sort(

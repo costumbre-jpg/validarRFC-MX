@@ -547,7 +547,23 @@ function CuentaPage() {
                         }
 
                         if (dbTotal > 0) return dbTotal;
-                        if (hasRealValidations) return monthlyCount;
+                        if (hasRealValidations) {
+                          // Usar local storage si existe, sino fallback a monthlyCount
+                          if (typeof window !== "undefined") {
+                            try {
+                              const localStored = localStorage.getItem("maflipp_local_validations");
+                              if (localStored) {
+                                const localParsed = JSON.parse(localStored);
+                                if (Array.isArray(localParsed) && localParsed.length > 0) {
+                                  return localParsed.length;
+                                }
+                              }
+                            } catch (e) {
+                              // Ignore
+                            }
+                          }
+                          return monthlyCount;
+                        }
                         return demoCount;
                       })()}
                     </p>
