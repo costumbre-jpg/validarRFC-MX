@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { getPlan, type PlanId } from "@/lib/plans";
+import { getPlan, getPlanValidationLimit, type PlanId } from "@/lib/plans";
 import { jsPDF } from "jspdf";
 
 interface AdvancedDashboardProps {
@@ -353,15 +353,36 @@ export default function AdvancedDashboard({
   const dailyToShow = isMock ? [] : dailyUsage;
   const monthlyToShow = isMock ? [] : monthlyTrends;
 
-  // Calcular máximos para escalar las barras
-  const maxDailyUsage =
-    dailyToShow.length > 0
-      ? Math.max(...dailyToShow.map((d) => d.count), 1)
-      : 1;
-  const maxMonthlyUsage =
-    monthlyToShow.length > 0
-      ? Math.max(...monthlyToShow.map((m) => m.count), 1)
-      : 1;
+  // Calcular máximos teóricos basados en el plan para barras proporcionales
+  const planLimit = userData?.subscription_status 
+    ? getPlanValidationLimit(userData.subscription_status as PlanId)
+    : 10; // Default a Free si no hay plan
+  
+  // Máximo diario teórico: límite mensual / 30 días (promedio diario esperado)
+  // Si el plan es ilimitado, usar un promedio razonable (ej: 200/día)
+  const theoreticalDailyMax = planLimit === -1 
+    ? 200 
+    : Math.max(planLimit / 30, 1);
+  
+  // Máximo mensual teórico: límite del plan
+  const theoreticalMonthlyMax = planLimit === -1 
+    ? 10000 // Valor razonable para visualización si es ilimitado
+    : planLimit;
+  
+  // Máximo por hora teórico: límite mensual / 30 días / 24 horas
+  const theoreticalHourlyMax = planLimit === -1 
+    ? 10 
+    : Math.max(planLimit / 30 / 24, 0.1);
+
+  // Usar el máximo entre el teórico y el real (para que las barras no se vean demasiado pequeñas si hay picos)
+  const maxDailyUsage = Math.max(
+    theoreticalDailyMax,
+    dailyToShow.length > 0 ? Math.max(...dailyToShow.map((d) => d.count), 1) : 1
+  );
+  const maxMonthlyUsage = Math.max(
+    theoreticalMonthlyMax,
+    monthlyToShow.length > 0 ? Math.max(...monthlyToShow.map((m) => m.count), 1) : 1
+  );
 
   if (isMock) {
     return (
@@ -1039,9 +1060,13 @@ export default function AdvancedDashboard({
                 
                 <div className="grid grid-cols-12 gap-1 max-md:gap-0.5 mb-4 max-md:mb-3">
                   {hourlyUsage.map((hour, index) => {
-                    const maxHour = Math.max(...hourlyUsage.map(h => h.count), 1);
+                    // Usar máximo teórico por hora para barras proporcionales
+                    const maxHour = Math.max(
+                      theoreticalHourlyMax,
+                      Math.max(...hourlyUsage.map(h => h.count), 0.1)
+                    );
                     const percentage = (hour.count / maxHour) * 100;
-                    const isPeak = hour.count === maxHour;
+                    const isPeak = hour.count === Math.max(...hourlyUsage.map(h => h.count), 0);
                     
                     return (
                       <div key={index} className="flex flex-col items-center group relative">
