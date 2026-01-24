@@ -211,13 +211,38 @@ export default function AdvancedDashboard({
 
         // Datos adicionales solo para Business
         if (isBusiness) {
-          // Análisis por hora del día (últimos 7 días)
+          // Análisis por hora del día (solo hoy)
+          const startOfToday = new Date();
+          startOfToday.setHours(0, 0, 0, 0);
+          const endOfToday = new Date();
+          endOfToday.setHours(23, 59, 59, 999);
+
+          const { data: todayValidationsData } = await supabase
+            .from("validations")
+            .select("created_at")
+            .eq("user_id", userId)
+            .gte("created_at", startOfToday.toISOString())
+            .lte("created_at", endOfToday.toISOString());
+
+          const propToday = (validations || [])
+            .filter((v: any) => {
+              const date = new Date(v.created_at);
+              return date >= startOfToday && date <= endOfToday;
+            })
+            .map((v: any) => ({ created_at: v.created_at }));
+
+          const dbToday = (todayValidationsData ?? []) as { created_at: string }[];
+          const allToday = [...propToday, ...dbToday];
+          const uniqueToday = Array.from(
+            new Map(allToday.map((v) => [v.created_at, v])).values()
+          );
+
           const hourlyCounts: Record<number, number> = {};
           for (let i = 0; i < 24; i++) {
             hourlyCounts[i] = 0;
           }
-          
-          recentValidations.forEach((v) => {
+
+          uniqueToday.forEach((v) => {
             const date = new Date(v.created_at);
             const hour = date.getHours();
             if (hourlyCounts[hour] !== undefined) {
@@ -354,25 +379,25 @@ export default function AdvancedDashboard({
   const monthlyToShow = isMock ? [] : monthlyTrends;
 
   // Calcular máximos teóricos basados en el plan para barras proporcionales
-  const planLimit = userData?.subscription_status 
+  const planLimitForScale = userData?.subscription_status
     ? getPlanValidationLimit(userData.subscription_status as PlanId)
     : 10; // Default a Free si no hay plan
   
   // Máximo diario teórico: límite mensual / 30 días (promedio diario esperado)
   // Si el plan es ilimitado, usar un promedio razonable (ej: 200/día)
-  const theoreticalDailyMax = planLimit === -1 
+  const theoreticalDailyMax = planLimitForScale === -1
     ? 200 
-    : Math.max(planLimit / 30, 1);
+    : Math.max(planLimitForScale / 30, 1);
   
   // Máximo mensual teórico: límite del plan
-  const theoreticalMonthlyMax = planLimit === -1 
+  const theoreticalMonthlyMax = planLimitForScale === -1
     ? 10000 // Valor razonable para visualización si es ilimitado
-    : planLimit;
+    : planLimitForScale;
   
   // Máximo por hora teórico: límite mensual / 30 días / 24 horas
-  const theoreticalHourlyMax = planLimit === -1 
+  const theoreticalHourlyMax = planLimitForScale === -1
     ? 10 
-    : Math.max(planLimit / 30 / 24, 0.1);
+    : Math.max(planLimitForScale / 30 / 24, 0.1);
 
   // Usar el máximo entre el teórico y el real (para que las barras no se vean demasiado pequeñas si hay picos)
   const maxDailyUsage = Math.max(
