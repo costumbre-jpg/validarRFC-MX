@@ -46,7 +46,8 @@ function HistorialPage() {
       return;
     }
 
-    const hasRealValidations = (count || 0) > 0;
+    const hasRealValidations =
+      (count || 0) > 0 || (userData?.rfc_queries_this_month || 0) > 0;
 
     // Incluir validaciones demo SOLO si no hay reales
     let demoValidations: any[] = [];

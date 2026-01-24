@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
+import { createClient } from "@/lib/supabase/client";
 
 interface RFCValidatorProps {
   userData: any;
@@ -116,12 +117,20 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
     setLoading(true);
 
     try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       // Llamar a la API de validación
       const response = await fetch("/api/validate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        credentials: "include",
         body: JSON.stringify({ rfc: formattedRFC }),
       });
 

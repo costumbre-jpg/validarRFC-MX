@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 import { validateRFC, normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
@@ -8,13 +8,59 @@ const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 10; // 10 requests por minuto
 const RATE_LIMIT_WINDOW_SECONDS = 60;
 
+const extractJwtFromCookie = (raw?: string) => {
+  if (!raw) return undefined;
+  if (raw.trim().startsWith("[")) {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr) && arr[0]) {
+        return arr[0] as string;
+      }
+    } catch {
+      // ignore parse error
+    }
+  }
+  return raw;
+};
+
 export async function POST(request: NextRequest) {
   try {
     // 1. Verificar autenticación
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey) {
+      return NextResponse.json(
+        { success: false, valid: false, rfc: "", remaining: 0, message: "Falta configuración de Supabase." },
+        { status: 500 }
+      );
+    }
+
+    const authHeader = request.headers.get("authorization") || "";
+    let jwt = authHeader.startsWith("Bearer ")
+      ? authHeader.replace("Bearer ", "")
+      : undefined;
+
+    if (!jwt) {
+      const cookieToken =
+        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
+        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
+      jwt = cookieToken || undefined;
+    }
+
+    const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    let user: { id: string } | null = null;
+    if (jwt) {
+      const { data, error } = await supabaseAdmin.auth.getUser(jwt);
+      if (!error && data?.user) {
+        user = data.user;
+      }
+    }
 
     // 2. Parsear body
     let body;
@@ -104,7 +150,7 @@ export async function POST(request: NextRequest) {
     let remaining = -1;
 
     if (!isDesignMode) {
-      const { data: userData, error: userError } = await supabase
+      const { data: userData, error: userError } = await supabaseAdmin
         .from("users")
         .select("subscription_status, rfc_queries_this_month")
         .eq("id", user.id)
@@ -150,13 +196,26 @@ export async function POST(request: NextRequest) {
 
     // 9. Guardar en base de datos (solo si no es modo diseño)
     if (!isDesignMode) {
-      const { error: insertError } = await supabase
+      if (!satResult.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: formattedRFC,
+            remaining: Math.max(0, remaining),
+            message: satResult.message || "Error al validar el RFC",
+          },
+          { status: 502 }
+        );
+      }
+
+      const { error: insertError } = await supabaseAdmin
         .from("validations")
         .insert({
           user_id: user.id,
           rfc: formattedRFC,
-          is_valid: satResult.valid,
-          response_time: satResult.responseTime,
+          is_valid: satResult.valid === true,
+          response_time: satResult.responseTime ?? 0,
         });
 
       if (insertError) {
@@ -164,7 +223,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Actualizar contador del usuario
-      const { data: currentUserData } = await supabase
+      const { data: currentUserData } = await supabaseAdmin
         .from("users")
         .select("rfc_queries_this_month")
         .eq("id", user.id)
@@ -172,7 +231,7 @@ export async function POST(request: NextRequest) {
 
       const newCount = (currentUserData?.rfc_queries_this_month || 0) + 1;
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from("users")
         .update({ rfc_queries_this_month: newCount })
         .eq("id", user.id);
@@ -182,7 +241,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Obtener límite restante
-      const { data: updatedUserData } = await supabase
+      const { data: updatedUserData } = await supabaseAdmin
         .from("users")
         .select("subscription_status, rfc_queries_this_month")
         .eq("id", user.id)

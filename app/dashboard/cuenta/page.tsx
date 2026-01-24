@@ -522,18 +522,33 @@ function CuentaPage() {
                     <p className="text-2xl max-md:text-xl font-bold mb-0.5" style={{ color: brandPrimaryColor }}>
                       {(() => {
                         const dbTotal = userData?.total_validations || 0;
+                        const monthlyCount = userData?.rfc_queries_this_month || 0;
+                        const hasRealValidations = dbTotal > 0 || monthlyCount > 0;
                         let demoCount = 0;
-                        try {
-                          if (typeof window !== "undefined") {
-                            const stored = localStorage.getItem("maflipp_demo_validations");
-                            if (stored) {
-                              demoCount = JSON.parse(stored).length;
+
+                        if (!hasRealValidations) {
+                          try {
+                            if (typeof window !== "undefined") {
+                              const stored = localStorage.getItem("maflipp_demo_validations");
+                              if (stored) {
+                                demoCount = JSON.parse(stored).length;
+                              }
                             }
+                          } catch (e) {
+                            // Ignore
                           }
-                        } catch (e) {
-                          // Ignore
+                        } else if (typeof window !== "undefined") {
+                          try {
+                            localStorage.removeItem("maflipp_demo_validations");
+                            localStorage.removeItem("maflipp_demo_validations_count");
+                          } catch (e) {
+                            // Ignore
+                          }
                         }
-                        return dbTotal + demoCount;
+
+                        if (dbTotal > 0) return dbTotal;
+                        if (hasRealValidations) return monthlyCount;
+                        return demoCount;
                       })()}
                     </p>
                     <p className="text-[10px] max-md:text-[9px] text-gray-500">Historial completo</p>
