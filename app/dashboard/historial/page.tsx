@@ -137,9 +137,16 @@ function HistorialPage() {
     }
 
     if (hasDbValidations) {
-      // Resultados reales ya vienen paginados por el servidor
-      setValidations(dbValidations || []);
-      setTotalCount(count || 0);
+      // Asegurar tamaño correcto por página aunque el backend devuelva más registros
+      const total = count || (dbValidations?.length || 0);
+      const remaining = Math.max(0, total - (page - 1) * itemsPerPage);
+      const expectedCount = Math.min(itemsPerPage, remaining);
+      const pageRows =
+        expectedCount > 0
+          ? (dbValidations || []).slice(0, expectedCount)
+          : [];
+      setValidations(pageRows);
+      setTotalCount(total);
     } else if (hasLocalValidations) {
       const allLocal = [...localValidations].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
