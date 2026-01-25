@@ -121,20 +121,26 @@ export default function AdvancedDashboard({
           new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
         );
 
-        // Agrupar por día
+        // Agrupar por día (zona horaria local)
         const dailyCounts: Record<string, number> = {};
+        const getLocalDateKey = (date: Date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        };
         Array.from({ length: 7 }, (_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - (6 - i));
           date.setHours(0, 0, 0, 0);
-          const key = date.toISOString().split("T")[0] ?? "";
+          const key = getLocalDateKey(date);
           dailyCounts[key] = 0;
         });
 
         recentValidations.forEach((v) => {
           const date = new Date(v.created_at);
           date.setHours(0, 0, 0, 0);
-          const key = date.toISOString().split("T")[0] ?? "";
+          const key = getLocalDateKey(date);
           if (dailyCounts[key] !== undefined) {
             dailyCounts[key]++;
           }
@@ -143,7 +149,7 @@ export default function AdvancedDashboard({
         const last7Days = Array.from({ length: 7 }, (_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - (6 - i));
-          const key = date.toISOString().split("T")[0] ?? "";
+          const key = getLocalDateKey(date);
           return {
             date: date.toLocaleDateString("es-MX", { weekday: "short", day: "numeric" }),
             count: dailyCounts[key] || 0,
