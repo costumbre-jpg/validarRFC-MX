@@ -15,7 +15,7 @@ function HistorialPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
   const searchParams = useSearchParams();
 
   const loadMockPage = (page: number) => {
