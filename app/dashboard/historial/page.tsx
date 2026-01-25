@@ -77,13 +77,18 @@ function HistorialPage() {
     const from = (page - 1) * itemsPerPage;
     const to = from + itemsPerPage - 1;
 
-    const { data: dbValidations, count, error } = await supabase
+    const { data: dbValidations, error } = await supabase
       .from("validations")
-      .select("*", { count: "exact" })
+      .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .range(from, to);
+
+    const { count } = await supabase
+      .from("validations")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
 
     if (error) {
       console.error("Error loading validations:", error);
@@ -132,16 +137,9 @@ function HistorialPage() {
     }
 
     if (hasDbValidations) {
-      // Asegurar paginación correcta incluso si el backend devuelve más registros
-      const total = count || (dbValidations?.length || 0);
-      const remaining = Math.max(0, total - (page - 1) * itemsPerPage);
-      const expectedCount = Math.min(itemsPerPage, remaining);
-      const pageRows =
-        expectedCount > 0
-          ? (dbValidations || []).slice(0, expectedCount)
-          : [];
-      setValidations(pageRows);
-      setTotalCount(total);
+      // Resultados reales ya vienen paginados por el servidor
+      setValidations(dbValidations || []);
+      setTotalCount(count || 0);
     } else if (hasLocalValidations) {
       const allLocal = [...localValidations].sort(
         (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
