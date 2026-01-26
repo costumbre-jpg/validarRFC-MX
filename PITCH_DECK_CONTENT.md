@@ -3,14 +3,15 @@
 ## Slide 1 — Portada
 **Maflipp**  
 Validación RFC + Analytics + White Label  
+Plataforma B2B para México (SAT)  
 Contacto: loorjimenezyandryjavier@gmail.com | soporte@maflipp.com
 
 ## Slide 2 — El problema
 Validar RFC de forma manual es lento, propenso a errores y costoso para equipos de facturación.  
-Cuando una empresa escala, necesita una validación confiable y automática.
+En México, el cumplimiento fiscal requiere un flujo confiable.
 
 ## Slide 3 — La solución
-Maflipp valida RFC en tiempo real, entrega resultados claros y mantiene trazabilidad completa.  
+Maflipp valida RFC en tiempo real (SAT), entrega resultados claros y mantiene trazabilidad completa.  
 Incluye dashboard y API listos para integrar en cualquier sistema.
 
 ## Slide 4 — Producto (capturas)
@@ -19,7 +20,7 @@ Incluye dashboard y API listos para integrar en cualquier sistema.
 - White label completo
 
 ## Slide 5 — Clientes objetivo
-ERPs, software de facturación, fintechs y SaaS en México.
+ERPs, facturación electrónica, fintechs, SaaS B2B y consultorías fiscales en México.
 
 ## Slide 6 — Modelo de negocio
 Planes por suscripción (Free / Pro / Business) según volumen y features.  

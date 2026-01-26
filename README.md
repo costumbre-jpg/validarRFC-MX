@@ -232,6 +232,7 @@ Todas las tablas tienen RLS habilitado con políticas que permiten:
 - `COSTS.md`: Costos operativos estimados
 - `PITCH_DECK_OUTLINE.md`: Estructura de pitch deck
 - `PITCH_DECK_CONTENT.md`: Texto final de pitch deck
+- `SLIDES_CONTENT_ES.md`: Pitch deck en español (México/SAT)
 - `DEMO_SCRIPT.md`: Guion de demo
 - `SALES_EMAIL.md`: Email de venta
 - `ONE_PAGER.md`: Resumen comercial 1 página
