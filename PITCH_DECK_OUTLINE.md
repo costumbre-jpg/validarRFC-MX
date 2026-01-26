@@ -6,6 +6,7 @@ Formato recomendado: 12–15 slides. Copia y pega cada slide.
 **Maflipp**  
 Validación RFC + Analytics + White Label  
 Plataforma B2B lista para escalar en México
+Contacto: loorjimenezyandryjavier@gmail.com | soporte@maflipp.com
 
 ## Slide 2 — El problema
 - La validación de RFC es crítica para facturación y cumplimiento.
@@ -21,6 +22,7 @@ Plataforma B2B lista para escalar en México
 - Validación inmediata con detalle de régimen y razón social.
 - Historial exportable y trazabilidad.
 - White label (logo, marca, colores).
+Logo oficial: `public/Maflipp-logo.png`
 
 ## Slide 5 — Clientes objetivo
 - ERPs y software de facturación
@@ -60,5 +62,5 @@ Plataforma B2B lista para escalar en México
 ## Slide 12 — Oferta
 - Venta de SaaS completo o código fuente
 - Documentación y handoff listos
-- Contacto: [tu email]
+- Contacto: loorjimenezyandryjavier@gmail.com / soporte@maflipp.com
 

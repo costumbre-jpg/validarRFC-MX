@@ -1,4 +1,4 @@
-# Demo Script (3 minutos, guion comercial)
+# Demo Script (3 minutos, guion corporativo)
 
 ## 1) Intro (0:00–0:15)
 “Maflipp valida RFC en tiempo real y da control total del uso con dashboard y API.”

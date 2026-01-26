@@ -33,5 +33,6 @@ Producto funcional y listo para producción
 Mercado B2B México con alta necesidad de validación fiscal y compliance
 
 ## Contacto
-[tu email aquí]
+loorjimenezyandryjavier@gmail.com  
+soporte@maflipp.com
 
