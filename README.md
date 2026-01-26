@@ -243,6 +243,7 @@ Todas las tablas tienen RLS habilitado con políticas que permiten:
 - `LAUNCH_CHECKLIST.md`: Checklist de lanzamiento
 - `PITCH_DECK_LAYOUT.md`: Guía de diseño para slides
 - `ONE_PAGER_LAYOUT.md`: Guía de diseño one‑pager
+- `SCREENSHOTS_GUIDE.md`: Guía completa de capturas de pantalla para venta
 - `BRAND_GUIDE.md`: Guía rápida de marca
 - `SALES_ASSETS.md`: Lista de assets recomendados
 - `env.template`: Template de variables de entorno
