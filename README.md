@@ -4,6 +4,14 @@ Sistema de validación de RFC construido con Next.js 14, TypeScript, Tailwind CS
 
 > Última actualización: Diseño responsive completo y optimizaciones móvil - Enero 2025
 
+## ✅ Checklist para venta (estado actual)
+
+- Core funcional: validaciones RFC, dashboard, white label, onboarding, API, Stripe.
+- Integraciones listas: Supabase, Stripe, Resend (email).
+- Falta solo afinar despliegue y documentación técnica para terceros.
+
+Si vendes el código hoy, el comprador solo necesita configurar credenciales y producción.
+
 ## 🚀 Inicio Rápido
 
 ### Prerrequisitos
@@ -50,7 +58,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 - Ejecuta todas las migraciones, incluyendo `supabase/migrations/014_update_subscription_status_business.sql`, que alinea el plan `business` en la base de datos.
 
-**Nota**: Consulta `SUPABASE_SETUP.md` y `STRIPE_SETUP.md` para instrucciones detalladas.
+**Nota**: Consulta `DOMAIN_SETUP.md` y `GOOGLE_OAUTH_SETUP.md` si necesitas dominio y OAuth.
 
 ### 3. Configurar Supabase
 
@@ -119,15 +127,14 @@ vercel
 
 1. Ve a tu proyecto en Vercel Dashboard
 2. Settings → Environment Variables
-3. Agrega todas las variables de `.env.local`:
+3. Agrega todas las variables de `.env.local` (puedes copiar `env.template`):
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `SUPABASE_SERVICE_ROLE_KEY`
    - `STRIPE_SECRET_KEY`
    - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
    - `STRIPE_WEBHOOK_SECRET`
-   - `STRIPE_PRICE_ID_PRO`
-   - `STRIPE_PRICE_ID_ENTERPRISE`
+   - `STRIPE_PRICE_ID_PRO` / `STRIPE_PRICE_ID_BUSINESS` / `STRIPE_PRICE_ID_ENTERPRISE`
    - `NEXT_PUBLIC_SITE_URL` (tu dominio de Vercel)
 
 ### Configurar Webhook de Stripe
@@ -186,6 +193,7 @@ validarFC.MX/
 ├── tailwind.config.ts           # Configuración Tailwind
 ├── postcss.config.mjs           # Configuración PostCSS
 ├── env.template                 # Template de variables de entorno
+├── HANDOFF.md                   # Guía rápida para entrega/venta
 └── README.md                    # Este archivo
 ```
 
@@ -217,8 +225,11 @@ Todas las tablas tienen RLS habilitado con políticas que permiten:
 
 ## 📚 Documentación Adicional
 
-- `SUPABASE_SETUP.md`: Guía detallada para configurar Supabase
-- `STRIPE_SETUP.md`: Guía para configurar Stripe
+- `DOMAIN_SETUP.md`: Guía para configurar dominio
+- `GOOGLE_OAUTH_SETUP.md`: Guía para OAuth de Google
+- `HANDOFF.md`: Resumen para entregar o vender
+- `SELLING_NOTES.md`: Argumentos para venta y valor
+- `COSTS.md`: Costos operativos estimados
 - `env.template`: Template de variables de entorno
 - `supabase/migrations/`: Migraciones SQL de la base de datos
 
@@ -235,12 +246,39 @@ Todas las tablas tienen RLS habilitado con políticas que permiten:
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Publishable key de Stripe | Stripe Dashboard → Developers → API keys |
 | `STRIPE_WEBHOOK_SECRET` | Webhook signing secret | Stripe Dashboard → Webhooks |
 | `STRIPE_PRICE_ID_PRO` | Price ID del plan Pro | Stripe Dashboard → Products |
+| `STRIPE_PRICE_ID_BUSINESS` | Price ID del plan Business | Stripe Dashboard → Products |
 | `STRIPE_PRICE_ID_ENTERPRISE` | Price ID del plan Enterprise | Stripe Dashboard → Products |
+| `STRIPE_PRICE_ID_BASIC` | Price ID del plan Basic (si aplica) | Stripe Dashboard → Products |
+| `STRIPE_PRICE_ID_API_PREMIUM` | Price ID API Premium (si aplica) | Stripe Dashboard → Products |
 | `NEXT_PUBLIC_SITE_URL` | URL del sitio (producción) | Tu dominio de Vercel |
 
 ### Opcionales
 
+- `STRIPE_PRICE_ID_PRO_ANNUAL`: Price ID anual Pro
+- `STRIPE_PRICE_ID_BUSINESS_ANNUAL`: Price ID anual Business
+- `STRIPE_PRICE_ID_ENTERPRISE_ANNUAL`: Price ID anual Enterprise
+- `STRIPE_PRICE_ID_BASIC_ANNUAL`: Price ID anual Basic (si aplica)
+- `STRIPE_PRICE_ID_API_PREMIUM_ANNUAL`: Price ID anual API Premium (si aplica)
+- `RESEND_API_KEY`: API Key de Resend para emails
+- `RESEND_FROM_EMAIL`: Remitente de emails (Resend)
+- `CRON_SECRET`: Token para /api/alerts/send
+- `UPSTASH_REDIS_REST_URL`: Redis (rate limit/cache, opcional)
+- `UPSTASH_REDIS_REST_TOKEN`: Redis (rate limit/cache, opcional)
 - `NODE_ENV`: Entorno (development/production)
+
+## 🧾 Handoff rápido (para vender)
+
+1. Crear buckets en Supabase Storage:
+   - `avatars` (público)
+   - `branding` (público)
+2. Configurar Resend (emails):
+   - `RESEND_API_KEY`
+   - `RESEND_FROM_EMAIL`
+3. Configurar Stripe Webhooks:
+   - `/api/stripe/webhook`
+4. Opcional: programar cron para alertas
+   - Endpoint: `/api/alerts/send`
+   - Header: `x-cron-secret: <CRON_SECRET>`
 
 ## 🔧 Configuración de Supabase para Producción
 
