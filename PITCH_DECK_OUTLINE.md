@@ -1,51 +1,64 @@
-# Pitch Deck (estructura)
+# Pitch Deck (contenido listo)
 
-Usa 12–15 slides. Este guion es para vender el producto o el código.
+Formato recomendado: 12–15 slides. Copia y pega cada slide.
 
-## 1. Portada
-- Maflipp — Plataforma de validación RFC para México
-- Logo + slogan corto
+## Slide 1 — Portada
+**Maflipp**  
+Validación RFC + Analytics + White Label  
+Plataforma B2B lista para escalar en México
 
-## 2. Problema
-- Empresas pierden tiempo validando RFC
-- Errores generan facturación incorrecta
+## Slide 2 — El problema
+- La validación de RFC es crítica para facturación y cumplimiento.
+- Las empresas pierden tiempo y cometen errores al validar manualmente.
+- APIs públicas/legacy son inestables o difíciles de integrar.
 
-## 3. Solución
-- Validación en tiempo real
-- Dashboard + API
+## Slide 3 — La solución
+- Validación RFC en tiempo real.
+- Dashboard con métricas de uso.
+- API pública con documentación lista.
 
-## 4. Producto (capturas)
-- Validación
-- Analytics
-- White label
+## Slide 4 — Producto (capturas)
+- Validación inmediata con detalle de régimen y razón social.
+- Historial exportable y trazabilidad.
+- White label (logo, marca, colores).
 
-## 5. Mercado
-- B2B México (facturación, ERP, fintech)
+## Slide 5 — Clientes objetivo
+- ERPs y software de facturación
+- Fintechs y empresas de cobranza
+- Startups SaaS y consultorías fiscales
 
-## 6. Modelo de negocio
-- Planes Free / Pro / Business
-- Ingresos recurrentes
+## Slide 6 — Modelo de negocio
+- Suscripción mensual por volumen
+- Free / Pro / Business
+- Upgrades por necesidad de white label y analytics
 
-## 7. Tecnología
-- Next.js + Supabase + Stripe
-- Escalable y rápido
+## Slide 7 — Diferenciadores
+- White label completo (marca, logo, colores)
+- Onboarding automatizado + emails
+- Analítica avanzada (día pico, proyecciones)
 
-## 8. Diferenciadores
-- White label
-- API pública
-- Onboarding automatizado
+## Slide 8 — Tecnología
+- Next.js 14 + Supabase + Stripe + Resend
+- Escalable en Vercel
+- Seguridad con RLS
 
-## 9. Tracción (si hay)
-- # validaciones, # usuarios, ingresos
+## Slide 9 — Tracción (placeholder)
+- Usuarios activos: [X]
+- Validaciones/mes: [X]
+- MRR actual: [X]
 
-## 10. Costos y margen
+## Slide 10 — Costos y margen
 - Infraestructura ligera
-- Alta rentabilidad
+- Alta rentabilidad con MRR recurrente
+- Escalado simple sin re-arquitectura
 
-## 11. Roadmap
-- CFDI, SLA, soporte, integraciones
+## Slide 11 — Roadmap
+- Validación CFDI
+- SLA + soporte empresarial
+- Integraciones con ERPs
 
-## 12. Oferta
-- Venta de SaaS o código fuente
-- Contacto
+## Slide 12 — Oferta
+- Venta de SaaS completo o código fuente
+- Documentación y handoff listos
+- Contacto: [tu email]
 
