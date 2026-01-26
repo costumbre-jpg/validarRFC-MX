@@ -235,6 +235,11 @@ Todas las tablas tienen RLS habilitado con políticas que permiten:
 - `DEMO_SCRIPT.md`: Guion de demo
 - `SALES_EMAIL.md`: Email de venta
 - `ONE_PAGER.md`: Resumen comercial 1 página
+- `INVESTOR_FAQ.md`: Preguntas frecuentes de venta
+- `PRODUCT_SPEC.md`: Resumen de producto
+- `SECURITY_NOTES.md`: Seguridad y compliance
+- `COMPETITIVE_POSITIONING.md`: Posicionamiento competitivo
+- `LAUNCH_CHECKLIST.md`: Checklist de lanzamiento
 - `env.template`: Template de variables de entorno
 - `supabase/migrations/`: Migraciones SQL de la base de datos
 
