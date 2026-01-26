@@ -231,7 +231,9 @@ Todas las tablas tienen RLS habilitado con políticas que permiten:
 - `SELLING_NOTES.md`: Argumentos para venta y valor
 - `COSTS.md`: Costos operativos estimados
 - `PITCH_DECK_OUTLINE.md`: Estructura de pitch deck
+- `PITCH_DECK_CONTENT.md`: Texto final de pitch deck
 - `DEMO_SCRIPT.md`: Guion de demo
+- `SALES_EMAIL.md`: Email de venta
 - `ONE_PAGER.md`: Resumen comercial 1 página
 - `env.template`: Template de variables de entorno
 - `supabase/migrations/`: Migraciones SQL de la base de datos
