@@ -1,10 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const AUTH_COOKIE_NAMES = [
-  "sb-access-token",
-  "supabase-auth-token",
-  "sb:token",
-];
+const AUTH_COOKIE_NAMES = ["sb-access-token", "supabase-auth-token", "sb:token"];
 
 const extractJwtFromCookie = (raw?: string) => {
   if (!raw) return undefined;
@@ -22,11 +18,35 @@ const extractJwtFromCookie = (raw?: string) => {
 };
 
 const getAuthToken = (request: NextRequest) => {
+  // 1) Buscar cookies estándar conocidas
   for (const name of AUTH_COOKIE_NAMES) {
     const value = request.cookies.get(name)?.value;
     const token = extractJwtFromCookie(value);
     if (token) return token;
   }
+
+  // 2) Buscar cookie de sesión de Supabase generada por set-cookie (`sb-<projectRef>-auth-token`)
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (supabaseUrl) {
+    const projectRef = supabaseUrl.replace("https://", "").replace(".supabase.co", "");
+    const baseName = `sb-${projectRef}-auth-token`;
+
+    // Cookie sin fragmentar
+    const direct = request.cookies.get(baseName)?.value;
+    if (direct) return direct;
+
+    // Cookies fragmentadas: sb-<ref>-auth-token.0, .1, ...
+    const chunks = request.cookies
+      .getAll()
+      .filter((c) => c.name === baseName || c.name.startsWith(`${baseName}.`))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (chunks.length > 0) {
+      const combined = chunks.map((c) => c.value).join("");
+      return combined || undefined;
+    }
+  }
+
   return undefined;
 };
 
