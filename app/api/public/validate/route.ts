@@ -6,7 +6,19 @@ import { validateRFC, normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { rateLimit } from "@/lib/rate-limit";
 
 const RATE_LIMIT_PER_MINUTE = 60; // 60 requests por minuto
+const RATE_LIMIT_IP_PER_MINUTE = 120; // 120 requests por minuto por IP
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const rateLimitIpMap = new Map<string, { count: number; resetTime: number }>();
+
+const getClientIp = (request: NextRequest) => {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const realIp = request.headers.get("x-real-ip");
+  return realIp || "unknown";
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -132,7 +144,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 7. Rate limiting
+    // 7. Rate limiting por IP (capa adicional)
+    const ip = getClientIp(request);
+    if (ip && ip !== "unknown") {
+      const ipRate = await rateLimit({
+        key: `public-validate-ip:${ip}`,
+        limit: RATE_LIMIT_IP_PER_MINUTE,
+        windowSeconds: 60,
+        fallbackMap: rateLimitIpMap,
+      });
+      if (!ipRate.allowed) {
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: "",
+            remaining: 0,
+            message: "Límite de solicitudes por IP excedido. Intenta más tarde.",
+          },
+          {
+            status: 429,
+            headers: {
+              "X-RateLimit-Limit": RATE_LIMIT_IP_PER_MINUTE.toString(),
+              "X-RateLimit-Remaining": "0",
+              "Retry-After": ipRate.resetSeconds.toString(),
+            },
+          }
+        );
+      }
+    }
+
+    // 8. Rate limiting por API key
     const rate = await rateLimit({
       key: `public-validate:${apiKeyData.id}`,
       limit: RATE_LIMIT_PER_MINUTE,
@@ -159,7 +201,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 8. Parsear body
+    // 9. Parsear body
     let body;
     try {
       body = await request.json();

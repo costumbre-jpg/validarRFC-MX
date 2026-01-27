@@ -37,10 +37,10 @@ Business agrega white label y analytics avanzados.
 Next.js 14 + Supabase + Stripe + Resend + Vercel  
 Arquitectura ligera y escalable.
 
-## Slide 9 — Tracción (placeholder)
-Usuarios activos: [X]  
-Validaciones/mes: [X]  
-MRR: [X]
+## Slide 9 — Estado actual
+MVP funcional completo y listo para lanzar.  
+Sin usuarios activos aún (oportunidad para comprador).  
+Producto terminado, falta ejecutar estrategia de marketing.
 
 ## Slide 10 — Costos y margen
 Infraestructura con costos controlados.  

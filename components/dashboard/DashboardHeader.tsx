@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import NotificationsBell from "@/components/dashboard/NotificationsBell";
 import { User } from "@supabase/supabase-js";
 import { getPlan, getPlanValidationLimit, type PlanId } from "@/lib/plans";
 
@@ -184,21 +185,24 @@ export default function DashboardHeader({
             )}
           </div>
         </div>
-        {!isPro && (
-          <Link
-            href="/dashboard/billing"
-            className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 border border-transparent text-base max-md:text-sm font-semibold rounded-lg text-white transition-all shadow-sm hover:shadow-md whitespace-nowrap"
-            style={{
-              backgroundColor: brandPrimary,
-              color: "white",
-            }}
-          >
-            <svg className="w-5 h-5 max-md:w-4 max-md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-            Mejorar Plan
-          </Link>
-        )}
+        <div className="flex items-center gap-3 max-md:gap-2">
+          <NotificationsBell />
+          {!isPro && (
+            <Link
+              href="/dashboard/billing"
+              className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 border border-transparent text-base max-md:text-sm font-semibold rounded-lg text-white transition-all shadow-sm hover:shadow-md whitespace-nowrap"
+              style={{
+                backgroundColor: brandPrimary,
+                color: "white",
+              }}
+            >
+              <svg className="w-5 h-5 max-md:w-4 max-md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+              Mejorar Plan
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
