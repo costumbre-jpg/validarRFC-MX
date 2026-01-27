@@ -78,7 +78,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
 
     try {
       const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -87,6 +87,26 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
         setError(signInError.message);
         setLoading(false);
         return;
+      }
+
+      // Sincronizar sesión con cookies para que el middleware pueda ver al usuario autenticado
+      const session = data?.session;
+      if (session) {
+        try {
+          await fetch("/api/auth/set-cookie", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              access_token: session.access_token,
+              refresh_token: session.refresh_token,
+            }),
+            credentials: "include",
+          });
+          // Pequeño delay para asegurar que el navegador persista las cookies
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } catch {
+          // Si falla, seguimos con la navegación usando solo localStorage
+        }
       }
 
       onClose();
