@@ -33,9 +33,6 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
   // Obtener access token
   useEffect(() => {
     const getToken = async () => {
-      if (userData?.id === "mock-user") {
-        return;
-      }
       try {
         const supabase = createClient();
         const { data: sessionData } = await supabase.auth.getSession();
@@ -50,14 +47,6 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
   // Cargar preferencias al montar el componente
   useEffect(() => {
     const loadPreferences = async () => {
-      // Modo diseño: usar valores por defecto
-      if (userData?.id === "mock-user") {
-        setAlertsEnabled(true);
-        setAlertThreshold(80);
-        setLoading(false);
-        return;
-      }
-
       try {
         const response = await fetch("/api/alerts/preferences", {
           headers: {
@@ -77,7 +66,7 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
       }
     };
 
-    if (userData && (userData.id === "mock-user" || accessToken !== null)) {
+    if (userData && accessToken !== null) {
       loadPreferences();
     }
   }, [userData, accessToken]);
@@ -86,16 +75,6 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
     setSaving(true);
     setSuccessMessage(null);
     setErrorMessage(null);
-    
-    // Modo diseño: simular guardado
-    if (userData?.id === "mock-user") {
-      setTimeout(() => {
-        setSuccessMessage("Cambios guardados");
-        setSaving(false);
-        setTimeout(() => setSuccessMessage(null), 5000);
-      }, 500);
-      return;
-    }
 
     try {
       const response = await fetch("/api/alerts/preferences", {

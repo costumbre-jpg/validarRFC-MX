@@ -42,19 +42,9 @@ function BillingPage() {
       const { data: sessionData } = await supabase.auth.getSession();
       setAccessToken(sessionData.session?.access_token ?? null);
 
-      // Modo diseño: permitir uso sin sesión
       if (!currentUser) {
-        // Leer parámetro 'plan' de la URL para modo diseño
-        const planParam = searchParams.get("plan");
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        setUserData({
-          id: "mock-user",
-          email: "diseño@maflipp.com",
-          subscription_status: designPlan, // Usar plan de la URL o 'free' por defecto
-        });
-        setSubscription(null);
         setLoading(false);
+        router.replace("/auth/login");
         return;
       }
 
@@ -65,13 +55,7 @@ function BillingPage() {
         .eq("id", currentUser.id)
         .single();
 
-      // Si hay un parámetro 'plan' en la URL, sobrescribir subscription_status temporalmente
-      const planParam = searchParams.get("plan");
-      const planFromUrl = planParam && ["pro", "business"].includes(planParam) ? planParam : null;
-      
-      if (planFromUrl && userData) {
-        setUserData({ ...(userData as any), subscription_status: planFromUrl });
-      } else if (userData) {
+      if (userData) {
         setUserData(userData);
       }
 
@@ -93,14 +77,12 @@ function BillingPage() {
   }, [router, searchParams]);
 
   const handleCheckout = useCallback(async (planId: PlanId) => {
-    // Modo diseño: redirigir al Dashboard con el plan seleccionado
-    if (!userData || userData.id === "mock-user") {
-      router.push(`/dashboard?plan=${planId}`);
+    if (!userData) {
+      setErrorMessage("No se pudo cargar el usuario. Intenta recargar.");
       return;
     }
 
-    // Modo test siempre activo para desarrollo (sin necesidad de parámetro)
-    const testMode = true; // Siempre usar modo test por ahora
+    const testMode = process.env.NEXT_PUBLIC_ALLOW_TEST_UPGRADE === "true";
 
     setProcessing(true);
     try {
@@ -186,13 +168,7 @@ function BillingPage() {
     // Evitar re-intentos
     autoCheckoutFiredRef.current = true;
 
-    // Modo diseño: redirigir inmediatamente al dashboard con el plan seleccionado
-    if (!userData || userData?.id === "mock-user") {
-      setTimeout(() => {
-        window.location.href = `/dashboard?plan=${planParam}`;
-      }, 100);
-      return undefined;
-    }
+    if (!userData) return undefined;
 
     // Si está cargando, esperar un poco y reintentar
     if (loading) {
@@ -204,7 +180,7 @@ function BillingPage() {
 
     // Si ya está en ese plan, redirigir al dashboard
     if (userData.subscription_status === planParam) {
-      window.location.href = `/dashboard?plan=${planParam}`;
+      window.location.href = "/dashboard";
       return undefined;
     }
 
@@ -215,8 +191,8 @@ function BillingPage() {
   }, [loading, searchParams, userData, router, handleCheckout]);
 
   const handleCustomerPortal = async () => {
-    if (!userData || userData.id === "mock-user") {
-      setErrorMessage("Modo diseño: el portal de cliente está deshabilitado hasta conectar una cuenta real.");
+    if (!userData) {
+      setErrorMessage("No se pudo cargar el usuario. Intenta recargar.");
       setTimeout(() => setErrorMessage(null), 5000);
       return;
     }
@@ -275,7 +251,6 @@ function BillingPage() {
   const currentPlan = userData?.subscription_status || "free";
   const paidPlans = ["pro", "business", "basic", "enterprise", "api_premium"];
   const isPro = paidPlans.includes(currentPlan);
-  const isMock = userData?.id === "mock-user";
 
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {
@@ -300,7 +275,7 @@ function BillingPage() {
             </span>
           </div>
           <Link
-            href={`/dashboard${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+            href="/dashboard"
             className="inline-flex items-center gap-2 max-md:gap-1.5 text-sm max-md:text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
             style={{ '--hover-color': brandPrimaryColor } as React.CSSProperties}
           >
@@ -388,7 +363,7 @@ function BillingPage() {
             </div>
             <div className="flex items-center gap-2">
               <Link
-                href="/dashboard/billing?plan=free&upgrade=pro"
+                href="/dashboard/billing?upgrade=pro"
                 className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold text-white"
                 style={{ backgroundColor: brandPrimaryColor }}
               >
@@ -403,7 +378,7 @@ function BillingPage() {
                     // ignore
                   }
                   setTrialBannerDismissed(true);
-                  router.replace("/dashboard/billing?plan=free");
+                  router.replace("/dashboard/billing");
                 }}
                 className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold border border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
               >
@@ -453,7 +428,7 @@ function BillingPage() {
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                      Estado: {subscription ? "Activo" : isMock ? "Modo diseño" : "—"}
+                      Estado: {subscription ? "Activo" : "—"}
                     </span>
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
                       Ciclo: {billingCycle === "annual" ? "Anual" : "Mensual"}
@@ -463,7 +438,7 @@ function BillingPage() {
                     </span>
                   </div>
                 </div>
-                {!isMock && subscription && (
+                {subscription && (
                   <div className="bg-gray-100 rounded-lg p-2.5 border border-gray-200">
                     <p className="text-xs font-semibold text-gray-600 mb-0.5">Próxima renovación</p>
                     <p className="text-xs font-bold text-gray-900">
@@ -903,24 +878,13 @@ function BillingPage() {
                 <div className="mt-1.5">
                 <button
                   onClick={() => {
-                    const planParam = searchParams.get("plan");
-                    const urlSuffix = planParam && ["pro", "business"].includes(planParam) ? `?plan=${planParam}` : "";
-                    
-                    if (isMock) {
-                      // En modo diseño: redirigir directamente al dashboard con el plan seleccionado
-                      router.push(`/dashboard?plan=${planId}`);
+                    if (currentPlan === planId) {
+                      router.push("/dashboard");
                     } else {
-                      // Si no es modo diseño, hacer checkout o redirigir según el plan
-                      if (currentPlan === planId) {
-                        // Si es el plan actual, solo redirigir al dashboard preservando el plan
-                        router.push(`/dashboard${urlSuffix}`);
-                      } else {
-                        // Si no es el plan actual, hacer checkout
-                        handleCheckout(planId);
-                      }
+                      handleCheckout(planId);
                     }
                   }}
-                  disabled={(processing && !isMock) || (isCurrentPlan && planId === "free")}
+                  disabled={processing || (isCurrentPlan && planId === "free")}
                   className={`w-full px-2.5 py-1.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md hover:scale-[1.01] font-semibold text-xs ${
                     plan.popular
                       ? "text-white"
@@ -928,7 +892,7 @@ function BillingPage() {
                   }`}
                   style={plan.popular ? { backgroundColor: brandPrimaryColor } : undefined}
                 >
-                  {processing && !isMock ? (
+                  {processing ? (
                     <span className="flex items-center justify-center gap-1.5">
                       <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -959,7 +923,7 @@ function BillingPage() {
       </div>
 
       {/* Estado del Trial - Solo si está en trial activo */}
-      {((!isMock && subscription && subscription.status === "trialing") || searchParams.get("showTrial") === "1") && (
+      {((subscription && subscription.status === "trialing") || searchParams.get("showTrial") === "1") && (
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-blue-100">
@@ -1012,19 +976,17 @@ function BillingPage() {
                 <p className="text-sm text-gray-600">
                   Para ver tu historial completo de pagos, facturas y gestionar tu suscripción, accede al portal de Stripe.
                 </p>
-                {!isMock && (
-                  <button
-                    onClick={handleCustomerPortal}
-                    disabled={processing}
-                    className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-50 bg-brand-primary hover-bg-brand-secondary"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    {processing ? "Cargando..." : "Gestionar Suscripción"}
-                  </button>
-                )}
+                <button
+                  onClick={handleCustomerPortal}
+                  disabled={processing}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all shadow-md hover:shadow-lg hover:scale-105 disabled:opacity-50 bg-brand-primary hover-bg-brand-secondary"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {processing ? "Cargando..." : "Gestionar Suscripción"}
+                </button>
               </div>
             </div>
           </div>

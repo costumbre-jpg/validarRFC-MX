@@ -29,7 +29,6 @@ export default function AdvancedDashboard({
   const queriesThisMonth = userData?.rfc_queries_this_month || 0;
   const planLimit = plan.validationsPerMonth;
   const isBusiness = planId === "business";
-  const isMock = userData?.id === "mock-user";
 
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {
@@ -74,17 +73,6 @@ export default function AdvancedDashboard({
       setYearComparison(null);
       setEfficiencyMetrics(null);
       setLoading(true);
-      // Modo diseño: no mostrar datos (todo en cero)
-      if (isMock) {
-        setDailyUsage([]);
-        setMonthlyTrends([]);
-        setHourlyUsage([]);
-        setYearComparison(null);
-        setEfficiencyMetrics(null);
-        setLoading(false);
-        return;
-      }
-
       try {
         const supabase = createClient();
         const userId = userData?.id;

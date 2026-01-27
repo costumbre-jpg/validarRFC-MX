@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { type PlanId } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
 
@@ -36,33 +36,22 @@ function WhiteLabelPage() {
   const [logoError, setLogoError] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const load = async () => {
-      // Modo diseño: permitir plan por query
-      // SIEMPRE leer el plan de la URL primero para priorizarlo
-      const planParam = searchParams.get("plan");
-      const planFromUrl = planParam && ["free", "pro", "business"].includes(planParam)
-        ? (planParam as PlanId)
-        : null;
-      const designPlan = planFromUrl || "free";
-      
-      // Establecer el plan inmediatamente si viene de la URL
-      if (planFromUrl) {
-        setPlanId(planFromUrl);
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setLoading(false);
+        router.replace("/auth/login");
+        return;
       }
 
-      let token: string | null = null;
-      try {
-        const supabase = createClient();
-        const { data: { session } } = await supabase.auth.getSession();
-        token = session?.access_token || null;
-        if (token) {
-          setAccessToken(token);
-        }
-      } catch (e) {
-        console.error("Error obteniendo sesión:", e);
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || null;
+      if (token) {
+        setAccessToken(token);
       }
 
       try {
@@ -70,84 +59,40 @@ function WhiteLabelPage() {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           credentials: "include",
         });
-        if (res.status === 401) {
-          // Sin sesión: usa preview local si existe (modo diseño business)
-          // Verificar nuevamente el plan de la URL para asegurar que se respete
-          const currentPlanParam = searchParams.get("plan");
-          const currentPlanFromUrl = currentPlanParam && ["free", "pro", "business"].includes(currentPlanParam)
-            ? (currentPlanParam as PlanId)
-            : designPlan;
-          
-          if (currentPlanFromUrl === "business" && typeof window !== "undefined") {
-            const stored = window.localStorage.getItem("branding_preview");
-            if (stored) {
-              try {
-                setSettings({ ...defaults, ...JSON.parse(stored) });
-              } catch {
-                setSettings(defaults);
-              }
-            } else {
-              setSettings(defaults);
-            }
-          } else {
-            setSettings(defaults);
-          }
-          setPlanId(currentPlanFromUrl);
-          setLoading(false);
-          return;
-        }
         if (res.ok) {
           const data = await res.json();
           setSettings({
             ...defaults,
             ...data,
           });
+        } else {
+          setSettings(defaults);
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
+        setSettings(defaults);
+      }
+
+      try {
+        const { data: userData } = await supabase
+          .from("users")
+          .select("subscription_status")
+          .eq("id", user.id)
+          .single();
+
+        const subscriptionStatus = (userData as any)?.subscription_status;
+        if (subscriptionStatus && ["free", "pro", "business"].includes(subscriptionStatus)) {
+          setPlanId(subscriptionStatus as PlanId);
+        } else {
+          setPlanId("free");
+        }
+      } catch {
+        setPlanId("free");
       } finally {
-        // Obtener plan real y verificar si es miembro de equipo
-        try {
-          const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
-          const planParam = searchParams.get("plan");
-          const planFromUrl = planParam && ["free", "pro", "business"].includes(planParam)
-            ? (planParam as PlanId)
-            : null;
-          
-          // SIEMPRE priorizar el plan de la URL si existe (para modo diseño)
-          if (planFromUrl) {
-            setPlanId(planFromUrl);
-          } else if (user) {
-            const { data: userData } = await supabase
-              .from("users")
-              .select("subscription_status")
-              .eq("id", user.id)
-              .single();
-            
-            const subscriptionStatus = (userData as any)?.subscription_status;
-            if (subscriptionStatus && ["free", "pro", "business"].includes(subscriptionStatus)) {
-              setPlanId(subscriptionStatus as PlanId);
-            } else {
-              setPlanId(designPlan);
-            }
-          } else {
-            setPlanId(designPlan);
-          }
-        } catch (e) {
-          console.error("Error obteniendo plan:", e);
-          // En caso de error, priorizar plan de URL o usar designPlan
-          const planParam = searchParams.get("plan");
-          const planFromUrl = planParam && ["free", "pro", "business"].includes(planParam)
-            ? (planParam as PlanId)
-            : null;
-          setPlanId(planFromUrl || designPlan);
-        }
         setLoading(false);
       }
     };
     load();
-  }, [searchParams]);
+  }, [router]);
 
   const isBusiness = planId === "business";
 
@@ -454,7 +399,7 @@ function WhiteLabelPage() {
           </div>
           <div className="text-center">
             <a
-              href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+              href="/dashboard/billing"
               className="inline-flex items-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-2.5 max-md:py-2 text-sm max-md:text-xs text-white rounded-lg transition-all font-semibold shadow-sm hover:shadow-md"
               style={{ backgroundColor: brandPrimary }}
             >

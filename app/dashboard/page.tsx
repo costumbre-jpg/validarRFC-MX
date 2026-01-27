@@ -20,9 +20,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Para forzar actualización
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -40,36 +41,18 @@ export default function DashboardPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        console.log("🔵 Dashboard: Cargando datos...");
+        setLoadError(null);
         const supabase = createClient() as any;
         
         // Obtener sesión
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        console.log("🔵 Dashboard: Sesión:", session ? "SÍ" : "NO", sessionError?.message || "");
         
-        // TEMPORAL: Permitir acceso sin sesión para diseño
-        if (!session) {
-          console.log("🟡 Dashboard: No hay sesión, usando datos mock para diseño");
-          
-          // Leer parámetro 'plan' de la URL para modo diseño
-          const planParam = searchParams.get("plan");
-          const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-          
-          setUser({ email: "diseño@maflipp.com", id: "mock-user" } as any);
-          setUserData({ 
-            id: "mock-user",
-            email: "diseño@maflipp.com", 
-            subscription_status: designPlan, // Usar plan de la URL o 'free' por defecto
-            rfc_queries_this_month: 0,
-          });
-          // Datos mock para estadísticas - empezar en 0
-          setStats({ total: 0, valid: 0, invalid: 0 });
-          setAllValidationsForStats([]);
+        if (!session || sessionError) {
           setLoading(false);
+          router.replace("/auth/login");
           return;
         }
 
-        console.log("🟢 Dashboard: Usuario:", session.user.email);
         setUser(session.user);
 
         // Obtener datos del usuario
@@ -79,15 +62,8 @@ export default function DashboardPage() {
           .eq("id", session.user.id)
           .single();
 
-        // Si hay un parámetro 'plan' en la URL, sobrescribir subscription_status temporalmente
-        const planParam = searchParams.get("plan");
-        const planFromUrl = planParam && ["pro", "business"].includes(planParam) ? planParam : null;
-        
         if (userDataResult) {
-          setUserData(planFromUrl 
-            ? { ...userDataResult, subscription_status: planFromUrl }
-            : userDataResult
-          );
+          setUserData(userDataResult);
         } else {
           // Crear usuario si no existe
           const { data: newUser } = await supabase
@@ -177,26 +153,15 @@ export default function DashboardPage() {
 
         setLoading(false);
       } catch (error) {
-        console.error("🔴 Dashboard: error en loadData, usando mock:", error);
-        // Fallback: datos mock para diseño
-        const planParam = searchParams.get("plan");
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        setUser({ email: "diseño@maflipp.com", id: "mock-user" } as any);
-        setUserData({ 
-          id: "mock-user",
-          email: "diseño@maflipp.com", 
-          subscription_status: designPlan,
-          rfc_queries_this_month: 0,
-        });
-        setStats({ total: 0, valid: 0, invalid: 0 });
-        setAllValidationsForStats([]);
+        setLoadError("No se pudieron cargar tus datos. Intenta recargar.");
+        setUser(null);
+        setUserData(null);
         setLoading(false);
       }
     };
 
     loadData();
-  }, [refreshKey, searchParams]);
+  }, [refreshKey, router]);
 
   // Función para refrescar datos después de una validación
   const refreshData = () => {
@@ -335,15 +300,6 @@ export default function DashboardPage() {
     );
   }
 
-  // TEMPORAL: Permitir acceso sin usuario para diseño
-  // if (!user) {
-  //   return (
-  //     <div className="text-center py-12">
-  //       <p className="text-gray-500">No se pudo cargar la sesión</p>
-  //     </div>
-  //   );
-  // }
-
   return (
     <Suspense fallback={null}>
       <div className="space-y-4">
@@ -374,7 +330,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-2">
               <Link
-                href="/dashboard/billing?plan=free&upgrade=pro"
+                href="/dashboard/billing?upgrade=pro"
                 className="inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold text-white bg-brand-primary hover-bg-brand-secondary"
               >
                 Activar Pro
@@ -388,8 +344,7 @@ export default function DashboardPage() {
                     // ignore
                   }
                   setTrialBannerDismissed(true);
-                  const plan = searchParams.get("plan");
-                  router.replace(`/dashboard${plan ? `?plan=${plan}` : ""}`);
+                  router.replace("/dashboard");
                 }}
                 className="inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-semibold border border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
               >
@@ -410,7 +365,7 @@ export default function DashboardPage() {
           />
         </div>
 
-        {userData && userData.id !== "mock-user" && (
+        {userData && (
           <div className="flex justify-end">
             <button
               type="button"
@@ -442,6 +397,12 @@ export default function DashboardPage() {
           />
         )}
 
+        {loadError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
+            {loadError}
+          </div>
+        )}
+
         {/* Notas de funcionalidades Próximamente para Business */}
         {userData?.subscription_status === "business" && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -453,27 +414,27 @@ export default function DashboardPage() {
                   clipRule="evenodd"
                 />
               </svg>
-              <h3 className="text-sm font-semibold text-gray-900">Próximamente en Business</h3>
+              <h3 className="text-sm font-semibold text-gray-900">Roadmap Business (no incluido aún)</h3>
             </div>
             <div className="space-y-1.5 text-xs text-gray-700">
               <div className="flex items-center gap-2">
                 <span>SLA 99.9%</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                  Próximamente
+                  En roadmap
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span>Soporte prioritario</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                  Próximamente
+                  En roadmap
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span>Validación CFDI</span>
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                  Próximamente
+                  En roadmap
                 </span>
-                <Link href={`/dashboard/cfdi${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`} className="text-brand-primary hover:underline text-xs font-medium">
+                <Link href="/dashboard/cfdi" className="text-brand-primary hover:underline text-xs font-medium">
                   Ver detalle
                 </Link>
               </div>
@@ -590,7 +551,7 @@ export default function DashboardPage() {
                 <li>• Más validaciones mensuales</li>
               </ul>
               <Link
-                href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+                href="/dashboard/billing"
                 className="inline-flex items-center justify-center w-full px-4 max-md:px-3 py-2 max-md:py-1.5 bg-brand-primary text-white rounded-lg hover-bg-brand-secondary transition-colors font-medium text-sm max-md:text-xs"
               >
                 Ver Planes y Precios
@@ -616,7 +577,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <Link
-              href={`/dashboard/historial${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+              href="/dashboard/historial"
               className="inline-flex items-center gap-2 max-md:gap-1.5 px-5 max-md:px-4 py-2.5 max-md:py-2 bg-brand-primary text-white rounded-lg hover-bg-brand-secondary transition-colors font-semibold text-sm max-md:text-xs shadow-sm hover:shadow-md w-full max-md:w-full justify-center max-md:justify-center"
             >
               Ver Historial Completo
@@ -644,7 +605,7 @@ export default function DashboardPage() {
               Incluye exportación a CSV, Excel y PDF
             </p>
             <Link
-              href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+              href="/dashboard/billing"
               className="inline-flex items-center gap-1.5 px-4 max-md:px-3 py-2 max-md:py-1.5 text-sm max-md:text-xs bg-brand-primary text-white rounded-lg hover-bg-brand-secondary transition-colors font-semibold shadow-sm hover:shadow-md"
             >
               Mejorar Plan

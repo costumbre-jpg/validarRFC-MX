@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import DeleteAccountCard from "@/components/dashboard/DeleteAccountCard";
 import EmailAlerts from "@/components/dashboard/EmailAlerts";
@@ -16,7 +16,7 @@ function CuentaPage() {
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [apiKeysCount, setApiKeysCount] = useState(0);
-  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Combinar userData con email del usuario autenticado para el modal
   const userDataForModal = safeUser ? {
@@ -31,21 +31,9 @@ function CuentaPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Modo diseño: permitir acceso sin login
       if (!user) {
-        // Leer parámetro 'plan' de la URL para modo diseño
-        const planParam = searchParams.get("plan");
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        setSafeUser({ id: "mock-user", email: "diseño@maflipp.com" } as any);
-        setUserData({
-          id: "mock-user",
-          email: "diseño@maflipp.com",
-          subscription_status: designPlan, // Usar plan de la URL o 'free' por defecto
-          created_at: new Date().toISOString(),
-        });
-        setApiKeysCount(0);
         setLoading(false);
+        router.replace("/auth/login");
         return;
       }
 
@@ -129,7 +117,7 @@ function CuentaPage() {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("maflipp_api_keys_updated", handleApiKeysUpdate);
     };
-  }, [searchParams]);
+  }, [router]);
 
   const handleProfileUpdate = async () => {
     const supabase = createClient();
@@ -395,7 +383,7 @@ function CuentaPage() {
                 </span>
                 {userData?.subscription_status === "free" && (
                   <a
-                    href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+                    href="/dashboard/billing"
                     className="inline-flex items-center gap-1 max-md:gap-0.5 text-xs max-md:text-[11px] font-semibold transition-all hover:scale-105"
                     style={{ color: brandPrimaryColor }}
                   >

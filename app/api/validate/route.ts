@@ -61,6 +61,12 @@ export async function POST(request: NextRequest) {
         user = data.user;
       }
     }
+    if (!user) {
+      return NextResponse.json(
+        { success: false, valid: false, rfc: "", remaining: 0, message: "No autenticado" },
+        { status: 401 }
+      );
+    }
 
     // 2. Parsear body
     let body;
@@ -80,7 +86,6 @@ export async function POST(request: NextRequest) {
     }
 
     const { rfc, forceRefresh = false } = body;
-    const isDesignMode = !user; // Modo diseño si no hay usuario autenticado
 
     // 3. Validar que RFC esté presente
     if (!rfc || typeof rfc !== "string") {
@@ -113,9 +118,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6. Rate limiting (solo para usuarios autenticados)
+    // 6. Rate limiting
     let rate = { allowed: true, remaining: RATE_LIMIT, resetSeconds: 0 };
-    if (!isDesignMode && user) {
+    if (user) {
       rate = await rateLimit({
         key: `validate:${user.id}`,
         limit: RATE_LIMIT,
@@ -143,13 +148,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 7. Verificar límite mensual del usuario (solo si no es modo diseño)
+    // 7. Verificar límite mensual del usuario
     let plan: PlanId = "free";
     let planLimit = getPlanValidationLimit(plan);
     let queriesThisMonth = 0;
     let remaining = -1;
 
-    if (!isDesignMode && user) {
+    if (user) {
       const { data: userData, error: userError } = await supabaseAdmin
         .from("users")
         .select("subscription_status, rfc_queries_this_month")
@@ -194,8 +199,8 @@ export async function POST(request: NextRequest) {
       forceRefresh,
     });
 
-    // 9. Guardar en base de datos (solo si no es modo diseño)
-    if (!isDesignMode && user) {
+    // 9. Guardar en base de datos
+    if (user) {
       if (!satResult.success) {
         return NextResponse.json(
           {

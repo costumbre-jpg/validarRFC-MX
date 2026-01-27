@@ -5,6 +5,16 @@ const ALLOWED_PLANS = ["free", "pro", "business"];
 
 export async function POST(request: NextRequest) {
   try {
+    if (
+      process.env.NODE_ENV === "production" &&
+      process.env.ALLOW_TEST_UPGRADE !== "true"
+    ) {
+      return NextResponse.json(
+        { error: "Endpoint deshabilitado" },
+        { status: 404 }
+      );
+    }
+
     const response = NextResponse.json({ success: false }, { status: 200 });
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

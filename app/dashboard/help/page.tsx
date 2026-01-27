@@ -2,17 +2,25 @@
 
 export const dynamic = "force-dynamic";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 function HelpPage() {
-  const searchParams = useSearchParams();
-  const planParam = searchParams.get("plan");
-  const currentPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
+  const [currentPlan, setCurrentPlan] = useState<"free" | "pro" | "business">("free");
   const [expandedFaqs, setExpandedFaqs] = useState<Record<string, boolean>>({});
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactStatus, setContactStatus] = useState<"idle" | "success" | "error">("idle");
   const [contactMessage, setContactMessage] = useState<string>("");
+
+  useEffect(() => {
+    try {
+      const storedPlan = localStorage.getItem("maflipp_plan");
+      if (storedPlan && ["free", "pro", "business"].includes(storedPlan)) {
+        setCurrentPlan(storedPlan as "free" | "pro" | "business");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const toggleFaq = (categoryIndex: number, faqIndex: number) => {
     const key = `${categoryIndex}-${faqIndex}`;

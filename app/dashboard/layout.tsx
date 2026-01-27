@@ -3,9 +3,8 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { type PlanId } from "@/lib/plans";
 import Sidebar from "@/components/dashboard/Sidebar";
 import MobileSidebar from "@/components/dashboard/MobileSidebar";
 
@@ -15,7 +14,6 @@ function DashboardLayoutContent({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [branding, setBranding] = useState<any>(null);
@@ -30,63 +28,13 @@ function DashboardLayoutContent({
 
   useEffect(() => {
     const checkAuth = async () => {
-      console.log("🔵 Layout: Verificando auth...");
       const supabase = createClient() as any;
-      
-      // TEMPORAL: Deshabilitar autenticación para diseño
-      // Verificar sesión
       const { data: { session }, error } = await supabase.auth.getSession();
-      console.log("🔵 Layout: Sesión:", session ? session.user.email : "NO HAY", error?.message || "");
-      
-      // TEMPORAL: Permitir acceso sin autenticación para diseño
-      if (!session) {
-        console.log("🟡 Layout: No hay sesión, pero permitiendo acceso para diseño");
-        
-        // Leer parámetro 'plan' de la URL para modo diseño
-        const planParam = searchParams.get("plan");
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        // Crear datos de usuario mock para diseño
-        setUserData({ 
-          email: "diseño@maflipp.com", 
-          subscription_status: designPlan, // Usar plan de la URL o 'free' por defecto
-          rfc_queries_this_month: 0
-        });
-        // Solo aplicar white label en modo diseño para Business; Free/Pro mantienen Maflipp
-        if (designPlan === "business") {
-          try {
-            const stored = typeof window !== "undefined" ? window.localStorage.getItem("branding_preview") : null;
-            if (stored) {
-              setBranding(JSON.parse(stored));
-            } else {
-              setBranding({
-                brand_name: "Tu Marca",
-                custom_logo_url: null,
-                primary_color: "#2F7E7A",
-                secondary_color: "#1F5D59",
-                hide_maflipp_brand: true,
-                show_brand_name: true,
-              });
-            }
-          } catch (e) {
-            console.error("🎨 Layout: Error leyendo branding_preview local", e);
-            setBranding({
-              brand_name: "Tu Marca",
-              custom_logo_url: null,
-              primary_color: "#2F7E7A",
-              secondary_color: "#1F5D59",
-              hide_maflipp_brand: true,
-              show_brand_name: true,
-            });
-          }
-        } else {
-          setBranding(null);
-        }
+      if (!session || error) {
         setLoading(false);
+        router.replace("/auth/login");
         return;
       }
-
-      console.log("🟢 Layout: Usuario autenticado:", session.user.email);
 
       // Obtener datos del usuario
       const { data: existingUser } = await supabase
@@ -95,22 +43,9 @@ function DashboardLayoutContent({
         .eq("id", session.user.id)
         .single();
 
-      // Si hay un parámetro 'plan' en la URL, sobrescribir subscription_status temporalmente
-      // Esto permite el modo diseño incluso con usuarios autenticados
-      const planParam = searchParams.get("plan");
-      // Si la URL tiene ?plan=free o no tiene plan, usar "free"
-      // Si tiene ?plan=pro o ?plan=business, usar ese plan
-      const planFromUrl: PlanId | null = planParam 
-        ? (["free", "pro", "business"].includes(planParam) ? (planParam as PlanId) : null)
-        : null;
-      
-      // Si hay plan en la URL, usarlo. Si no, usar el de la BD
-      const finalPlanIdForUserData = planFromUrl || existingUser?.subscription_status || "free";
-      
       if (existingUser) {
         setUserData({ 
-          ...existingUser, 
-          subscription_status: finalPlanIdForUserData 
+          ...existingUser
         });
       } else {
         // Crear usuario si no existe
@@ -119,7 +54,7 @@ function DashboardLayoutContent({
           .insert({
             id: session.user.id,
             email: session.user.email || "",
-            subscription_status: finalPlanIdForUserData,
+            subscription_status: "free",
             rfc_queries_this_month: 0,
           })
           .select("id, email, subscription_status, rfc_queries_this_month")
@@ -127,15 +62,14 @@ function DashboardLayoutContent({
         
         setUserData(newUser || { 
           email: session.user.email, 
-          subscription_status: finalPlanIdForUserData
+          subscription_status: "free"
         });
       }
 
       setLoading(false);
 
       // Branding (solo si autenticado Y tiene plan Business)
-      // Usar el plan de la URL si existe, si no el de la BD, si no "free"
-      const finalPlanId = planFromUrl || existingUser?.subscription_status || "free";
+      const finalPlanId = existingUser?.subscription_status || "free";
       if (finalPlanId === "business") {
         void (async () => {
           try {
@@ -147,17 +81,13 @@ function DashboardLayoutContent({
                 : undefined,
               credentials: "include",
             });
-            console.log("🎨 Layout: Fetching branding, status:", res.status);
             if (res.ok) {
               const data = await res.json();
-              console.log("🎨 Layout: Branding data:", data);
               setBranding(data);
             } else if (res.status === 401) {
-              console.log("🎨 Layout: No autenticado, no branding");
               setBranding(null);
             }
           } catch (e) {
-            console.error("🎨 Layout: Branding fetch error", e);
             setBranding(null);
           }
         })();
@@ -168,7 +98,7 @@ function DashboardLayoutContent({
     };
 
     checkAuth();
-  }, [router, searchParams]);
+  }, [router]);
 
   const primary = branding?.primary_color || "#2F7E7A";
   const secondary = branding?.secondary_color || "#1F5D59";
@@ -195,19 +125,6 @@ function DashboardLayoutContent({
       </div>
     );
   }
-
-  // TEMPORAL: Permitir acceso sin usuario para diseño
-  // if (!user) {
-  //   // Redirigir a login si no hay usuario
-  //   if (typeof window !== "undefined") {
-  //     window.location.href = "/auth/login";
-  //   }
-  //   return (
-  //     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-  //       <p className="text-gray-500">Redirigiendo...</p>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div

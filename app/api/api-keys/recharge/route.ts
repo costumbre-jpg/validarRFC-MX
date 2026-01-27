@@ -16,6 +16,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (process.env.ENABLE_API_KEY_RECHARGE !== "true") {
+      return NextResponse.json(
+        {
+          error:
+            "Recargas deshabilitadas temporalmente. Activa pagos para habilitar esta función.",
+          code: "RECHARGE_DISABLED",
+        },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const { apiKeyId, amount } = body;
 
@@ -65,8 +76,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Integrar con sistema de pagos (Stripe) para procesar el pago real
-    // Por ahora, solo actualizamos el saldo directamente
+    // Nota: habilitar solo con integración de pagos verificada.
 
     return NextResponse.json({
       success: true,

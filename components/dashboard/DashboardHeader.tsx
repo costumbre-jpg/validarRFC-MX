@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { User } from "@supabase/supabase-js";
 import { getPlan, getPlanValidationLimit, type PlanId } from "@/lib/plans";
 
@@ -14,19 +13,7 @@ export default function DashboardHeader({
   userData,
   demoValidationCount = 0,
 }: DashboardHeaderProps) {
-  const searchParams = useSearchParams();
-  const planParam = searchParams.get("plan");
-  const urlSuffix = planParam && ["pro", "business"].includes(planParam) ? `?plan=${planParam}` : "";
-  
-  // Priorizar el parámetro 'plan' de la URL sobre subscription_status de la BD
-  // Esto permite el modo diseño con ?plan=pro o ?plan=business
-  const planFromUrl = planParam && ["pro", "business"].includes(planParam) ? planParam : null;
-  
-  // SIEMPRE priorizar el parámetro de la URL si existe
-  // Esto es crítico para el modo diseño
-  const planId = planFromUrl 
-    ? (planFromUrl as PlanId) 
-    : ((userData?.subscription_status || "free") as PlanId);
+  const planId = (userData?.subscription_status || "free") as PlanId;
   
   // Incluir validaciones demo desde localStorage SOLO si no hay validaciones reales
   // Esto evita duplicar contadores cuando hay validaciones reales en la BD
@@ -195,7 +182,7 @@ export default function DashboardHeader({
         </div>
         {!isPro && (
           <Link
-            href={`/dashboard/billing${urlSuffix}`}
+            href="/dashboard/billing"
             className="inline-flex items-center justify-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 border border-transparent text-base max-md:text-sm font-semibold rounded-lg text-white transition-all shadow-sm hover:shadow-md whitespace-nowrap"
             style={{
               backgroundColor: brandPrimary,

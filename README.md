@@ -9,6 +9,8 @@ Sistema de validación de RFC construido con Next.js 14, TypeScript, Tailwind CS
 - Core funcional: validaciones RFC, dashboard, white label, onboarding, API, Stripe.
 - Integraciones listas: Supabase, Stripe, Resend (email).
 - Falta solo afinar despliegue y documentación técnica para terceros.
+- CFDI requiere integración con proveedor PAC/SAT (no incluido).
+- Recarga de API Keys y test-upgrade deshabilitados por defecto (flags en env).
 
 Si vendes el código hoy, el comprador solo necesita configurar credenciales y producción.
 

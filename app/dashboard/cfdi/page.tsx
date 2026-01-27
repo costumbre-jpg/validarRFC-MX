@@ -3,13 +3,13 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { type PlanId } from "@/lib/plans";
 
 function CFDIPage() {
-  const searchParams = useSearchParams();
+  const router = useRouter();
   const [planId, setPlanId] = useState<PlanId>("free");
   const [loading, setLoading] = useState(true);
 
@@ -18,12 +18,6 @@ function CFDIPage() {
 
   useEffect(() => {
     const loadPlan = async () => {
-      // Modo diseño: permitir plan por query
-      const planParam = searchParams.get("plan");
-      const designPlan = (planParam && ["pro", "business"].includes(planParam)
-        ? planParam
-        : "free") as PlanId;
-
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -39,21 +33,21 @@ function CFDIPage() {
           if (subscriptionStatus && ["free", "pro", "business"].includes(subscriptionStatus)) {
             setPlanId(subscriptionStatus as PlanId);
           } else {
-            setPlanId(designPlan);
+            setPlanId("free");
           }
         } else {
-          setPlanId(designPlan);
+          router.replace("/auth/login");
+          return;
         }
       } catch (e) {
-        console.error("Error obteniendo plan:", e);
-        setPlanId(designPlan);
+        setPlanId("free");
       } finally {
         setLoading(false);
       }
     };
 
     loadPlan();
-  }, [searchParams]);
+  }, [router]);
 
   if (loading) {
     return (
@@ -86,7 +80,7 @@ function CFDIPage() {
               </p>
             </div>
             <Link
-              href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+              href="/dashboard/billing"
               className="inline-flex items-center gap-2 max-md:gap-1.5 px-6 max-md:px-5 py-3 max-md:py-2.5 text-sm max-md:text-xs text-white rounded-lg transition-all font-semibold shadow-sm hover:shadow-md"
               style={{ backgroundColor: brandPrimary }}
             >
@@ -123,7 +117,7 @@ function CFDIPage() {
     );
   }
 
-  // Si ES Business, mostrar mensaje de "Próximamente"
+  // Si ES Business, mostrar mensaje de roadmap
   return (
     <div className="space-y-4 max-md:space-y-3">
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4 max-md:p-3">
@@ -153,7 +147,7 @@ function CFDIPage() {
           </div>
           <div className="flex-1">
             <h3 className="text-sm max-md:text-xs font-semibold text-amber-900 mb-2 max-md:mb-1.5">
-              Próximamente disponible
+              En roadmap (no incluido aún)
             </h3>
             <p className="text-xs max-md:text-[11px] text-amber-800 mb-3 max-md:mb-2">
               Estamos trabajando en integrar la validación de CFDI con un proveedor autorizado del SAT (PAC). 
@@ -187,7 +181,7 @@ function CFDIPage() {
             </ul>
             <div className="bg-white/60 rounded-lg p-3 max-md:p-2.5 border border-amber-200">
               <p className="text-xs max-md:text-[11px] text-amber-900 font-medium mb-1 max-md:mb-0.5">
-                💡 Mientras tanto
+                Mientras tanto
               </p>
               <p className="text-xs max-md:text-[11px] text-amber-800">
                 Puedes usar la validación de RFCs y todas las demás funcionalidades del plan Business, 

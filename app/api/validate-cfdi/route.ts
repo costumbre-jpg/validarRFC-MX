@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPlan, type PlanId } from "@/lib/plans";
 
-/**
- * Validación de CFDI (mock) para plan Business.
- * Nota: Implementación real debería consultar al SAT.
- */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -33,28 +29,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
-    const { uuid, rfcEmisor, rfcReceptor, total } = body || {};
-
-    if (!uuid || !rfcEmisor || !rfcReceptor || !total) {
-      return NextResponse.json(
-        { error: "Faltan campos: uuid, rfcEmisor, rfcReceptor, total" },
-        { status: 400 }
-      );
-    }
-
-    // Mock de validación: siempre válido, con timestamp
     return NextResponse.json({
-      success: true,
-      valid: true,
-      uuid,
-      rfcEmisor,
-      rfcReceptor,
-      total,
-      status: "Vigente (mock)",
-      validated_at: new Date().toISOString(),
-      source: "mock",
-    });
+      error: "Validación CFDI no disponible por ahora. Requiere proveedor PAC/SAT.",
+      code: "CFDI_NOT_IMPLEMENTED",
+    }, { status: 501 });
   } catch (error: any) {
     console.error("Error validando CFDI:", error);
     return NextResponse.json(

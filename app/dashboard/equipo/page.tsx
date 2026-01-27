@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getPlan, type PlanId } from "@/lib/plans";
 
@@ -20,7 +20,7 @@ function EquipoPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [ownerPlan, setOwnerPlan] = useState<string | null>(null);
-  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const loadData = async () => {
@@ -29,33 +29,9 @@ function EquipoPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Modo diseño: permitir acceso sin login
       if (!user) {
-        const planParam = searchParams.get("plan");
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        setUserData({
-          id: "mock-user",
-          email: "diseño@maflipp.com",
-          subscription_status: designPlan,
-        });
-        
-        // Datos mock para equipo
-        if (designPlan === "pro") {
-          setTeamMembers([
-            { id: "1", email: "diseño@maflipp.com", role: "Owner", status: "active", created_at: new Date().toISOString() },
-            { id: "2", email: "usuario2@example.com", role: "Member", status: "pending", created_at: new Date().toISOString() },
-          ]);
-        } else if (designPlan === "business") {
-          setTeamMembers([
-            { id: "1", email: "diseño@maflipp.com", role: "Owner", status: "active", created_at: new Date().toISOString() },
-            { id: "2", email: "usuario2@example.com", role: "Admin", status: "active", created_at: new Date().toISOString() },
-            { id: "3", email: "usuario3@example.com", role: "Member", status: "active", created_at: new Date().toISOString() },
-            { id: "4", email: "usuario4@example.com", role: "Member", status: "pending", created_at: new Date().toISOString() },
-          ]);
-        }
-        
         setLoading(false);
+        router.replace("/auth/login");
         return;
       }
 
@@ -100,7 +76,7 @@ function EquipoPage() {
     };
 
     loadData();
-  }, [searchParams]);
+  }, [router]);
 
   const isOwner = useMemo(() => {
     if (!userData?.email) return false;
@@ -162,7 +138,7 @@ function EquipoPage() {
               La gestión de equipo está disponible en los planes Pro y Business. Invita miembros, asigna roles y colabora en equipo.
             </p>
             <a
-              href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+              href="/dashboard/billing"
               className="inline-flex items-center gap-1.5 px-4 py-2 text-sm text-white rounded-lg transition-all font-medium shadow-sm hover:shadow-md"
               style={{ backgroundColor: brandPrimary }}
             >
@@ -186,28 +162,6 @@ function EquipoPage() {
 
     setSuccessMessage(null);
     setErrorMessage(null);
-
-    // Modo diseño: simular invitación
-    if (userData?.id === "mock-user") {
-      setInviting(true);
-      setTimeout(() => {
-        setTeamMembers([
-          ...teamMembers,
-          {
-            id: String(teamMembers.length + 1),
-            email: inviteEmail,
-            role: "Member",
-            status: "pending",
-            created_at: new Date().toISOString(),
-          },
-        ]);
-        setInviteEmail("");
-        setInviting(false);
-        setSuccessMessage(`✅ Invitación enviada a ${inviteEmail} (modo diseño)`);
-        setTimeout(() => setSuccessMessage(null), 5000);
-      }, 500);
-      return;
-    }
 
     setInviting(true);
     try {
@@ -275,16 +229,6 @@ function EquipoPage() {
 
     setDeleting(true);
 
-    // Modo diseño: simular eliminación
-    if (userData?.id === "mock-user") {
-      setTimeout(() => {
-        setTeamMembers(teamMembers.filter((m) => (m.member_id ?? m.id) !== memberToDelete.id));
-        setMemberToDelete(null);
-        setDeleting(false);
-      }, 500);
-      return;
-    }
-
     try {
       // Obtener token fresco antes de eliminar
       const supabase = createClient();
@@ -346,8 +290,8 @@ function EquipoPage() {
   };
 
   const handleLeaveTeam = async () => {
-    if (!userData || userData.id === "mock-user") {
-      setErrorMessage("No puedes salir del equipo en modo diseño");
+    if (!userData) {
+      setErrorMessage("No se pudo cargar el usuario. Intenta recargar.");
       setTimeout(() => setErrorMessage(null), 5000);
       return;
     }
@@ -567,7 +511,7 @@ function EquipoPage() {
               </p>
               {planId === "pro" && (
                 <a
-                  href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+                  href="/dashboard/billing"
                   className="inline-flex items-center gap-1 text-xs font-medium text-amber-800 hover:text-amber-900"
                 >
                   Actualizar a Business

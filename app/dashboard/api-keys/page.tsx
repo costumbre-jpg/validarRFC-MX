@@ -3,7 +3,6 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getPlan, type PlanId } from "@/lib/plans";
@@ -36,7 +35,6 @@ function APIKeysPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,43 +43,9 @@ function APIKeysPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Modo diseño: permitir acceso sin login
       if (!user) {
-        const planParam = searchParams.get("plan");
-        // En modo diseño, usar el plan de la URL o Free por defecto
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        setUserData({
-          id: "mock-user",
-          email: "diseño@maflipp.com",
-          subscription_status: designPlan,
-        });
-        
-        // Datos mock para API Keys
-        if (designPlan === "pro" || designPlan === "business") {
-          setApiKeys([
-            {
-              id: "1",
-              name: "Producción",
-              key_prefix: "sk_live_abc123...",
-              total_used: 1250,
-              last_used_at: new Date().toISOString(),
-              is_active: true,
-              created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-            },
-            {
-              id: "2",
-              name: "Desarrollo",
-              key_prefix: "sk_live_xyz789...",
-              total_used: 45,
-              last_used_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-              is_active: true,
-              created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-            },
-          ]);
-        }
-        
         setLoading(false);
+        window.location.href = "/auth/login";
         return;
       }
 
@@ -98,17 +62,7 @@ function APIKeysPage() {
         setAccessToken(session.access_token);
       }
       
-      // Si hay un parámetro 'plan' en la URL, sobrescribir subscription_status temporalmente
-      // Esto permite el modo diseño incluso con usuarios autenticados
-      const planParam = searchParams.get("plan");
-      const planFromUrl = planParam && ["pro", "business"].includes(planParam) ? planParam : null;
-      
-      if (dbUser && planFromUrl) {
-        setUserData({
-          ...(dbUser as any),
-          subscription_status: planFromUrl, // Sobrescribir con el plan de la URL
-        });
-      } else if (dbUser) {
+      if (dbUser) {
         setUserData(dbUser);
       }
 
@@ -124,7 +78,7 @@ function APIKeysPage() {
     };
 
     loadData();
-  }, [searchParams]);
+  }, []);
 
   const handleCreateKey = async () => {
     if (!newKeyName.trim()) {
@@ -246,19 +200,6 @@ function APIKeysPage() {
     setSuccessMessage(null);
     setErrorMessage(null);
 
-    // Modo diseño: simular toggle
-    if (userData?.id === "mock-user") {
-      setTimeout(() => {
-        setApiKeys(apiKeys.map((k) => 
-          k.id === keyId ? { ...k, is_active: !currentStatus } : k
-        ));
-        setTogglingKey(null);
-        setSuccessMessage(`✅ API Key ${!currentStatus ? "activada" : "desactivada"}`);
-        setTimeout(() => setSuccessMessage(null), 3000);
-      }, 500);
-      return;
-    }
-
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
@@ -313,21 +254,6 @@ function APIKeysPage() {
     setRenamingKey(true);
     setSuccessMessage(null);
     setErrorMessage(null);
-
-    // Modo diseño: simular rename
-    if (userData?.id === "mock-user") {
-      setTimeout(() => {
-        setApiKeys(apiKeys.map((k) => 
-          k.id === keyToRename.id ? { ...k, name: newKeyNameForRename.trim() } : k
-        ));
-        setKeyToRename(null);
-        setNewKeyNameForRename("");
-        setRenamingKey(false);
-        setSuccessMessage("✅ Nombre actualizado");
-        setTimeout(() => setSuccessMessage(null), 3000);
-      }, 500);
-      return;
-    }
 
     try {
       const supabase = createClient();
@@ -384,16 +310,7 @@ function APIKeysPage() {
     );
   }
 
-  // Priorizar el parámetro 'plan' de la URL sobre subscription_status de la BD
-  // Esto permite el modo diseño con ?plan=pro o ?plan=business
-  const planParam = searchParams.get("plan");
-  const planFromUrl = planParam && ["pro", "business"].includes(planParam) ? planParam : null;
-  
-  // SIEMPRE priorizar el parámetro de la URL si existe
-  // Esto es crítico para el modo diseño
-  const planId = planFromUrl 
-    ? (planFromUrl as PlanId) 
-    : ((userData?.subscription_status || "free") as PlanId);
+  const planId = (userData?.subscription_status || "free") as PlanId;
   const plan = getPlan(planId);
   const isPro = planId === "pro" || planId === "business";
   const apiLimit = plan.features.apiCallsPerMonth || 0;
@@ -433,7 +350,7 @@ function APIKeysPage() {
               Disponible en Pro y Business para integrar la API de RFC.
             </p>
             <a
-              href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+              href="/dashboard/billing"
               className="inline-flex items-center gap-2 max-md:gap-1.5 px-5 max-md:px-4 py-2 max-md:py-1.5 text-sm max-md:text-xs text-white rounded-lg transition-all font-semibold shadow-sm hover:shadow-md"
               style={{ backgroundColor: brandPrimary }}
             >

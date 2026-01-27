@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { formatDate, formatRFCForDisplay } from "@/lib/utils";
 import Link from "next/link";
 import { jsPDF } from "jspdf";
@@ -48,7 +47,6 @@ export default function ValidationHistory({
       setLocalCurrentPage(page);
     }
   };
-  const searchParams = useSearchParams();
   const planId = (userData?.subscription_status || "free") as PlanId;
   const isPro = planId === "pro" || planId === "business";
   const plan = getPlan(planId);
@@ -88,10 +86,6 @@ export default function ValidationHistory({
   const brandSecondary = getBrandColor("--brand-secondary", "#1F5D59");
   const { name: brandName, hide: hideMaflipp } = getBrandMeta();
   
-  // Mantener parámetro 'plan' en los links
-  const planParam = searchParams.get("plan");
-  const urlSuffix = planParam && ["pro", "business"].includes(planParam) ? `?plan=${planParam}` : "";
-
   // Si es paginación del servidor, mostrar todas las validaciones recibidas
   // Si es paginación del cliente, hacer slice
   const serverPageValidations =
@@ -118,26 +112,6 @@ export default function ValidationHistory({
 
   // Función para cargar todas las validaciones para exportar (cuando hay paginación del servidor)
   const loadAllValidationsForExport = async (): Promise<Validation[]> => {
-    // Verificar si estamos en modo diseño (mock-user)
-    if (userData?.id === "mock-user") {
-      // En modo diseño, devolver todas las validaciones mock (12 en total)
-      const allMockValidations = [
-        { id: "1", rfc: "ABC123456789", is_valid: true, created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-        { id: "2", rfc: "XYZ987654321", is_valid: false, created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-        { id: "3", rfc: "DEF456789012", is_valid: true, created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-        { id: "4", rfc: "GHI789012345", is_valid: true, created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "5", rfc: "JKL012345678", is_valid: false, created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "6", rfc: "MNO345678901", is_valid: true, created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "7", rfc: "PQR678901234", is_valid: true, created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "8", rfc: "STU901234567", is_valid: false, created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "9", rfc: "VWX234567890", is_valid: true, created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "10", rfc: "YZA567890123", is_valid: true, created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "11", rfc: "BCD890123456", is_valid: true, created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "12", rfc: "EFG123456789", is_valid: false, created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
-      ];
-      return allMockValidations;
-    }
-
     if (!isServerPagination) {
       // Si no hay paginación del servidor, usar las validaciones que ya tenemos
       return validations;
@@ -581,7 +555,7 @@ export default function ValidationHistory({
         )}
         {!showFullTable && (
           <Link
-            href={`/dashboard/historial${urlSuffix}`}
+            href="/dashboard/historial"
             className="text-xs font-medium text-brand-primary hover-text-brand-secondary"
           >
             Ver todo →

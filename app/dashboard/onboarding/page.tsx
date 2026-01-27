@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { type PlanId } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
 
@@ -50,7 +50,7 @@ function OnboardingPage() {
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
   const [autoSaveReady, setAutoSaveReady] = useState(false);
-  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -76,11 +76,6 @@ function OnboardingPage() {
 
   useEffect(() => {
     const load = async () => {
-      const planParam = searchParams.get("plan");
-      const designPlan = (planParam && ["pro", "business"].includes(planParam)
-        ? planParam
-        : "business") as PlanId;
-
       let token: string | null = null;
       try {
         const supabase = createClient();
@@ -103,14 +98,13 @@ function OnboardingPage() {
           credentials: "include",
         });
         if (res.status === 401) {
-          setPlanId(designPlan);
-          setForm(defaults);
           setLoading(false);
+          router.replace("/auth/login");
           return;
         }
         if (res.ok) {
           const data = await res.json();
-          setPlanId((data.planId || designPlan) as PlanId);
+          setPlanId((data.planId || "free") as PlanId);
           if (data.onboarding) {
             setForm({ ...defaults, ...data.onboarding });
           }
@@ -122,7 +116,7 @@ function OnboardingPage() {
       }
     };
     load();
-  }, [searchParams]);
+  }, [router]);
 
   useEffect(() => {
     if (!loading) {
@@ -298,7 +292,7 @@ function OnboardingPage() {
             Disponible solo en plan Business. Configura tu cuenta a medida con nuestro equipo.
           </p>
           <a
-            href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+            href="/dashboard/billing"
             className="inline-flex items-center gap-2 max-md:gap-1.5 px-5 max-md:px-4 py-2.5 max-md:py-2 text-sm max-md:text-xs text-white rounded-lg transition-all font-semibold shadow-sm hover:shadow-md"
             style={{ backgroundColor: brandPrimary }}
           >

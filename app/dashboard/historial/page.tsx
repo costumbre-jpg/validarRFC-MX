@@ -3,7 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import ValidationHistory from "@/components/dashboard/ValidationHistory";
@@ -16,50 +16,13 @@ function HistorialPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 20;
-  const searchParams = useSearchParams();
-
-  const loadMockPage = (page: number) => {
-    const planParam = searchParams.get("plan");
-    const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-
-    if (designPlan === "pro" || designPlan === "business") {
-      const allMockValidations = [
-        { id: "1", rfc: "ABC123456789", is_valid: true, created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
-        { id: "2", rfc: "XYZ987654321", is_valid: false, created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() },
-        { id: "3", rfc: "DEF456789012", is_valid: true, created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-        { id: "4", rfc: "GHI789012345", is_valid: true, created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "5", rfc: "JKL012345678", is_valid: false, created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "6", rfc: "MNO345678901", is_valid: true, created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "7", rfc: "PQR678901234", is_valid: true, created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "8", rfc: "STU901234567", is_valid: false, created_at: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "9", rfc: "VWX234567890", is_valid: true, created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "10", rfc: "YZA567890123", is_valid: true, created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "11", rfc: "BCD890123456", is_valid: true, created_at: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString() },
-        { id: "12", rfc: "EFG123456789", is_valid: false, created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString() },
-      ];
-
-      const from = (page - 1) * itemsPerPage;
-      const to = from + itemsPerPage;
-      const paginatedValidations = allMockValidations.slice(from, to);
-
-      setValidations(paginatedValidations);
-      setTotalCount(allMockValidations.length);
-    } else {
-      setValidations([]);
-      setTotalCount(0);
-    }
-    setLoading(false);
-  };
+  const router = useRouter();
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     if (!userData) return;
     setLoading(true);
-    if (userData.id === "mock-user") {
-      loadMockPage(page);
-    } else {
-      loadValidations(page);
-    }
+    loadValidations(page);
   };
 
   const loadValidations = async (page: number) => {
@@ -70,6 +33,7 @@ function HistorialPage() {
 
     if (!user) {
       setLoading(false);
+      router.replace("/auth/login");
       return;
     }
 
@@ -173,21 +137,9 @@ function HistorialPage() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      // Modo diseño: permitir acceso sin login
       if (!user) {
-        // Leer parámetro 'plan' de la URL para modo diseño
-        const planParam = searchParams.get("plan");
-        const designPlan = planParam && ["pro", "business"].includes(planParam) ? planParam : "free";
-        
-        setUserData({
-          id: "mock-user",
-          email: "diseño@maflipp.com",
-          subscription_status: designPlan, // Usar plan de la URL o 'free' por defecto
-          rfc_queries_this_month: 3,
-        });
-        
-        // Datos de ejemplo para visualizar el diseño (solo en modo diseño y planes Pro/Business)
-        loadMockPage(1);
+        setLoading(false);
+        router.replace("/auth/login");
         return;
       }
 
@@ -205,7 +157,7 @@ function HistorialPage() {
     };
 
     loadData();
-  }, [searchParams]);
+  }, [router]);
 
   // Recargar cuando cambia la página: ahora lo maneja handlePageChange
 
@@ -247,7 +199,7 @@ function HistorialPage() {
               El historial completo de validaciones está disponible en los planes Pro y Business.
             </p>
             <Link
-              href={`/dashboard/billing${searchParams.get("plan") && ["pro", "business"].includes(searchParams.get("plan")!) ? `?plan=${searchParams.get("plan")}` : ""}`}
+              href="/dashboard/billing"
               className="inline-flex items-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-white rounded-xl max-md:rounded-lg transition-all font-medium text-base max-md:text-sm shadow-md hover:shadow-lg"
               style={{ backgroundColor: brandPrimary }}
             >

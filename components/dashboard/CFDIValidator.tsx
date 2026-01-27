@@ -119,14 +119,13 @@ export default function CFDIValidator() {
         {result && (
           <div className="rounded-lg border-2 shadow-sm p-4 bg-green-50 border-green-200">
             <p className="text-sm font-semibold text-green-800 mb-2">
-              CFDI {result.valid ? "Vigente (mock)" : "No válido"}
+              CFDI {result.valid ? "Vigente" : "No válido"}
             </p>
             <div className="text-sm text-gray-700 space-y-1">
               <p><strong>UUID:</strong> {result.uuid}</p>
               <p><strong>RFC Emisor:</strong> {result.rfcEmisor}</p>
               <p><strong>RFC Receptor:</strong> {result.rfcReceptor}</p>
               <p><strong>Total:</strong> {result.total}</p>
-              <p><strong>Fuente:</strong> {result.source}</p>
               <p><strong>Validado:</strong> {new Date(result.validated_at).toLocaleString("es-MX")}</p>
             </div>
           </div>
