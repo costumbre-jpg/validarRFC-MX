@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { type PlanId } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
@@ -162,7 +162,7 @@ function OnboardingPage() {
     return Object.keys(nextErrors).length === 0;
   };
 
-  const saveOnboarding = async (
+  const saveOnboarding = useCallback(async (
     options: { silent?: boolean; status?: string } = {}
   ) => {
     if (!isBusiness) {
@@ -235,7 +235,7 @@ function OnboardingPage() {
         setSaving(false);
       }
     }
-  };
+  }, [accessToken, form, isBusiness]);
 
   const handleSave = async () => {
     const valid = validateFields();

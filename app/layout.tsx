@@ -127,7 +127,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <GoogleAnalytics />
-            <PWARegister />
+        <PWARegister />
         {children}
       </body>
     </html>

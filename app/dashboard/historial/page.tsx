@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
@@ -18,14 +18,7 @@ function HistorialPage() {
   const itemsPerPage = 20;
   const router = useRouter();
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    if (!userData) return;
-    setLoading(true);
-    loadValidations(page);
-  };
-
-  const loadValidations = async (page: number) => {
+  const loadValidations = useCallback(async (page: number) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -128,6 +121,13 @@ function HistorialPage() {
       setTotalCount(allDemo.length);
     }
     setLoading(false);
+  }, [itemsPerPage, router, userData]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    if (!userData) return;
+    setLoading(true);
+    loadValidations(page);
   };
 
   useEffect(() => {

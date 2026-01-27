@@ -1,6 +1,6 @@
 "use client";
  
- import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
  import { createClient } from "@/lib/supabase/client";
  
  type Notification = {
@@ -35,11 +35,11 @@
  
    const unreadCount = items.filter((item) => !item.read).length;
  
-   const markAllRead = async () => {
-     const supabase = createClient();
+  const markAllRead = async () => {
+    const supabase = createClient() as any;
      await supabase
        .from("notifications")
-       .update({ read: true })
+      .update({ read: true })
        .eq("read", false);
  
      setItems((prev) => prev.map((item) => ({ ...item, read: true })));
