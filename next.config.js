@@ -12,10 +12,6 @@ const nextConfig = {
       },
     ],
   },
-  // Enable Sentry only in production
-  sentry: {
-    hideSourceMaps: true,
-  },
 }
 
 // Wrap with Sentry if DSN is configured
