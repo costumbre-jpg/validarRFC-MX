@@ -8,11 +8,18 @@ Sistema de validación de RFC construido con Next.js 14, TypeScript, Tailwind CS
 
 - Core funcional: validaciones RFC, dashboard, white label, onboarding, API, Stripe.
 - Integraciones listas: Supabase, Stripe, Resend (email).
+- **✅ Google Analytics 4** integrado (opcional, requiere `NEXT_PUBLIC_GA_MEASUREMENT_ID`).
+- **✅ Sentry** para monitoreo de errores (opcional, requiere `NEXT_PUBLIC_SENTRY_DSN`).
+- **✅ Health check endpoint** (`/api/health`) y página de status (`/status`).
+- **✅ SEO mejorado** (sitemap dinámico, robots.txt).
+- **✅ Documentación API completa** (`API_DOCUMENTATION.md`).
+- **✅ Suite de tests** (unitarios e integración).
+- **✅ Rate limiting robusto** con Redis (Upstash) y fallback en memoria.
 - Falta solo afinar despliegue y documentación técnica para terceros.
 - CFDI requiere integración con proveedor PAC/SAT (no incluido).
 - Recarga de API Keys y test-upgrade deshabilitados por defecto (flags en env).
 
-Si vendes el código hoy, el comprador solo necesita configurar credenciales y producción.
+**Si vendes el código hoy, el comprador solo necesita configurar credenciales y producción.**
 
 ## 🚀 Inicio Rápido
 

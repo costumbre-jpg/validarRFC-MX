@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://maflipp.com"),
@@ -124,6 +125,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <GoogleAnalytics />
         {children}
       </body>
     </html>

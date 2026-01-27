@@ -45,6 +45,12 @@ Este documento resume lo mínimo que un comprador necesita para poner la platafo
 - El endpoint de test-upgrade está deshabilitado en producción (`ALLOW_TEST_UPGRADE=false`).
 - La validación CFDI requiere integración con proveedor PAC/SAT.
 
+### Nuevas funcionalidades (2025)
+
+- **Google Analytics 4**: Integrado opcionalmente. Configurar `NEXT_PUBLIC_GA_MEASUREMENT_ID` en variables de entorno.
+- **Health Check**: Endpoint `/api/health` verifica estado de servicios (Supabase, Stripe). Página pública `/status` muestra estado en tiempo real.
+- **SEO**: Sitemap dinámico (`/sitemap.xml`) y robots.txt (`/robots.txt`) optimizados para indexación.
+
 ## 4) Checklist de producción
 
 - Configurar dominio y SSL
