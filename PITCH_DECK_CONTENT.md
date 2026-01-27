@@ -35,10 +35,10 @@ White label y analytics avanzados agregan valor en Business.
 Next.js 14 + Supabase + Stripe + Resend  
 Arquitectura ligera, escalable y fácil de mantener.
 
-## Slide 9 — Tracción (si aplica)
-Usuarios activos: [X]  
-Validaciones/mes: [X]  
-MRR: [X]
+## Slide 9 — Estado actual
+MVP funcional completo y listo para lanzar.  
+Sin usuarios activos aún (oportunidad para comprador).  
+Producto terminado, falta ejecutar estrategia de marketing.
 
 ## Slide 10 — Costos y margen
 Infraestructura ligera con costos controlados.  

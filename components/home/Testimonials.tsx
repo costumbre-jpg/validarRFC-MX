@@ -1,24 +1,29 @@
 "use client";
 
+// Componente de testimonios - NO USAR hasta tener testimonios reales
+// Para vender MVP sin traccion, mejor no mostrar esta seccion
 export default function Testimonials() {
+  // Comentado: no mostrar testimonios hasta tener clientes reales
+  // Si quieres mostrar esta seccion, descomenta y agrega testimonios reales
+  const testimonials: any[] = [];
+  
+  // Si no hay testimonios, no renderizar nada
+  if (testimonials.length === 0) {
+    return null;
+  }
+  
+  // Codigo original comentado para referencia:
+  /*
   const testimonials = [
     {
       id: 1,
-      quote:
-        "Testimonio real pendiente. Reemplaza este texto con una cita de cliente.",
-      author: "Nombre del cliente",
-      role: "Cargo / Empresa",
-      rating: 5,
-    },
-    {
-      id: 2,
-      quote:
-        "Testimonio real pendiente. Idealmente incluye ahorro de tiempo o ROI.",
+      quote: "Testimonio real pendiente...",
       author: "Nombre del cliente",
       role: "Cargo / Empresa",
       rating: 5,
     },
   ];
+  */
 
   return (
     <section className="px-4 md:px-0 bg-gray-50 py-20">

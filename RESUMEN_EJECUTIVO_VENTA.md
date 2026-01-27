@@ -31,28 +31,27 @@
 - API documentation y handoff tecnico.
 - Demo grabada y guia de screenshots.
 
-### 6) Estado actual (placeholders)
-- Usuarios activos: [X]
-- Validaciones/mes: [X]
-- MRR: [X]
-- Tasa de conversion: [X]
-- CAC y LTV: [X]
+### 6) Estado actual
+- **MVP funcional completo** - Producto terminado y listo para lanzar.
+- **Sin usuarios activos** - Plataforma nueva, sin traccion comercial aun.
+- **Sin ingresos** - Listo para monetizar desde dia 1.
+- **Potencial validado** - Mercado mexicano con necesidad real (validacion RFC obligatoria).
 
-### 7) Casos de uso y ROI (placeholders)
-- Caso 1: [cliente] redujo [X] horas/mes en validacion manual.
-- Caso 2: [empresa] disminuyo errores de RFC en [X]% y evito rechazos.
-- Caso 3: [equipo] automatizo onboarding con API y ahorro [X] horas/mes.
+### 7) Ventajas para comprador
+- **Time-to-market inmediato** - Producto funcional, no requiere desarrollo inicial.
+- **Base tecnica solida** - Codigo limpio, TypeScript, arquitectura escalable.
+- **Documentacion completa** - Handoff tecnico, API docs, guias de deployment.
+- **Stack moderno** - Next.js 14, Supabase, Stripe, Redis (facil de mantener/escalar).
+- **Features completas** - Dashboard, API, white-label, onboarding, analytics.
+- **Listo para marketing** - Activos de venta incluidos (pitch deck, one-pager, etc).
 
-### 8) Ventajas para comprador
-- Time-to-market inmediato con producto funcional.
-- Base tecnica limpia y documentada.
-- Growth rapido con marketing y partnerships.
+### 8) Riesgos/pendientes (transparentes)
+- **Sin traccion comercial** - MVP sin usuarios ni ingresos (oportunidad para comprador).
+- **Validacion CFDI** - Disponible como add-on bajo cotizacion (requiere PAC).
+- **Marketing pendiente** - Producto listo, falta ejecutar estrategia de adquisicion.
+- **Mejoras posibles** - Mas integraciones, automatizaciones, features adicionales.
 
-### 9) Riesgos/pendientes (transparentes)
-- Validacion CFDI es add-on (requiere PAC).
-- Mejoras posibles: mas integraciones y automatizaciones.
-
-### 10) Incluye en la venta
+### 9) Incluye en la venta
 - Dominio `maflipp.com`
 - Codigo fuente completo
 - Documentacion y handoff
