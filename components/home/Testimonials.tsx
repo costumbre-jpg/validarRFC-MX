@@ -5,17 +5,17 @@ export default function Testimonials() {
     {
       id: 1,
       quote:
-        "Como contador, valido 50+ RFCs al mes. Maflipp me ahorra horas de trabajo manual.",
-      author: "Carlos",
-      role: "Contador",
+        "Testimonio real pendiente. Reemplaza este texto con una cita de cliente.",
+      author: "Nombre del cliente",
+      role: "Cargo / Empresa",
       rating: 5,
     },
     {
       id: 2,
       quote:
-        "Implementamos Maflipp en nuestra fintech para validar clientes automáticamente. La API es excelente.",
-      author: "Sofía",
-      role: "CTO Fintech",
+        "Testimonio real pendiente. Idealmente incluye ahorro de tiempo o ROI.",
+      author: "Nombre del cliente",
+      role: "Cargo / Empresa",
       rating: 5,
     },
   ];

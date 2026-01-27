@@ -45,6 +45,13 @@ describe('Stripe Webhooks', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_secret'
+    jest.spyOn(console, 'error').mockImplementation(() => {})
+    jest.spyOn(console, 'log').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    ;(console.error as jest.Mock).mockRestore()
+    ;(console.log as jest.Mock).mockRestore()
   })
 
   it('should return 400 if signature is missing', async () => {

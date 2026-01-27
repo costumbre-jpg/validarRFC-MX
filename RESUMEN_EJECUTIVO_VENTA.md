@@ -38,16 +38,21 @@
 - Tasa de conversion: [X]
 - CAC y LTV: [X]
 
-### 7) Ventajas para comprador
+### 7) Casos de uso y ROI (placeholders)
+- Caso 1: [cliente] redujo [X] horas/mes en validacion manual.
+- Caso 2: [empresa] disminuyo errores de RFC en [X]% y evito rechazos.
+- Caso 3: [equipo] automatizo onboarding con API y ahorro [X] horas/mes.
+
+### 8) Ventajas para comprador
 - Time-to-market inmediato con producto funcional.
 - Base tecnica limpia y documentada.
 - Growth rapido con marketing y partnerships.
 
-### 8) Riesgos/pendientes (transparentes)
+### 9) Riesgos/pendientes (transparentes)
 - Validacion CFDI es add-on (requiere PAC).
 - Mejoras posibles: mas integraciones y automatizaciones.
 
-### 9) Incluye en la venta
+### 10) Incluye en la venta
 - Dominio `maflipp.com`
 - Codigo fuente completo
 - Documentacion y handoff

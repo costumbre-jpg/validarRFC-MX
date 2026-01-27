@@ -136,6 +136,19 @@
 
 ---
 
+### 9. Testimonios reales (cuando los tengas)
+**Qué capturar:**
+- Seccion "Lo que dicen nuestros clientes" con citas reales
+- Nombre y cargo visibles
+
+**Cómo:**
+- Actualiza `components/home/Testimonials.tsx` con testimonios reales
+- Captura la seccion en home
+
+**Dónde usar:**
+- Slide de pruebas sociales
+- One-pager y listings
+
 ## 🎨 Cómo Tomar las Capturas
 
 ### Herramientas Recomendadas:
