@@ -3,7 +3,9 @@ import { test, expect } from "@playwright/test";
 test("home page loads", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle(/Maflipp/i);
-  await expect(page.getByText("Validación RFC", { exact: false })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Validación de RFCs contra el SAT/i })
+  ).toBeVisible();
 });
 
 test("pricing page loads", async ({ page }) => {
@@ -18,5 +20,5 @@ test("developers docs load", async ({ page }) => {
 
 test("dashboard redirects to login when unauthenticated", async ({ page }) => {
   await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/\?auth=login/);
+  await expect(page).toHaveURL(/\/auth\/login/);
 });
