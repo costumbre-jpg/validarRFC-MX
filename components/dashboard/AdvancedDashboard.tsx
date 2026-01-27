@@ -427,7 +427,7 @@ export default function AdvancedDashboard({
   const avgPerDay = currentMonthTotal > 0 ? (currentMonthTotal / Math.max(activeDays, 1)) : 0;
   const projection = currentMonthTotal > 0 ? Math.round((currentMonthTotal / Math.max(daysElapsed, 1)) * daysInMonth) : 0;
 
-  if (isMock) {
+  if (!validations || validations.length === 0) {
     return (
       <div className="bg-white rounded-lg border border-gray-200 p-4 text-sm text-gray-600">
         Aún no hay datos reales para mostrar en el análisis detallado.
