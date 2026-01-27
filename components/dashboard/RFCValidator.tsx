@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
@@ -30,6 +31,7 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
     isDemo?: boolean;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
 
   useEffect(() => {
     if (!result && !error) return;
@@ -102,6 +104,7 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
   const handleValidate = async () => {
     setError(null);
     setResult(null);
+    setLimitReached(false);
 
     const formattedRFC = normalizeRFC(rfc);
 
@@ -120,6 +123,7 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
       setError(
         `Has alcanzado el límite de ${planLimit.toLocaleString()} validaciones este mes. Mejora tu plan para obtener más.`
       );
+      setLimitReached(true);
       return;
     }
 
@@ -152,6 +156,9 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
           rawMessage.toLowerCase().includes("fetch failed")
             ? "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos."
             : rawMessage;
+        if (response.status === 403) {
+          setLimitReached(true);
+        }
         if (applyDemoFallback(formattedRFC, friendlyMessage)) {
           setLoading(false);
           return;
@@ -168,6 +175,9 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
           rawMessage.toLowerCase().includes("fetch failed")
             ? "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos."
             : rawMessage;
+        if (response.status === 403) {
+          setLimitReached(true);
+        }
         if (applyDemoFallback(formattedRFC, friendlyMessage)) {
           setLoading(false);
           return;
@@ -304,6 +314,16 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
         {error && (
           <div className="rounded-md bg-red-50 p-4 max-md:p-3">
             <p className="text-sm max-md:text-xs text-red-800">{error}</p>
+            {limitReached && (
+              <div className="mt-2">
+                <Link
+                  href="/dashboard/billing"
+                  className="inline-flex items-center text-xs font-semibold text-red-700 hover:text-red-800 underline"
+                >
+                  Ver planes y aumentar límite
+                </Link>
+              </div>
+            )}
           </div>
         )}
 

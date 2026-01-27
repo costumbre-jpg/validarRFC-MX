@@ -5,3 +5,18 @@ test("home page loads", async ({ page }) => {
   await expect(page).toHaveTitle(/Maflipp/i);
   await expect(page.getByText("Validación RFC", { exact: false })).toBeVisible();
 });
+
+test("pricing page loads", async ({ page }) => {
+  await page.goto("/pricing");
+  await expect(page.getByRole("heading", { name: "Planes y Precios" })).toBeVisible();
+});
+
+test("developers docs load", async ({ page }) => {
+  await page.goto("/developers");
+  await expect(page.getByText("Documentación de la API", { exact: false })).toBeVisible();
+});
+
+test("dashboard redirects to login when unauthenticated", async ({ page }) => {
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/\?auth=login/);
+});

@@ -399,7 +399,24 @@ export default function DashboardPage() {
 
         {loadError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
-            {loadError}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <span>{loadError}</span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRefreshKey((prev) => prev + 1)}
+                  className="inline-flex items-center px-3 py-2 rounded-lg text-xs font-semibold border border-red-200 text-red-700 bg-white hover:bg-red-100"
+                >
+                  Reintentar
+                </button>
+                <Link
+                  href="/dashboard/help"
+                  className="inline-flex items-center px-3 py-2 rounded-lg text-xs font-semibold border border-gray-200 text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Soporte
+                </Link>
+              </div>
+            </div>
           </div>
         )}
 
