@@ -1,10 +1,12 @@
+/** @jest-environment node */
+
 import { POST } from '@/app/api/stripe/webhook/route'
 import { NextRequest } from 'next/server'
 import { stripe } from '@/lib/stripe'
 
 // Mock Stripe
-jest.mock('@/lib/stripe', () => ({
-  stripe: {
+jest.mock('@/lib/stripe', () => {
+  const stripe = {
     webhooks: {
       constructEvent: jest.fn(),
     },
@@ -14,35 +16,29 @@ jest.mock('@/lib/stripe', () => ({
     customers: {
       retrieve: jest.fn(),
     },
-  },
-}))
+  }
+
+  return {
+    getStripe: () => stripe,
+    stripe,
+  }
+})
 
 // Mock Supabase
 jest.mock('@supabase/supabase-js', () => ({
-  createClient: jest.fn(() => ({
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          single: jest.fn(() => ({
-            data: {
-              id: 'test-user-id',
-              subscription_status: 'free',
-            },
-          })),
-        })),
-      })),
-      update: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          data: null,
-          error: null,
-        })),
-      })),
-      insert: jest.fn(() => ({
-        data: null,
-        error: null,
-      })),
-    })),
-  })),
+  createClient: jest.fn(() => {
+    const chain = {
+      select: jest.fn(() => chain),
+      update: jest.fn(() => chain),
+      insert: jest.fn(() => ({ data: null, error: null })),
+      eq: jest.fn(() => chain),
+      single: jest.fn(() => ({ data: null, error: null })),
+    }
+
+    return {
+      from: jest.fn(() => chain),
+    }
+  }),
 }))
 
 describe('Stripe Webhooks', () => {

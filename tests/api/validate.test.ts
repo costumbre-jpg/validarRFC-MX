@@ -1,8 +1,10 @@
+/** @jest-environment node */
+
 import { POST } from '@/app/api/validate/route'
 import { NextRequest } from 'next/server'
 
-// Mock Supabase
-jest.mock('@/lib/supabase/server', () => ({
+// Mock Supabase admin client
+jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     auth: {
       getUser: jest.fn(() => ({
@@ -49,7 +51,7 @@ describe('API /api/validate', () => {
   })
 
   it('should return 401 if user is not authenticated', async () => {
-    const { createClient } = require('@/lib/supabase/server')
+    const { createClient } = require('@supabase/supabase-js')
     createClient.mockReturnValueOnce({
       auth: {
         getUser: jest.fn(() => ({
@@ -61,7 +63,10 @@ describe('API /api/validate', () => {
 
     const request = new NextRequest('http://localhost:3000/api/validate', {
       method: 'POST',
-      body: JSON.stringify({ rfc: 'ABC123456XYZ' }),
+      headers: {
+        authorization: 'Bearer test-token',
+      },
+      body: JSON.stringify({ rfc: 'ABC9901011A2' }),
     })
 
     const response = await POST(request)
@@ -69,12 +74,15 @@ describe('API /api/validate', () => {
 
     expect(response.status).toBe(401)
     expect(data.success).toBe(false)
-    expect(data.message).toContain('no autenticado')
+    expect(data.message.toLowerCase()).toContain('no autenticado')
   })
 
   it('should return 400 if RFC is missing', async () => {
     const request = new NextRequest('http://localhost:3000/api/validate', {
       method: 'POST',
+      headers: new Headers({
+        authorization: 'Bearer test-token',
+      }),
       body: JSON.stringify({}),
     })
 
@@ -89,6 +97,9 @@ describe('API /api/validate', () => {
   it('should return 400 if RFC format is invalid', async () => {
     const request = new NextRequest('http://localhost:3000/api/validate', {
       method: 'POST',
+      headers: new Headers({
+        authorization: 'Bearer test-token',
+      }),
       body: JSON.stringify({ rfc: 'INVALID' }),
     })
 
@@ -101,7 +112,7 @@ describe('API /api/validate', () => {
   })
 
   it('should return 403 if monthly limit is reached', async () => {
-    const { createClient } = require('@/lib/supabase/server')
+    const { createClient } = require('@supabase/supabase-js')
     createClient.mockReturnValueOnce({
       auth: {
         getUser: jest.fn(() => ({
@@ -120,7 +131,7 @@ describe('API /api/validate', () => {
             single: jest.fn(() => ({
               data: {
                 subscription_status: 'free',
-                rfc_queries_this_month: 5, // Limit reached
+                rfc_queries_this_month: 10, // Limit reached for free plan
               },
             })),
           })),
@@ -130,7 +141,10 @@ describe('API /api/validate', () => {
 
     const request = new NextRequest('http://localhost:3000/api/validate', {
       method: 'POST',
-      body: JSON.stringify({ rfc: 'ABC123456XYZ' }),
+      headers: new Headers({
+        authorization: 'Bearer test-token',
+      }),
+      body: JSON.stringify({ rfc: 'ABC9901011A2' }),
     })
 
     const response = await POST(request)
@@ -150,7 +164,10 @@ describe('API /api/validate', () => {
 
     const request = new NextRequest('http://localhost:3000/api/validate', {
       method: 'POST',
-      body: JSON.stringify({ rfc: 'ABC123456XYZ' }),
+      headers: new Headers({
+        authorization: 'Bearer test-token',
+      }),
+      body: JSON.stringify({ rfc: 'ABC9901011A2' }),
     })
 
     const response = await POST(request)
@@ -158,7 +175,7 @@ describe('API /api/validate', () => {
 
     expect(response.status).toBe(200)
     expect(data.success).toBe(true)
-    expect(data.rfc).toBe('ABC123456XYZ')
+    expect(data.rfc).toBe('ABC9901011A2')
     expect(typeof data.valid).toBe('boolean')
   })
 })

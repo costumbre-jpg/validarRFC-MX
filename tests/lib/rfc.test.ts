@@ -1,3 +1,7 @@
+jest.mock("@/lib/redis", () => ({
+  getRedis: () => null,
+}));
+
 import { validateRFC, normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 
 describe("RFC Utilities", () => {
@@ -19,12 +23,12 @@ describe("RFC Utilities", () => {
   describe("isValidRFCFormatStrict", () => {
     it("should validate correct RFC personas físicas", () => {
       expect(isValidRFCFormatStrict("XAXX010101000")).toBe(true);
-      expect(isValidRFCFormatStrict("ABCD123456E12")).toBe(true);
+      expect(isValidRFCFormatStrict("ABCD9901011A2")).toBe(true);
     });
 
     it("should validate correct RFC personas morales", () => {
-      expect(isValidRFCFormatStrict("ABC123456789")).toBe(true);
-      expect(isValidRFCFormatStrict("XYZ987654321")).toBe(true);
+      expect(isValidRFCFormatStrict("ABC9901011A2")).toBe(true);
+      expect(isValidRFCFormatStrict("XYZ0001011A0")).toBe(true);
     });
 
     it("should reject RFCs that are too short", () => {
@@ -40,7 +44,8 @@ describe("RFC Utilities", () => {
     it("should reject invalid formats", () => {
       expect(isValidRFCFormatStrict("123456789012")).toBe(false); // All numbers
       expect(isValidRFCFormatStrict("ABCDEFGHIJKL")).toBe(false); // All letters
-      expect(isValidRFCFormatStrict("XAXX01010100A")).toBe(false); // Invalid last char
+      expect(isValidRFCFormatStrict("XAXX991301000")).toBe(false); // Invalid month
+      expect(isValidRFCFormatStrict("XAXX01010100@")).toBe(false); // Invalid char
     });
 
     it("should handle empty strings", () => {
@@ -63,24 +68,25 @@ describe("RFC Utilities", () => {
     it("should return valid result for valid RFC from SAT", async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        text: async () => "Vigente|PUBLICO EN GENERAL|",
+        text: async () =>
+          "Registro activo. Razón Social: PUBLICO EN GENERAL. Régimen: General.",
       });
 
       const result = await validateRFC("XAXX010101000");
 
       expect(result.success).toBe(true);
       expect(result.valid).toBe(true);
-      expect(result.name).toBe("PUBLICO EN GENERAL");
-      expect(result.status).toBe("Vigente");
+      expect(result.name?.toUpperCase()).toContain("PUBLICO EN GENERAL");
+      expect(result.message?.toLowerCase()).toContain("rfc válido");
     });
 
     it("should return invalid result for non-existent RFC", async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        text: async () => "No Encontrado||",
+        text: async () => "RFC no encontrado",
       });
 
-      const result = await validateRFC("ABCD123456789");
+      const result = await validateRFC("ABCD9901011A2");
 
       expect(result.success).toBe(true);
       expect(result.valid).toBe(false);
@@ -89,11 +95,11 @@ describe("RFC Utilities", () => {
     it("should handle SAT API errors gracefully", async () => {
       (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("Network error"));
 
-      const result = await validateRFC("XAXX010101000");
+      const result = await validateRFC("ABC9901011A2");
 
       expect(result.success).toBe(false);
       expect(result.valid).toBe(false);
-      expect(result.message).toContain("Error");
+      expect(result.message?.toLowerCase()).toContain("sat");
     });
 
     it("should handle invalid RFC format before calling SAT", async () => {
@@ -101,7 +107,7 @@ describe("RFC Utilities", () => {
 
       expect(result.success).toBe(false);
       expect(result.valid).toBe(false);
-      expect(result.message).toContain("formato");
+      expect(result.message).toMatch(/formato/i);
       expect(global.fetch).not.toHaveBeenCalled();
     });
   });

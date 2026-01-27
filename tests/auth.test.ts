@@ -131,7 +131,7 @@ describe('Authentication', () => {
       )
 
       expect(result.error).toBeNull()
-      expect(mockReset).toHaveBeenCalledWith('test@example.com', expect.any(Object))
+      expect(mockReset).toHaveBeenCalledWith('test@example.com')
     })
   })
 
