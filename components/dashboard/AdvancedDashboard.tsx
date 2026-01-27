@@ -367,10 +367,8 @@ export default function AdvancedDashboard({
   }, [userData, isBusiness, queriesThisMonth, validations.length]); // Re-ejecutar cuando cambien las validaciones
 
   // Calcular máximos para escalar las barras
-  // Datos de ejemplo para asegurar vista previa siempre visible
-  // Usar datos reales; sin datos = arreglos vacíos (no mostrar ejemplos)
-  const dailyToShow = isMock ? [] : dailyUsage;
-  const monthlyToShow = isMock ? [] : monthlyTrends;
+  const dailyToShow = dailyUsage;
+  const monthlyToShow = monthlyTrends;
 
   // Calcular máximos teóricos basados en el plan para barras proporcionales
   const planLimitForScale = userData?.subscription_status
