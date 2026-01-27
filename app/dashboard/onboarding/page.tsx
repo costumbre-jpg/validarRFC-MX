@@ -258,7 +258,7 @@ function OnboardingPage() {
     }, 1500);
 
     return () => clearTimeout(timeout);
-  }, [form, autoSaveEnabled, autoSaveReady, isBusiness, saving]);
+  }, [form, autoSaveEnabled, autoSaveReady, isBusiness, saving, saveOnboarding]);
 
   if (loading) {
     return (

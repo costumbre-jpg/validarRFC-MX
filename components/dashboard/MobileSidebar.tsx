@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import { usePathname } from "next/navigation";
@@ -167,10 +168,13 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
             <div className="flex-1 text-sm font-semibold leading-6 text-gray-900 flex items-center gap-2 min-w-0">
               <div className="flex flex-col items-start gap-0.5">
                 {showCustomLogo ? (
-                  <img
+                  <Image
                     src={branding?.custom_logo_url || ""}
                     alt={branding?.brand_name || "Logo"}
+                    width={120}
+                    height={40}
                     className="h-10 w-auto object-contain"
+                    unoptimized
                   />
                 ) : hideMaflipp ? (
                   <div
@@ -201,10 +205,13 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
           <div className="flex justify-between items-center p-4 max-md:p-3">
             <div className="flex flex-col items-start gap-0.5">
               {showCustomLogo ? (
-                <img
+                <Image
                   src={branding?.custom_logo_url || ""}
                   alt={branding?.brand_name || "Logo"}
+                  width={120}
+                  height={40}
                   className="h-10 max-md:h-8 w-auto object-contain"
+                  unoptimized
                 />
               ) : hideMaflipp ? (
                 <div

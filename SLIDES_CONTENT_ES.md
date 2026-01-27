@@ -47,7 +47,7 @@ Infraestructura con costos controlados.
 Modelo de suscripción con margen alto.
 
 ## Slide 11 — Roadmap
-Validación CFDI, SLA empresarial, integraciones con ERPs.
+Integración CFDI (add-on con PAC), SLA empresarial, integraciones con ERPs.
 
 ## Slide 12 — Oferta
 Venta de SaaS completo o código fuente con handoff.  

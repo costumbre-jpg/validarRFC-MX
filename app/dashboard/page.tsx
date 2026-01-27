@@ -431,8 +431,8 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span>Validación CFDI</span>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
-                  En roadmap
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                  Add-on
                 </span>
                 <Link href="/dashboard/cfdi" className="text-brand-primary hover:underline text-xs font-medium">
                   Ver detalle

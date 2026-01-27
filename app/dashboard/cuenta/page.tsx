@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import DeleteAccountCard from "@/components/dashboard/DeleteAccountCard";
 import EmailAlerts from "@/components/dashboard/EmailAlerts";
@@ -220,10 +221,13 @@ function CuentaPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 max-md:gap-3">
           <div className="relative">
             {userData?.avatar_url ? (
-              <img
+              <Image
                 src={userData.avatar_url}
                 alt={displayName}
+                width={80}
+                height={80}
                 className="h-20 w-20 max-md:h-16 max-md:w-16 rounded-full object-cover border-2 border-white shadow-lg ring-2 ring-gray-100"
+                unoptimized
               />
             ) : (
               <div 
@@ -276,22 +280,14 @@ function CuentaPage() {
                 Plan {planName}
               </span>
               <span className="inline-flex items-center gap-1 max-md:gap-0.5 px-2.5 max-md:px-2 py-1 max-md:py-0.5 rounded-full text-[10px] max-md:text-[9px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
-                <img 
-                  src="https://flagcdn.com/w40/mx.png" 
-                  srcSet="https://flagcdn.com/w80/mx.png 2x"
-                  alt="Bandera de México" 
+                <Image
+                  src="https://flagcdn.com/w40/mx.png"
+                  alt="Bandera de México"
+                  width={14}
+                  height={10}
                   className="w-3.5 h-2.5 max-md:w-3 max-md:h-2 object-cover rounded-sm"
-                  style={{ imageRendering: 'crisp-edges' }}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    const parent = e.currentTarget.parentElement;
-                    if (parent && !parent.querySelector('.flag-emoji')) {
-                      const emoji = document.createElement('span');
-                      emoji.className = 'flag-emoji';
-                      emoji.textContent = '🇲🇽';
-                      parent.insertBefore(emoji, parent.firstChild);
-                    }
-                  }}
+                  style={{ imageRendering: "crisp-edges" }}
+                  unoptimized
                 />
                 México
               </span>
@@ -403,22 +399,14 @@ function CuentaPage() {
                 <label className="text-xs max-md:text-[11px] font-semibold text-gray-700">País</label>
               </div>
               <div className="flex items-center gap-1.5">
-                <img 
-                  src="https://flagcdn.com/w80/mx.png" 
-                  srcSet="https://flagcdn.com/w160/mx.png 2x"
-                  alt="Bandera de México" 
+                <Image
+                  src="https://flagcdn.com/w80/mx.png"
+                  alt="Bandera de México"
+                  width={20}
+                  height={14}
                   className="w-5 h-3.5 max-md:w-4 max-md:h-3 object-cover rounded-sm"
-                  style={{ imageRendering: 'crisp-edges' }}
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                    const parent = e.currentTarget.parentElement;
-                    if (parent && !parent.querySelector('.flag-emoji')) {
-                      const emoji = document.createElement('span');
-                      emoji.className = 'flag-emoji text-base';
-                      emoji.textContent = '🇲🇽';
-                      parent.insertBefore(emoji, parent.firstChild);
-                    }
-                  }}
+                  style={{ imageRendering: "crisp-edges" }}
+                  unoptimized
                 />
                 <p className="text-xs max-md:text-[11px] text-gray-900 font-semibold">México</p>
               </div>

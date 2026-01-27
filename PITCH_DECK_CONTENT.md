@@ -45,7 +45,7 @@ Infraestructura ligera con costos controlados.
 El modelo permite márgenes altos al crecer en MRR.
 
 ## Slide 11 — Roadmap
-CFDI, SLA empresarial, integraciones con ERPs y mayor automatización.
+Integración CFDI (add-on con PAC), SLA empresarial, integraciones con ERPs y mayor automatización.
 
 ## Slide 12 — Oferta
 Venta de SaaS completo o código fuente con handoff.  

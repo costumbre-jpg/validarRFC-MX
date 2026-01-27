@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 interface EditProfileModalProps {
@@ -258,10 +259,13 @@ export default function EditProfileModal({
               <div className="flex items-center gap-4 max-md:gap-3">
                 <div className="relative">
                   {avatarPreview ? (
-                    <img
+                    <Image
                       src={avatarPreview}
                       alt="Preview"
+                      width={80}
+                      height={80}
                       className="h-20 w-20 max-md:h-16 max-md:w-16 rounded-full object-cover border-2 border-gray-200"
+                      unoptimized
                     />
                   ) : (
                     <div 
@@ -383,23 +387,14 @@ export default function EditProfileModal({
                 País
               </label>
               <div className="flex items-center gap-2 px-4 max-md:px-3 py-2 max-md:py-2 border border-gray-300 rounded-lg bg-gray-50">
-                <img 
-                  src="https://flagcdn.com/w80/mx.png" 
-                  srcSet="https://flagcdn.com/w160/mx.png 2x"
-                  alt="Bandera de México" 
+                <Image
+                  src="https://flagcdn.com/w80/mx.png"
+                  alt="Bandera de México"
+                  width={24}
+                  height={16}
                   className="w-6 h-4 max-md:w-5 max-md:h-3.5 object-cover rounded-sm"
-                  style={{ imageRendering: 'crisp-edges' }}
-                  onError={(e) => {
-                    // Fallback a emoji si la imagen no carga
-                    e.currentTarget.style.display = 'none';
-                    const parent = e.currentTarget.parentElement;
-                    if (parent && !parent.querySelector('.flag-emoji')) {
-                      const emoji = document.createElement('span');
-                      emoji.className = 'flag-emoji text-lg';
-                      emoji.textContent = '🇲🇽';
-                      parent.insertBefore(emoji, parent.firstChild);
-                    }
-                  }}
+                  style={{ imageRendering: "crisp-edges" }}
+                  unoptimized
                 />
                 <span className="text-sm max-md:text-xs font-medium text-gray-700">México</span>
               </div>

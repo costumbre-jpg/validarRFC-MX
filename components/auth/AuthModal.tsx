@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
 import Link from "next/link";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -165,6 +166,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
 
       if (signUpData?.user) {
         if (signUpData.session) {
+          trackEvent("sign_up", { method: "email" });
           await new Promise(resolve => setTimeout(resolve, 500));
           onClose();
           window.location.href = finalRedirectTo;
@@ -176,6 +178,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
           });
 
           if (!signInError && signInData?.session) {
+            trackEvent("sign_up", { method: "email" });
             await new Promise(resolve => setTimeout(resolve, 500));
             onClose();
             window.location.href = finalRedirectTo;
@@ -186,6 +189,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
           setError(null);
           setLoading(false);
           setRegisterNeedsEmailConfirm(true);
+          trackEvent("sign_up_pending", { method: "email" });
           return;
         }
       }

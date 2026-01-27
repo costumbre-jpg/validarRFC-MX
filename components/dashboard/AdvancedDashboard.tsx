@@ -364,7 +364,7 @@ export default function AdvancedDashboard({
     if (userData) {
       loadAdvancedData();
     }
-  }, [userData, isBusiness, queriesThisMonth, validations.length]); // Re-ejecutar cuando cambien las validaciones
+  }, [userData, isBusiness, queriesThisMonth, validations]); // Re-ejecutar cuando cambien las validaciones
 
   // Calcular máximos para escalar las barras
   const dailyToShow = dailyUsage;

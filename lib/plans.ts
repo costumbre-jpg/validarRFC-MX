@@ -123,7 +123,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
         "Comparación año anterior y métricas de eficiencia",
         "Predicciones avanzadas y exportación de reportes PDF",
         "Alertas por email",
-        "Validación CFDI (Próximamente)",
+        "Validación CFDI (add-on personalizado)",
         "Onboarding personalizado",
       ],
     },

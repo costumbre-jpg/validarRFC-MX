@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { type PlanId } from "@/lib/plans";
 import { createClient } from "@/lib/supabase/client";
 
@@ -585,11 +586,14 @@ function WhiteLabelPage() {
                       {logoError ? (
                         <p className="text-xs max-md:text-[11px] text-red-600">Error al cargar el logo</p>
                       ) : (
-                        <img
+                        <Image
                           src={settings.custom_logo_url}
                           alt="Logo preview"
+                          width={160}
+                          height={48}
                           className="max-h-12 max-md:max-h-10 max-w-full object-contain"
                           onError={() => setLogoError(true)}
+                          unoptimized
                         />
                       )}
                     </div>
@@ -806,11 +810,14 @@ function WhiteLabelPage() {
                 <h4 className="text-xs max-md:text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2 max-md:mb-1.5">Logo</h4>
                 <div className="bg-white rounded-lg p-4 max-md:p-3 border border-gray-200 flex items-center justify-center min-h-[80px] max-md:min-h-[85px]">
                   {settings.custom_logo_url && !logoError ? (
-                    <img
+                    <Image
                       src={settings.custom_logo_url}
                       alt="Logo preview"
+                      width={200}
+                      height={64}
                       className="max-h-16 max-md:max-h-12 max-w-full object-contain"
                       onError={() => setLogoError(true)}
+                      unoptimized
                     />
                   ) : (
                     <div className="text-center">

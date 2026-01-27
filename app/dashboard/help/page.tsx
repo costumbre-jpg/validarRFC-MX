@@ -66,7 +66,7 @@ function HelpPage() {
         },
         {
           question: "¿Facturan con CFDI?",
-          answer: "Sí, para los planes Pro y Business emitimos facturas CFDI (Comprobante Fiscal Digital por Internet) electrónicas válidas ante el SAT. Esto significa que cada pago que realices será facturado correctamente y podrás deducir estos gastos en tu contabilidad. Recibirás tu factura CFDI por email inmediatamente después de cada pago exitoso, y también podrás descargarla desde tu dashboard en la sección de Facturación. Las facturas incluyen toda la información fiscal requerida por el SAT, incluyendo el RFC emisor, el RFC receptor, el concepto del servicio, el monto, los impuestos correspondientes, y el UUID (identificador único) del CFDI. Todas nuestras facturas son válidas para deducciones fiscales y cumplen con las normativas mexicanas vigentes."
+          answer: "Podemos emitir CFDI bajo solicitud mediante integración con un proveedor autorizado (PAC). Si necesitas facturación fiscal, te ayudamos a configurarlo durante el onboarding. De lo contrario, puedes recibir comprobantes de pago estándar."
         },
         {
           question: "¿Tienen prueba gratis?",
@@ -225,8 +225,8 @@ function HelpPage() {
           answer: "Si excedes tu límite mensual de validaciones (5,000) o llamadas API (10,000) en el plan Business, el servicio se pausará temporalmente hasta que se reinicie tu contador el primer día del siguiente mes. Recibirás alertas por email cuando te acerques a tus límites y cuando los alcances. Si necesitas más capacidad de forma permanente, puedes contactar a nuestro equipo de soporte para discutir opciones de planes personalizados o incrementos de límites escribiendo a soporte@maflipp.com. Las validaciones y llamadas API no utilizadas no se acumulan al siguiente mes. Para empresas con necesidades muy altas, ofrecemos soluciones empresariales personalizadas."
         },
         {
-          question: "¿Qué es la validación CFDI y cuándo estará disponible?",
-          answer: "La validación CFDI (Comprobante Fiscal Digital por Internet) es una funcionalidad avanzada que permitirá validar facturas electrónicas directamente contra el SAT, verificando que los CFDI sean válidos, estén activos, y cumplan con todos los requisitos fiscales. Esta funcionalidad está en desarrollo y estará disponible próximamente para usuarios del plan Business. La validación CFDI será especialmente útil para empresas que necesitan verificar grandes volúmenes de facturas, cumplir con requisitos de auditoría, o integrar la validación en sus procesos contables automatizados. Te notificaremos cuando esta funcionalidad esté disponible."
+          question: "¿Qué es la validación CFDI y cómo se habilita?",
+          answer: "La validación CFDI permite verificar facturas electrónicas directamente contra el SAT (estatus, vigencia y cancelaciones). Esta funcionalidad está disponible como add-on personalizado mediante un proveedor autorizado (PAC). Si te interesa, podemos cotizar la integración y activarla para tu cuenta."
         },
         {
           question: "¿Cómo funciona el soporte prioritario en el plan Business?",

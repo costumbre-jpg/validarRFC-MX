@@ -4,6 +4,7 @@ import { useState } from "react";
 import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import { formatRFC, isValidRFCFormat } from "@/lib/utils";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 
 interface ValidationFormProps {
   onSubmit: (rfc: string) => Promise<void>;
@@ -46,6 +47,10 @@ export default function ValidationForm({
 
     try {
       await onSubmit(formattedRFC);
+      trackEvent("rfc_validation", {
+        planLimit,
+        remainingQueries,
+      });
       setRfc("");
     } catch (err: any) {
       setError(err.message || "Ocurrió un error al validar el RFC");

@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { getPlan, type PlanId } from "@/lib/plans";
 
@@ -650,20 +651,18 @@ function EquipoPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2.5">
                         {member.avatar_url ? (
-                          <img
+                          <Image
                             src={member.avatar_url}
                             alt={member.email}
-                            className="w-10 h-10 rounded-full object-cover border-2 flex-shrink-0"
-                            style={{ 
-                              borderColor: brandPrimary,
-                              imageRendering: "auto"
-                            }}
                             width={40}
                             height={40}
-                            loading="lazy"
-                            decoding="async"
+                            className="w-10 h-10 rounded-full object-cover border-2 flex-shrink-0"
+                            style={{
+                              borderColor: brandPrimary,
+                              imageRendering: "auto",
+                            }}
+                            unoptimized
                             onError={(e) => {
-                              // Si la imagen falla, ocultarla y mostrar iniciales
                               const img = e.target as HTMLImageElement;
                               img.style.display = "none";
                               const fallback = img.nextElementSibling as HTMLElement;

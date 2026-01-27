@@ -76,18 +76,18 @@ function CFDIPage() {
                 Valida comprobantes fiscales digitales (CFDI) directamente contra el SAT.
               </p>
               <p className="text-xs max-md:text-[11px] text-gray-500 max-w-md mx-auto">
-                Disponible exclusivamente en el plan Business.
+                Disponible como add-on personalizado con proveedor PAC.
               </p>
             </div>
             <Link
-              href="/dashboard/billing"
+              href="/dashboard/help"
               className="inline-flex items-center gap-2 max-md:gap-1.5 px-6 max-md:px-5 py-3 max-md:py-2.5 text-sm max-md:text-xs text-white rounded-lg transition-all font-semibold shadow-sm hover:shadow-md"
               style={{ backgroundColor: brandPrimary }}
             >
               <svg className="w-4 h-4 max-md:w-3.5 max-md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-              Mejorar a Business
+              Solicitar integración
             </Link>
           </div>
         </div>
@@ -130,7 +130,7 @@ function CFDIPage() {
           <div>
             <h1 className="text-lg max-md:text-base font-semibold text-gray-900">Validación CFDI</h1>
             <p className="text-xs max-md:text-[11px] text-gray-500 mt-0.5">
-              Valida comprobantes fiscales digitales contra el SAT
+              Add-on personalizado con proveedor PAC
             </p>
           </div>
         </div>
@@ -147,11 +147,11 @@ function CFDIPage() {
           </div>
           <div className="flex-1">
             <h3 className="text-sm max-md:text-xs font-semibold text-amber-900 mb-2 max-md:mb-1.5">
-              En roadmap (no incluido aún)
+              Disponible bajo cotización
             </h3>
             <p className="text-xs max-md:text-[11px] text-amber-800 mb-3 max-md:mb-2">
-              Estamos trabajando en integrar la validación de CFDI con un proveedor autorizado del SAT (PAC). 
-              Esta funcionalidad te permitirá:
+              Integramos la validación CFDI mediante un proveedor autorizado (PAC). 
+              Esta funcionalidad te permite:
             </p>
             <ul className="space-y-1.5 max-md:space-y-1 mb-3 max-md:mb-2">
               <li className="flex items-start gap-2 max-md:gap-1.5">

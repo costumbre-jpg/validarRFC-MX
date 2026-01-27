@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { User } from "@supabase/supabase-js";
 import { getPlan, getPlanValidationLimit, type PlanId } from "@/lib/plans";
 
@@ -78,10 +79,13 @@ export default function DashboardHeader({
           <div className="flex items-center gap-3 max-md:gap-2">
             <div className="h-12 w-12 max-md:h-10 max-md:w-10 rounded-full overflow-hidden bg-brand-primary-10 text-brand-primary font-semibold flex items-center justify-center uppercase text-sm max-md:text-xs ring-2 ring-gray-100">
               {userData?.avatar_url ? (
-                <img
+                <Image
                   src={userData.avatar_url}
                   alt={displayName}
+                  width={48}
+                  height={48}
                   className="h-full w-full object-cover"
+                  unoptimized
                 />
               ) : (
                 getInitials(displayName)

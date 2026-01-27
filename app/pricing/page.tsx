@@ -965,9 +965,9 @@ export default function PricingPage() {
                 ¿Facturan con CFDI?
               </h3>
               <p className="text-xs text-gray-600">
-                Sí, para planes Pro y Business emitimos facturas CFDI
-                electrónicas válidas ante el SAT. Recibirás tu factura por
-                email después de cada pago.
+                Podemos emitir CFDI bajo solicitud mediante integración con un
+                proveedor autorizado (PAC). Si necesitas facturación fiscal,
+                te ayudamos a configurarlo durante el onboarding.
               </p>
             </div>
 

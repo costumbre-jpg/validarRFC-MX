@@ -157,7 +157,7 @@ function HistorialPage() {
     };
 
     loadData();
-  }, [router]);
+  }, [router, loadValidations]);
 
   // Recargar cuando cambia la página: ahora lo maneja handlePageChange
 

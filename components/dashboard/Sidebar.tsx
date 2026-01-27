@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/layout/Logo";
 import { usePathname } from "next/navigation";
@@ -161,10 +162,13 @@ export default function Sidebar({ userData, branding }: SidebarProps) {
         <div className="flex h-20 shrink-0 items-center gap-3">
           <div className="flex flex-col items-start gap-1">
             {showCustomLogo ? (
-              <img
+              <Image
                 src={branding?.custom_logo_url || ""}
                 alt={branding?.brand_name || "Logo"}
+                width={140}
+                height={56}
                 className="h-14 w-auto object-contain"
+                unoptimized
               />
             ) : hideMaflipp ? (
               <div

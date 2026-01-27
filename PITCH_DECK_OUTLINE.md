@@ -55,7 +55,7 @@ Logo oficial: `public/Maflipp-logo.png`
 - Escalado simple sin re-arquitectura
 
 ## Slide 11 — Roadmap
-- Validación CFDI
+- Integración CFDI (add-on con PAC)
 - SLA + soporte empresarial
 - Integraciones con ERPs
 

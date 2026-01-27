@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getPlan, ACTIVE_PLANS, type PlanId } from "@/lib/plans";
+import { trackEvent } from "@/components/analytics/GoogleAnalytics";
 
 function BillingPage() {
   const [userData, setUserData] = useState<any>(null);
@@ -85,6 +86,7 @@ function BillingPage() {
     const testMode = process.env.NEXT_PUBLIC_ALLOW_TEST_UPGRADE === "true";
 
     setProcessing(true);
+    trackEvent("checkout_start", { planId, billingCycle });
     try {
       // Modo test: activar plan sin pasar por Stripe
       if (testMode) {
@@ -149,7 +151,7 @@ function BillingPage() {
       setProcessing(false);
       setTimeout(() => setErrorMessage(null), 5000);
     }
-  }, [accessToken, billingCycle, router, userData]);
+  }, [accessToken, billingCycle, userData]);
 
   // Auto-checkout: cuando viene desde "Probar Pro 7 Días"
   useEffect(() => {
