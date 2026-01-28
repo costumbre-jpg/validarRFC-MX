@@ -83,7 +83,8 @@ function BillingPage() {
       return;
     }
 
-    const testMode = process.env.NEXT_PUBLIC_ALLOW_TEST_UPGRADE === "true";
+    // Modo demo: activar siempre test-upgrade (sin Stripe)
+    const testMode = true;
 
     setProcessing(true);
     trackEvent("checkout_start", { planId, billingCycle });
