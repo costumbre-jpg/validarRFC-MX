@@ -54,11 +54,13 @@ export async function POST(request: NextRequest) {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    let user: { id: string } | null = null;
+    let user: { id: string; email?: string } | null = null;
+    let userEmail: string | undefined = undefined;
     if (jwt) {
       const { data, error } = await supabaseAdmin.auth.getUser(jwt);
       if (!error && data?.user) {
-        user = data.user;
+        user = { id: data.user.id, email: data.user.email };
+        userEmail = data.user.email;
       }
     }
     if (!user) {
@@ -224,11 +226,17 @@ export async function POST(request: NextRequest) {
       if (userCheckError || !userExists) {
         console.error("User not found in users table:", user.id, userCheckError);
         // Intentar crear el usuario si no existe
+        // Si no tenemos el email, intentar obtenerlo de la tabla auth.users usando admin
+        let finalEmail = userEmail || user.email || "";
+        if (!finalEmail) {
+          // Como último recurso, usar el ID como email temporal (se actualizará después)
+          finalEmail = `${user.id}@temp.maflipp.com`;
+        }
         const { error: createUserError } = await supabaseAdmin
           .from("users")
           .insert({
             id: user.id,
-            email: user.email || "",
+            email: finalEmail,
             subscription_status: "free",
             rfc_queries_this_month: 0,
           });
