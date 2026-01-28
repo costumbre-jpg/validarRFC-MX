@@ -34,18 +34,13 @@ function HistorialPage() {
     const from = (page - 1) * itemsPerPage;
     const to = from + itemsPerPage - 1;
 
-    const { data: dbValidations, error } = await supabase
+    const { data: dbValidations, error, count } = await supabase
       .from("validations")
-      .select("*")
+      .select("*", { count: "exact" })
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .range(from, to);
-
-    const { count } = await supabase
-      .from("validations")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id);
 
     if (error) {
       console.error("Error loading validations:", error);
@@ -53,7 +48,7 @@ function HistorialPage() {
       return;
     }
 
-    const hasDbValidations = (count || 0) > 0;
+    const hasDbValidations = (dbValidations?.length || 0) > 0;
     const monthlyCount = userData?.rfc_queries_this_month || 0;
 
     // Fallback: validaciones locales si no hay datos en BD
@@ -94,15 +89,8 @@ function HistorialPage() {
     }
 
     if (hasDbValidations) {
-      // Asegurar tamaño correcto por página aunque el backend devuelva más registros
-      const total = count || (dbValidations?.length || 0);
-      const remaining = Math.max(0, total - (page - 1) * itemsPerPage);
-      const expectedCount = Math.min(itemsPerPage, remaining);
-      const pageRows =
-        expectedCount > 0
-          ? (dbValidations || []).slice(0, expectedCount)
-          : [];
-      setValidations(pageRows);
+      const total = count ?? (dbValidations?.length || 0);
+      setValidations(dbValidations || []);
       setTotalCount(total);
     } else if (hasLocalValidations) {
       const allLocal = [...localValidations].sort(
