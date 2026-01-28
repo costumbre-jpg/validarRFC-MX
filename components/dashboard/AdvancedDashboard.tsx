@@ -1268,13 +1268,20 @@ export default function AdvancedDashboard({
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
                           </svg>
                           <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-72 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
-                            Rango: mes actual vs mismo mes del año pasado. Porcentaje = variación vs el año anterior.
+                            Rango: mes actual vs mismo mes del año pasado. Solo datos reales (sin demo). Porcentaje = variación vs el año anterior.
                           </span>
                         </span>
                       </div>
                       <p className="text-xs max-md:text-[11px] text-gray-500">Evolución vs mismo período del año pasado</p>
                     </div>
                   </div>
+                  {yearComparison.lastYear === 0 && (
+                    <div className="mb-4 max-md:mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                      <p className="text-xs text-amber-700">
+                        Sin datos del año anterior para este mes. La comparación puede no ser representativa.
+                      </p>
+                    </div>
+                  )}
                   
                   <div className="grid grid-cols-2 gap-4 max-md:gap-3">
                     <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 max-md:p-3 border border-blue-200">
