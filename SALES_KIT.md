@@ -43,12 +43,10 @@ Plataforma B2B para validar RFC en tiempo real con dashboard, API y white label,
 - Soporte de handoff segun `HANDOFF.md`
 
 ## Materiales listos en el repo
-- One pager: `ONE_PAGER.md`
-- Pitch deck (texto): `PITCH_DECK_CONTENT.md`
-- Email de venta: `SALES_EMAIL.md`
-- Posicionamiento: `COMPETITIVE_POSITIONING.md`
-- Guia de capturas: `SCREENSHOTS_GUIDE.md`
-- Handoff: `HANDOFF.md`
+- **One pager**: `ONE_PAGER.md` (compartir rápido)
+- **Email de venta**: `SALES_EMAIL.md` (template para outreach)
+- **Handoff técnico**: `HANDOFF.md` (para el comprador)
+- **Checklist pre-venta**: `PRE_VENTA_CHECKLIST.md` (qué preparar antes de vender)
 
 ## CTA sugerido
 Puedo compartir demo y detalles tecnicos. Te va bien una llamada corta esta semana?

@@ -2,12 +2,16 @@
 
 Este documento resume lo mínimo que un comprador necesita para poner la plataforma en producción.
 
+**📋 Para proceso completo de transferencia de cuentas, ver**: `TRANSFERENCIA_CUENTAS.md`
+
 ## 1) Setup rápido
 
 - Instalar dependencias: `npm install`
 - Crear `.env.local` desde `env.template`
-- Ejecutar migraciones SQL en Supabase (`supabase/migrations/`)
+- Ejecutar migraciones SQL en Supabase (ver `MIGRACIONES_LISTA.md` para orden y descripción)
 - Levantar local: `npm run dev`
+
+**📋 Lista completa de migraciones**: Ver `MIGRACIONES_LISTA.md` para orden de ejecución y descripción de cada una.
 
 ## 2) Servicios externos
 
@@ -58,9 +62,27 @@ Este documento resume lo mínimo que un comprador necesita para poner la platafo
 - Logs y monitoreo (Vercel + Supabase)
 - Política de privacidad y términos
 
-## 5) Qué revisar después de la venta
+## 5) Known Issues / Edge Cases
+
+### Autenticación
+- **PWA móvil**: El login puede requerir ajustes en algunos dispositivos específicos. El flujo funciona correctamente en escritorio y la mayoría de móviles, pero algunos edge cases pueden necesitar refinamiento según el dispositivo/navegador.
+- **Middleware de auth**: Recién implementado. Si se cambia el flujo de login, revisar que las cookies se sincronicen correctamente con `/api/auth/set-cookie`.
+
+### Validación SAT
+- **Dependencia externa**: La validación depende del sitio web del SAT. Si cambian su estructura HTML, puede requerir ajustes en `lib/rfc.ts`.
+- **Timeouts**: Configurado con timeout de 12s. Si el SAT está muy lento, puede fallar. El sistema tiene fallback a modo demo para RFCs de ejemplo.
+
+### Testing
+- **E2E básicos**: Solo smoke tests implementados. Flujos complejos (checkout completo, onboarding completo) pueden necesitar más cobertura según necesidades del comprador.
+
+### Performance
+- **Alertas por email**: Procesamiento síncrono. Con muchos usuarios simultáneos, considerar implementar queue system (ej: BullMQ, Inngest).
+
+## 6) Qué revisar después de la venta
 
 - Actualizar branding final
 - Revisar planes y precios en Stripe
 - Validar onboarding real con emails
+- Ampliar tests E2E según necesidades específicas
+- Considerar queue system para alertas si escalan usuarios
 

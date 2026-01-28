@@ -110,8 +110,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = "login", redi
       }
 
       onClose();
-      router.push(finalRedirectTo);
-      router.refresh();
+      // En PWA/móvil, usar window.location.href para evitar loops de redirect
+      // Esto fuerza una recarga completa que asegura que las cookies se lean correctamente
+      if (typeof window !== "undefined" && window.location.pathname.startsWith("/pwa")) {
+        window.location.href = finalRedirectTo;
+      } else {
+        router.push(finalRedirectTo);
+        router.refresh();
+      }
     } catch (err) {
       setError("Ocurrió un error inesperado. Por favor intenta de nuevo.");
       setLoading(false);

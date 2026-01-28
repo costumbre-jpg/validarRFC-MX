@@ -14,12 +14,25 @@ export default function PwaEntryPage() {
 
   useEffect(() => {
     let active = true;
+    
+    const redirectToDashboard = () => {
+      if (!active) return;
+      // En PWA, usar window.location para evitar loops de redirect
+      // Esto fuerza una recarga completa que asegura que el middleware vea las cookies
+      if (typeof window !== "undefined") {
+        window.location.href = "/dashboard";
+      } else {
+        router.replace("/dashboard");
+      }
+    };
+
     const check = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!active) return;
         if (user) {
-          router.replace("/dashboard");
+          redirectToDashboard();
+          return;
         } else {
           setAuthModalOpen(true);
           setAuthMode("login");
@@ -32,9 +45,20 @@ export default function PwaEntryPage() {
         if (active) setChecking(false);
       }
     };
+    
     check();
+    
+    // Escuchar cambios en la sesión (cuando el usuario hace login desde el modal)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      if (event === "SIGNED_IN" && session?.user) {
+        redirectToDashboard();
+      }
+    });
+    
     return () => {
       active = false;
+      subscription.unsubscribe();
     };
   }, [router, supabase]);
 
