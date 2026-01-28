@@ -85,7 +85,7 @@ function HistorialPage() {
     } finally {
       setLoading(false);
     }
-  }, [itemsPerPage, router, userData]);
+  }, [itemsPerPage, router]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

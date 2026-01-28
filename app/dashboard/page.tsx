@@ -16,7 +16,6 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<any>(null);
   const [allValidationsForStats, setAllValidationsForStats] = useState<any[]>([]); // Para estadísticas y gráfico
   const [stats, setStats] = useState({ total: 0, valid: 0, invalid: 0 });
-  const [demoValidationsCount, setDemoValidationsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [resetting, setResetting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Para forzar actualización
@@ -32,7 +31,6 @@ export default function DashboardPage() {
       localStorage.removeItem("maflipp_demo_validations_count");
       localStorage.removeItem("maflipp_demo_validations");
       localStorage.removeItem("maflipp_local_validations");
-      setDemoValidationsCount(0);
     } catch {
       // ignore
     }
@@ -98,7 +96,6 @@ export default function DashboardPage() {
           .gte("created_at", startOfMonth.toISOString());
 
         const dbValidations = allValidations || [];
-        const dbTotal = dbValidations.length;
 
         // Usar SOLO datos de Supabase (sin fallback a localStorage)
         setAllValidationsForStats(dbValidations);
@@ -115,7 +112,6 @@ export default function DashboardPage() {
             localStorage.removeItem("maflipp_demo_validations_count");
             localStorage.removeItem("maflipp_demo_validations");
             localStorage.removeItem("maflipp_local_validations");
-            setDemoValidationsCount(0);
           } catch (e) {
             // Ignore
           }
@@ -173,7 +169,6 @@ export default function DashboardPage() {
         }
       }
 
-      setDemoValidationsCount(0);
       setAllValidationsForStats([]);
       setStats({ total: 0, valid: 0, invalid: 0 });
       setUserData((prev: any) =>
@@ -200,7 +195,6 @@ export default function DashboardPage() {
       };
 
       // NO guardar en localStorage - solo mostrar en esta sesión
-      setDemoValidationsCount((prev) => prev + 1);
 
       const isValid = options.valid ?? true;
       setStats((prev) => ({
@@ -218,7 +212,6 @@ export default function DashboardPage() {
         // Limpiar demo validations cuando se hace una validación real
         localStorage.removeItem("maflipp_demo_validations_count");
         localStorage.removeItem("maflipp_demo_validations");
-        setDemoValidationsCount(0);
       } catch (e) {
         // Ignore
       }
@@ -259,7 +252,6 @@ export default function DashboardPage() {
       <DashboardHeader
         user={user}
         userData={userData}
-        demoValidationCount={demoValidationsCount}
       />
 
       {/* Demo (diseño): Banner de fin de prueba */}
@@ -314,7 +306,6 @@ export default function DashboardPage() {
           <RFCValidator 
             userData={userData} 
             onValidationComplete={handleValidationComplete}
-            demoValidationCount={demoValidationsCount}
           />
         </div>
 

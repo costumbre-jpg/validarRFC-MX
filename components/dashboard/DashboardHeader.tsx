@@ -7,13 +7,11 @@ import { getPlan, getPlanValidationLimit, type PlanId } from "@/lib/plans";
 interface DashboardHeaderProps {
   user: User;
   userData: any;
-  demoValidationCount?: number;
 }
 
 export default function DashboardHeader({
   user,
   userData,
-  demoValidationCount = 0,
 }: DashboardHeaderProps) {
   const planId = (userData?.subscription_status || "free") as PlanId;
   

@@ -13,10 +13,9 @@ interface RFCValidatorProps {
     valid?: boolean;
     rfc?: string;
   }) => void;
-  demoValidationCount?: number;
 }
 
-export default function RFCValidator({ userData, onValidationComplete, demoValidationCount = 0 }: RFCValidatorProps) {
+export default function RFCValidator({ userData, onValidationComplete }: RFCValidatorProps) {
   const [rfc, setRfc] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
@@ -43,7 +42,7 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
   }, [result, error]);
 
   const planId = (userData?.subscription_status || "free") as PlanId;
-  const queriesThisMonth = (userData?.rfc_queries_this_month || 0) + demoValidationCount;
+  const queriesThisMonth = userData?.rfc_queries_this_month || 0;
   const planLimit = getPlanValidationLimit(planId);
   const brandPrimary = "var(--brand-primary, #2F7E7A)";
   const brandSecondary = "var(--brand-secondary, #1F5D59)";
