@@ -35,9 +35,9 @@ function HistorialPage() {
       const from = (page - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
 
-      const { data: dbValidations, error, count } = await supabase
+      const { data: dbValidations, error } = await supabase
         .from("validations")
-        .select("*", { count: "exact" })
+        .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .order("id", { ascending: false })
@@ -47,6 +47,11 @@ function HistorialPage() {
         console.error("Error loading validations:", error);
         return;
       }
+
+      const { count } = await supabase
+        .from("validations")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
 
       const hasDbValidations = (dbValidations?.length || 0) > 0;
       const monthlyCount = userData?.rfc_queries_this_month || 0;
@@ -153,7 +158,7 @@ function HistorialPage() {
 
     setLoading(true);
     loadData();
-  }, [router, loadValidations]);
+  }, [router]);
 
   useEffect(() => {
     if (!userData) return;
