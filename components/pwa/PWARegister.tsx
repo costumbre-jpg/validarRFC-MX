@@ -62,15 +62,20 @@ export default function PWARegister() {
  
    if (!showBanner || !installEvent) return null;
  
-   const handleInstall = async () => {
-     await installEvent.prompt();
-     const choice = await installEvent.userChoice;
+  const handleInstall = async () => {
+    await installEvent.prompt();
+    const choice = await installEvent.userChoice;
     if (choice.outcome === "accepted") {
       markDismissed();
       setShowBanner(false);
       setInstallEvent(null);
+      return;
     }
-   };
+    // Si el usuario rechaza, ocultar y no volver a mostrar por 7 días
+    markDismissed();
+    setShowBanner(false);
+    setInstallEvent(null);
+  };
  
    return (
      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md rounded-xl border border-gray-200 bg-white shadow-lg p-4">

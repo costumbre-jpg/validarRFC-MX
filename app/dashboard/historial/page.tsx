@@ -90,7 +90,11 @@ function HistorialPage() {
 
       if (hasDbValidations) {
         const total = count ?? (dbValidations?.length || 0);
-        setValidations(dbValidations || []);
+        const remaining = Math.max(0, total - (page - 1) * itemsPerPage);
+        const expectedCount = Math.min(itemsPerPage, remaining);
+        const pageRows =
+          expectedCount > 0 ? (dbValidations || []).slice(0, expectedCount) : [];
+        setValidations(pageRows);
         setTotalCount(total);
       } else if (hasLocalValidations) {
         const allLocal = [...localValidations].sort(
