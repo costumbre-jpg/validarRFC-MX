@@ -113,9 +113,6 @@ function HistorialPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    if (!userData) return;
-    setLoading(true);
-    loadValidations(page);
   };
 
   useEffect(() => {
@@ -140,12 +137,16 @@ function HistorialPage() {
       
       setUserData(dbUser);
 
-      // Cargar primera página con paginación del servidor
-      await loadValidations(1);
     };
 
     loadData();
   }, [router, loadValidations]);
+
+  useEffect(() => {
+    if (!userData) return;
+    setLoading(true);
+    loadValidations(currentPage);
+  }, [currentPage, userData, loadValidations]);
 
   // Recargar cuando cambia la página: ahora lo maneja handlePageChange
 
