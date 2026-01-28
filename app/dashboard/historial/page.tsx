@@ -19,96 +19,100 @@ function HistorialPage() {
   const router = useRouter();
 
   const loadValidations = useCallback(async (page: number) => {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      setLoading(false);
-      router.replace("/auth/login");
-      return;
-    }
+      if (!user) {
+        setLoading(false);
+        router.replace("/auth/login");
+        return;
+      }
 
-    // Paginación del servidor: solo cargar 10 registros de la página actual
-    const from = (page - 1) * itemsPerPage;
-    const to = from + itemsPerPage - 1;
+      // Paginación del servidor: solo cargar 10 registros de la página actual
+      const from = (page - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
 
-    const { data: dbValidations, error, count } = await supabase
-      .from("validations")
-      .select("*", { count: "exact" })
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .order("id", { ascending: false })
-      .range(from, to);
+      const { data: dbValidations, error, count } = await supabase
+        .from("validations")
+        .select("*", { count: "exact" })
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false })
+        .range(from, to);
 
-    if (error) {
+      if (error) {
+        console.error("Error loading validations:", error);
+        return;
+      }
+
+      const hasDbValidations = (dbValidations?.length || 0) > 0;
+      const monthlyCount = userData?.rfc_queries_this_month || 0;
+
+      // Fallback: validaciones locales si no hay datos en BD
+      let localValidations: any[] = [];
+      if (!hasDbValidations && typeof window !== "undefined") {
+        try {
+          const stored = localStorage.getItem("maflipp_local_validations");
+          if (stored) {
+            localValidations = JSON.parse(stored);
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      const hasLocalValidations = localValidations.length > 0;
+      const hasRealValidations = hasDbValidations || hasLocalValidations || monthlyCount > 0;
+
+      // Incluir validaciones demo SOLO si no hay reales ni locales
+      let demoValidations: any[] = [];
+      if (!hasRealValidations) {
+        try {
+          const stored = localStorage.getItem("maflipp_demo_validations");
+          if (stored) {
+            demoValidations = JSON.parse(stored);
+          }
+        } catch (e) {
+          // Ignore
+        }
+      } else if (typeof window !== "undefined") {
+        try {
+          // Limpiar demo cuando ya hay validaciones reales
+          localStorage.removeItem("maflipp_demo_validations");
+          localStorage.removeItem("maflipp_demo_validations_count");
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      if (hasDbValidations) {
+        const total = count ?? (dbValidations?.length || 0);
+        setValidations(dbValidations || []);
+        setTotalCount(total);
+      } else if (hasLocalValidations) {
+        const allLocal = [...localValidations].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        const paginated = allLocal.slice(from, from + itemsPerPage);
+        setValidations(paginated);
+        setTotalCount(allLocal.length);
+      } else {
+        // Solo demo: ordenar y paginar en cliente
+        const allDemo = [...demoValidations].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        const paginated = allDemo.slice(from, from + itemsPerPage);
+        setValidations(paginated);
+        setTotalCount(allDemo.length);
+      }
+    } catch (error) {
       console.error("Error loading validations:", error);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    const hasDbValidations = (dbValidations?.length || 0) > 0;
-    const monthlyCount = userData?.rfc_queries_this_month || 0;
-
-    // Fallback: validaciones locales si no hay datos en BD
-    let localValidations: any[] = [];
-    if (!hasDbValidations && typeof window !== "undefined") {
-      try {
-        const stored = localStorage.getItem("maflipp_local_validations");
-        if (stored) {
-          localValidations = JSON.parse(stored);
-        }
-      } catch (e) {
-        // Ignore
-      }
-    }
-
-    const hasLocalValidations = localValidations.length > 0;
-    const hasRealValidations = hasDbValidations || hasLocalValidations || monthlyCount > 0;
-
-    // Incluir validaciones demo SOLO si no hay reales ni locales
-    let demoValidations: any[] = [];
-    if (!hasRealValidations) {
-      try {
-        const stored = localStorage.getItem("maflipp_demo_validations");
-        if (stored) {
-          demoValidations = JSON.parse(stored);
-        }
-      } catch (e) {
-        // Ignore
-      }
-    } else if (typeof window !== "undefined") {
-      try {
-        // Limpiar demo cuando ya hay validaciones reales
-        localStorage.removeItem("maflipp_demo_validations");
-        localStorage.removeItem("maflipp_demo_validations_count");
-      } catch (e) {
-        // Ignore
-      }
-    }
-
-    if (hasDbValidations) {
-      const total = count ?? (dbValidations?.length || 0);
-      setValidations(dbValidations || []);
-      setTotalCount(total);
-    } else if (hasLocalValidations) {
-      const allLocal = [...localValidations].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      const paginated = allLocal.slice(from, from + itemsPerPage);
-      setValidations(paginated);
-      setTotalCount(allLocal.length);
-    } else {
-      // Solo demo: ordenar y paginar en cliente
-      const allDemo = [...demoValidations].sort(
-        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      const paginated = allDemo.slice(from, from + itemsPerPage);
-      setValidations(paginated);
-      setTotalCount(allDemo.length);
-    }
-    setLoading(false);
   }, [itemsPerPage, router, userData]);
 
   const handlePageChange = (page: number) => {
@@ -128,17 +132,22 @@ function HistorialPage() {
         return;
       }
 
-      // Get user data real
-      const { data: dbUser } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      setUserData(dbUser);
-
+      try {
+        // Get user data real
+        const { data: dbUser } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        
+        setUserData(dbUser);
+      } catch (error) {
+        console.error("Error loading user data:", error);
+        setLoading(false);
+      }
     };
 
+    setLoading(true);
     loadData();
   }, [router, loadValidations]);
 
