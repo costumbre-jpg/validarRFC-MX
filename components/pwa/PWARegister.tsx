@@ -7,20 +7,46 @@
    userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
  }
  
- export default function PWARegister() {
-   const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
-   const [showBanner, setShowBanner] = useState(false);
+const DISMISS_KEY = "pwa_install_banner_dismissed_at";
+const DISMISS_DAYS = 7;
+
+const wasDismissedRecently = () => {
+  if (typeof window === "undefined") return false;
+  const raw = window.localStorage.getItem(DISMISS_KEY);
+  if (!raw) return false;
+  const last = Number(raw);
+  if (!Number.isFinite(last)) return false;
+  const now = Date.now();
+  const maxAge = DISMISS_DAYS * 24 * 60 * 60 * 1000;
+  return now - last < maxAge;
+};
+
+const markDismissed = () => {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(DISMISS_KEY, String(Date.now()));
+};
+
+export default function PWARegister() {
+  const [installEvent, setInstallEvent] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showBanner, setShowBanner] = useState(false);
  
    useEffect(() => {
      if (!("serviceWorker" in navigator)) return;
  
-     const handleBeforeInstall = (event: Event) => {
+    const handleBeforeInstall = (event: Event) => {
        event.preventDefault();
+      if (wasDismissedRecently()) return;
        setInstallEvent(event as BeforeInstallPromptEvent);
        setShowBanner(true);
      };
  
      window.addEventListener("beforeinstallprompt", handleBeforeInstall);
+    const handleAppInstalled = () => {
+      setShowBanner(false);
+      setInstallEvent(null);
+      markDismissed();
+    };
+    window.addEventListener("appinstalled", handleAppInstalled);
  
      navigator.serviceWorker
        .register("/sw.js")
@@ -30,6 +56,7 @@
  
      return () => {
        window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      window.removeEventListener("appinstalled", handleAppInstalled);
      };
    }, []);
  
@@ -38,10 +65,11 @@
    const handleInstall = async () => {
      await installEvent.prompt();
      const choice = await installEvent.userChoice;
-     if (choice.outcome === "accepted") {
-       setShowBanner(false);
-       setInstallEvent(null);
-     }
+    if (choice.outcome === "accepted") {
+      markDismissed();
+      setShowBanner(false);
+      setInstallEvent(null);
+    }
    };
  
    return (
@@ -53,9 +81,12 @@
              Agrega la app a tu pantalla de inicio para acceso rapido.
            </p>
          </div>
-         <button
+        <button
            className="text-xs text-gray-500 hover:text-gray-700"
-           onClick={() => setShowBanner(false)}
+          onClick={() => {
+            markDismissed();
+            setShowBanner(false);
+          }}
            aria-label="Cerrar"
          >
            Cerrar
