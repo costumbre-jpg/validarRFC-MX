@@ -748,11 +748,15 @@ export default function AdvancedDashboard({
                   <h3 className="text-sm font-semibold text-gray-900 mb-0.5">
                     Uso Diario (Últimos 7 días)
                   </h3>
-                  <span className="group relative inline-flex items-center">
+                  <span
+                    className="group relative inline-flex items-center"
+                    tabIndex={0}
+                    aria-label="Información de uso diario"
+                  >
                     <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
                     </svg>
-                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-72 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block">
+                    <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-72 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block group-focus-within:block z-50">
                       Rango: últimos 7 días. Muestra el total de validaciones por día.
                     </span>
                   </span>
@@ -1145,11 +1149,25 @@ export default function AdvancedDashboard({
                       </svg>
                       EXCLUSIVO BUSINESS
                     </div>
-                    <h3 className="text-sm max-md:text-xs font-semibold text-gray-900 mb-0.5">
-                      Análisis por Hora del Día
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm max-md:text-xs font-semibold text-gray-900 mb-0.5">
+                        Análisis por Hora del Día
+                      </h3>
+                      <span
+                        className="group relative inline-flex items-center"
+                        tabIndex={0}
+                        aria-label="Información de análisis por hora"
+                      >
+                        <svg className="w-4 h-4 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-4a1 1 0 100 2 1 1 0 000-2zm1 3a1 1 0 00-2 0v5a1 1 0 002 0V9z" clipRule="evenodd" />
+                        </svg>
+                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-72 rounded-lg bg-gray-900 px-3 py-2 text-[11px] text-white shadow-lg group-hover:block group-focus-within:block z-50">
+                          Rango: hoy. Cada barra representa las validaciones en esa hora (hora local).
+                        </span>
+                      </span>
+                    </div>
                     <p className="text-xs max-md:text-[11px] text-gray-500">
-                      Hoy · Identifica tus horas pico de actividad
+                      Hoy · Identifica tus horas pico de actividad (hora local)
                     </p>
                   </div>
                 </div>
