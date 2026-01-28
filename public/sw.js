@@ -1,4 +1,5 @@
-const CACHE_NAME = "maflipp-v1";
+// Bump version to forzar que PWA use el código más reciente
+const CACHE_NAME = "maflipp-v2";
 const STATIC_ASSETS = [
   "/",
   "/favicon.ico",
