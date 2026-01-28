@@ -214,6 +214,40 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // Verificar que el usuario existe en la tabla users
+      const { data: userExists, error: userCheckError } = await supabaseAdmin
+        .from("users")
+        .select("id")
+        .eq("id", user.id)
+        .single();
+
+      if (userCheckError || !userExists) {
+        console.error("User not found in users table:", user.id, userCheckError);
+        // Intentar crear el usuario si no existe
+        const { error: createUserError } = await supabaseAdmin
+          .from("users")
+          .insert({
+            id: user.id,
+            email: user.email || "",
+            subscription_status: "free",
+            rfc_queries_this_month: 0,
+          });
+
+        if (createUserError) {
+          console.error("Error creating user:", createUserError);
+          return NextResponse.json(
+            {
+              success: false,
+              valid: false,
+              rfc: formattedRFC,
+              remaining: Math.max(0, remaining),
+              message: `Error al verificar usuario: ${createUserError.message}`,
+            },
+            { status: 500 }
+          );
+        }
+      }
+
       const { error: insertError } = await supabaseAdmin
         .from("validations")
         .insert({
@@ -225,14 +259,38 @@ export async function POST(request: NextRequest) {
 
       if (insertError) {
         console.error("Error saving validation:", insertError);
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: formattedRFC,
+            remaining: Math.max(0, remaining),
+            message: `Error al guardar validación: ${insertError.message}`,
+          },
+          { status: 500 }
+        );
       }
 
       // Actualizar contador del usuario
-      const { data: currentUserData } = await supabaseAdmin
+      const { data: currentUserData, error: selectError } = await supabaseAdmin
         .from("users")
         .select("rfc_queries_this_month")
         .eq("id", user.id)
         .single();
+
+      if (selectError) {
+        console.error("Error fetching user data for count update:", selectError);
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: formattedRFC,
+            remaining: Math.max(0, remaining),
+            message: `Error al obtener datos del usuario: ${selectError.message}`,
+          },
+          { status: 500 }
+        );
+      }
 
       const newCount = (currentUserData?.rfc_queries_this_month || 0) + 1;
 
@@ -243,6 +301,16 @@ export async function POST(request: NextRequest) {
 
       if (updateError) {
         console.error("Error updating user count:", updateError);
+        return NextResponse.json(
+          {
+            success: false,
+            valid: false,
+            rfc: formattedRFC,
+            remaining: Math.max(0, remaining),
+            message: `Error al actualizar contador: ${updateError.message}`,
+          },
+          { status: 500 }
+        );
       }
 
       // Obtener límite restante
