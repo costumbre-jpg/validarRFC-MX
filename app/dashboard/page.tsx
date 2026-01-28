@@ -28,11 +28,11 @@ export default function DashboardPage() {
   useEffect(() => {
     try {
       setTrialBannerDismissed(localStorage.getItem("maflipp_trialEnded_dismissed") === "1");
-      // Cargar contador de demo validations desde localStorage al inicio
-      const storedCount = localStorage.getItem("maflipp_demo_validations_count");
-      if (storedCount) {
-        setDemoValidationsCount(parseInt(storedCount, 10));
-      }
+      // Limpiar datos antiguos de localStorage para usar solo Supabase
+      localStorage.removeItem("maflipp_demo_validations_count");
+      localStorage.removeItem("maflipp_demo_validations");
+      localStorage.removeItem("maflipp_local_validations");
+      setDemoValidationsCount(0);
     } catch {
       // ignore
     }
@@ -100,47 +100,17 @@ export default function DashboardPage() {
         const dbValidations = allValidations || [];
         const dbTotal = dbValidations.length;
 
-        // Fallback: usar validaciones locales o demo si la BD está vacía
-        let fallbackValidations: any[] = [];
-        if (dbTotal === 0 && typeof window !== "undefined") {
-          try {
-            const startOfMonthIso = startOfMonth.toISOString();
+        // Usar SOLO datos de Supabase (sin fallback a localStorage)
+        setAllValidationsForStats(dbValidations);
 
-            const localStored = localStorage.getItem("maflipp_local_validations");
-            if (localStored) {
-              const localParsed = JSON.parse(localStored);
-              fallbackValidations = localParsed.filter(
-                (v: any) => v?.created_at && v.created_at >= startOfMonthIso
-              );
-            }
-
-            if (fallbackValidations.length === 0) {
-              const demoStored = localStorage.getItem("maflipp_demo_validations");
-              if (demoStored) {
-                const demoParsed = JSON.parse(demoStored);
-                fallbackValidations = demoParsed.filter(
-                  (v: any) => v?.created_at && v.created_at >= startOfMonthIso
-                );
-              }
-            }
-          } catch (e) {
-            // Ignore
-          }
-        }
-
-        const finalValidations =
-          dbTotal > 0 ? dbValidations : fallbackValidations;
-
-        setAllValidationsForStats(finalValidations);
-
-        const total = finalValidations.length;
+        const total = dbValidations.length;
         const valid =
-          finalValidations?.filter((v: { is_valid: boolean }) => v.is_valid)
+          dbValidations?.filter((v: { is_valid: boolean }) => v.is_valid)
             .length || 0;
         setStats({ total, valid, invalid: total - valid });
 
-        // Si hay validaciones reales en la BD, limpiar contador de demo/local para evitar duplicación
-        if (dbTotal > 0 && typeof window !== "undefined") {
+        // Limpiar datos antiguos de localStorage siempre
+        if (typeof window !== "undefined") {
           try {
             localStorage.removeItem("maflipp_demo_validations_count");
             localStorage.removeItem("maflipp_demo_validations");
@@ -221,6 +191,7 @@ export default function DashboardPage() {
     rfc?: string;
   }) => {
     if (options?.isDemo) {
+      // Validaciones demo: solo en memoria (no guardar en localStorage)
       const demoValidation = {
         id: `demo-${Date.now()}`,
         is_valid: options.valid ?? true,
@@ -228,26 +199,8 @@ export default function DashboardPage() {
         rfc: options.rfc || "DEMO",
       };
 
-      // Guardar en localStorage para que otras páginas puedan leerlo
-      let updatedDemoList = [demoValidation];
-      try {
-        const existing = JSON.parse(
-          localStorage.getItem("maflipp_demo_validations") || "[]"
-        );
-        updatedDemoList = [demoValidation, ...existing];
-        localStorage.setItem(
-          "maflipp_demo_validations",
-          JSON.stringify(updatedDemoList)
-        );
-        localStorage.setItem(
-          "maflipp_demo_validations_count",
-          String(updatedDemoList.length)
-        );
-      } catch (e) {
-        // Ignore localStorage errors
-      }
-
-      setDemoValidationsCount((prev) => Math.max(prev + 1, updatedDemoList.length));
+      // NO guardar en localStorage - solo mostrar en esta sesión
+      setDemoValidationsCount((prev) => prev + 1);
 
       const isValid = options.valid ?? true;
       setStats((prev) => ({

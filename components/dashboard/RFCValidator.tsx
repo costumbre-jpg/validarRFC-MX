@@ -199,21 +199,13 @@ export default function RFCValidator({ userData, onValidationComplete, demoValid
         isDemo: data.source === "demo",
       });
 
-      // Guardar validaciones reales en localStorage como respaldo UI
-      if (typeof window !== "undefined" && data.source !== "demo") {
+      // Ya no guardamos en localStorage - todo se guarda en Supabase
+      // Limpiar datos antiguos si existen
+      if (typeof window !== "undefined") {
         try {
-          const stored = localStorage.getItem("maflipp_local_validations");
-          const parsed = stored ? JSON.parse(stored) : [];
-          const newItem = {
-            id: `local-${Date.now()}`,
-            rfc: data.rfc,
-            is_valid: data.valid,
-            created_at: new Date().toISOString(),
-          };
-          localStorage.setItem(
-            "maflipp_local_validations",
-            JSON.stringify([newItem, ...parsed])
-          );
+          localStorage.removeItem("maflipp_local_validations");
+          localStorage.removeItem("maflipp_demo_validations");
+          localStorage.removeItem("maflipp_demo_validations_count");
         } catch (e) {
           // Ignore
         }

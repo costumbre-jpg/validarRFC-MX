@@ -19,14 +19,8 @@ export default function EmailAlerts({ userData }: EmailAlertsProps) {
 
   const planId = (userData?.subscription_status || "free") as PlanId;
   const plan = getPlan(planId);
-  // Incluir validaciones demo desde localStorage
-  let demoCount = 0;
-  try {
-    demoCount = parseInt(localStorage.getItem("maflipp_demo_validations_count") || "0", 10);
-  } catch (e) {
-    // Ignore
-  }
-  const queriesThisMonth = (userData?.rfc_queries_this_month || 0) + demoCount;
+  // Usar SOLO datos de Supabase (sin localStorage)
+  const queriesThisMonth = userData?.rfc_queries_this_month || 0;
   const planLimit = plan.validationsPerMonth;
   const usagePercentage = planLimit === -1 ? 0 : Math.min(100, (queriesThisMonth / planLimit) * 100);
 

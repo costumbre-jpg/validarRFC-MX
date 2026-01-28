@@ -54,45 +54,19 @@ function HistorialPage() {
         .eq("user_id", user.id);
 
       const hasDbValidations = (dbValidations?.length || 0) > 0;
-      const monthlyCount = userData?.rfc_queries_this_month || 0;
 
-      // Fallback: validaciones locales si no hay datos en BD
-      let localValidations: any[] = [];
-      if (!hasDbValidations && typeof window !== "undefined") {
+      // Limpiar datos antiguos de localStorage siempre
+      if (typeof window !== "undefined") {
         try {
-          const stored = localStorage.getItem("maflipp_local_validations");
-          if (stored) {
-            localValidations = JSON.parse(stored);
-          }
-        } catch (e) {
-          // Ignore
-        }
-      }
-
-      const hasLocalValidations = localValidations.length > 0;
-      const hasRealValidations = hasDbValidations || hasLocalValidations || monthlyCount > 0;
-
-      // Incluir validaciones demo SOLO si no hay reales ni locales
-      let demoValidations: any[] = [];
-      if (!hasRealValidations) {
-        try {
-          const stored = localStorage.getItem("maflipp_demo_validations");
-          if (stored) {
-            demoValidations = JSON.parse(stored);
-          }
-        } catch (e) {
-          // Ignore
-        }
-      } else if (typeof window !== "undefined") {
-        try {
-          // Limpiar demo cuando ya hay validaciones reales
           localStorage.removeItem("maflipp_demo_validations");
           localStorage.removeItem("maflipp_demo_validations_count");
+          localStorage.removeItem("maflipp_local_validations");
         } catch (e) {
           // Ignore
         }
       }
 
+      // Usar SOLO datos de Supabase (sin fallback a localStorage)
       if (hasDbValidations) {
         const total = count ?? (dbValidations?.length || 0);
         const remaining = Math.max(0, total - (page - 1) * itemsPerPage);
@@ -101,21 +75,10 @@ function HistorialPage() {
           expectedCount > 0 ? (dbValidations || []).slice(0, expectedCount) : [];
         setValidations(pageRows);
         setTotalCount(total);
-      } else if (hasLocalValidations) {
-        const allLocal = [...localValidations].sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        const paginated = allLocal.slice(from, from + itemsPerPage);
-        setValidations(paginated);
-        setTotalCount(allLocal.length);
       } else {
-        // Solo demo: ordenar y paginar en cliente
-        const allDemo = [...demoValidations].sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-        const paginated = allDemo.slice(from, from + itemsPerPage);
-        setValidations(paginated);
-        setTotalCount(allDemo.length);
+        // No hay datos en BD: mostrar vacío
+        setValidations([]);
+        setTotalCount(0);
       }
     } catch (error) {
       console.error("Error loading validations:", error);
