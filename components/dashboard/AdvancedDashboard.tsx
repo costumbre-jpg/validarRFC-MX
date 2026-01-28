@@ -117,6 +117,20 @@ export default function AdvancedDashboard({
           const day = String(date.getDate()).padStart(2, "0");
           return `${year}-${month}-${day}`;
         };
+        const getLocalDayRange = (base: Date) => {
+          const start = new Date(base);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(base);
+          end.setHours(23, 59, 59, 999);
+          return { start, end };
+        };
+        const getLocalMonthRange = (year: number, month: number) => {
+          const start = new Date(year, month, 1);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(year, month + 1, 1);
+          end.setHours(0, 0, 0, 0);
+          return { start, end };
+        };
         Array.from({ length: 7 }, (_, i) => {
           const date = new Date();
           date.setDate(date.getDate() - (6 - i));
@@ -205,11 +219,8 @@ export default function AdvancedDashboard({
 
         // Datos adicionales solo para Business
         if (isBusiness) {
-          // Análisis por hora del día (solo hoy)
-          const startOfToday = new Date();
-          startOfToday.setHours(0, 0, 0, 0);
-          const endOfToday = new Date();
-          endOfToday.setHours(23, 59, 59, 999);
+          // Análisis por hora del día (solo hoy, hora local)
+          const { start: startOfToday, end: endOfToday } = getLocalDayRange(new Date());
 
           const { data: todayValidationsData } = await supabase
             .from("validations")
@@ -253,33 +264,36 @@ export default function AdvancedDashboard({
           }));
           setHourlyUsage(hourlyData);
 
-          // Comparación año anterior (mes actual vs mismo mes año pasado)
-          const currentMonth = new Date().getMonth();
-          const currentYear = new Date().getFullYear();
+          // Comparación año anterior (mes actual vs mismo mes año pasado, hora local)
+          const now = new Date();
+          const currentMonth = now.getMonth();
+          const currentYear = now.getFullYear();
           const lastYear = currentYear - 1;
+          const { start: currentMonthStart, end: currentMonthEnd } = getLocalMonthRange(
+            currentYear,
+            currentMonth
+          );
+          const { start: lastYearStart, end: lastYearEnd } = getLocalMonthRange(
+            lastYear,
+            currentMonth
+          );
 
           const { data: currentMonthValidations } = await supabase
             .from("validations")
             .select("created_at")
             .eq("user_id", userId)
-            .gte("created_at", new Date(currentYear, currentMonth, 1).toISOString())
-            .lt("created_at", new Date(currentYear, currentMonth + 1, 1).toISOString());
+            .gte("created_at", currentMonthStart.toISOString())
+            .lt("created_at", currentMonthEnd.toISOString());
 
           const { data: lastYearValidations } = await supabase
             .from("validations")
             .select("created_at")
             .eq("user_id", userId)
-            .gte("created_at", new Date(lastYear, currentMonth, 1).toISOString())
-            .lt("created_at", new Date(lastYear, currentMonth + 1, 1).toISOString());
+            .gte("created_at", lastYearStart.toISOString())
+            .lt("created_at", lastYearEnd.toISOString());
 
-          // Incluir validaciones demo del mes actual
-          const currentMonthStart = new Date(currentYear, currentMonth, 1);
-          const currentMonthEnd = new Date(currentYear, currentMonth + 1, 1);
-          const propCurrentMonth = (validations || []).filter((v: any) => {
-            const date = new Date(v.created_at);
-            return date >= currentMonthStart && date < currentMonthEnd;
-          });
-          const currentCount = (currentMonthValidations?.length || 0) + propCurrentMonth.length;
+          // Comparación solo con datos reales (sin demo) para evitar sesgos
+          const currentCount = currentMonthValidations?.length || 0;
           const lastYearCount = lastYearValidations?.length || 0;
           const change = currentCount - lastYearCount;
           const changePercent = lastYearCount > 0 ? ((change / lastYearCount) * 100).toFixed(1) : '0';
