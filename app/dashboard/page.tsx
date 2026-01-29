@@ -215,9 +215,13 @@ export default function DashboardPage() {
       total: newCount ?? prev.total + 1,
       valid: prev.valid + (isValid ? 1 : 0),
       invalid: prev.invalid + (isValid ? 0 : 1),
-    })); // total se sincroniza con refreshData()
+    }));
 
-    setTimeout(() => refreshData(), 600);
+    // Solo refrescar desde BD cuando NO tenemos el contador de la API.
+    // Si tenemos queriesThisMonth, la API ya guardó y no recargar para no pisar el 1/5000 con un 0.
+    if (newCount === undefined) {
+      setTimeout(() => refreshData(), 600);
+    }
   };
 
   if (loading) {
