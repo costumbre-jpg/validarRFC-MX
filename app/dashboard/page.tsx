@@ -185,31 +185,10 @@ export default function DashboardPage() {
     valid?: boolean;
     rfc?: string;
   }) => {
-    if (options?.isDemo) {
-      // Validaciones demo: solo en memoria (no guardar en localStorage)
-      const demoValidation = {
-        id: `demo-${Date.now()}`,
-        is_valid: options.valid ?? true,
-        created_at: new Date().toISOString(),
-        rfc: options.rfc || "DEMO",
-      };
-
-      // NO guardar en localStorage - solo mostrar en esta sesión
-
-      const isValid = options.valid ?? true;
-      setStats((prev) => ({
-        total: prev.total + 1,
-        valid: prev.valid + (isValid ? 1 : 0),
-        invalid: prev.invalid + (isValid ? 0 : 1),
-      }));
-      setAllValidationsForStats((prev) => [demoValidation, ...prev]);
-      return;
-    }
-
-    // Para validaciones reales: limpiar demo validations y actualizar inmediatamente
+    // Para cualquier validación (demo o real): limpiar demo validations locales y actualizar inmediatamente
     if (typeof window !== "undefined") {
       try {
-        // Limpiar demo validations cuando se hace una validación real
+        // Limpiar demo validations locales (ya no se usan)
         localStorage.removeItem("maflipp_demo_validations_count");
         localStorage.removeItem("maflipp_demo_validations");
       } catch (e) {
