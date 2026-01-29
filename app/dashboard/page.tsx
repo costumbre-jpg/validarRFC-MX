@@ -101,15 +101,21 @@ export default function DashboardPage() {
           .gte("created_at", startOfMonth.toISOString());
 
         const dbValidations = allValidations || [];
-
-        // Usar SOLO datos de Supabase (sin fallback a localStorage)
-        setAllValidationsForStats(dbValidations);
-
-        const total = dbValidations.length;
-        const valid =
+        const totalFromDb = dbValidations.length;
+        const validFromDb =
           dbValidations?.filter((v: { is_valid: boolean }) => v.is_valid)
             .length || 0;
-        setStats({ total, valid, invalid: total - valid });
+        const invalidFromDb = totalFromDb - validFromDb;
+
+        // No pisar gráficas con 0: si la BD devuelve datos, usarlos; si no, mantener lo que ya hay
+        setAllValidationsForStats((prev: any[]) =>
+          dbValidations.length > 0 ? dbValidations : prev
+        );
+        setStats((prev: { total: number; valid: number; invalid: number }) => ({
+          total: Math.max(prev.total, totalFromDb),
+          valid: Math.max(prev.valid, validFromDb),
+          invalid: Math.max(prev.invalid, invalidFromDb),
+        }));
 
         // Limpiar datos antiguos de localStorage siempre
         if (typeof window !== "undefined") {
@@ -222,7 +228,19 @@ export default function DashboardPage() {
       invalid: prev.invalid + (isValid ? 0 : 1),
     }));
 
-    // Refrescar listas y gráficas; loadData usa el máximo(BD, actual) para el contador y no lo pisa con 0
+    // Añadir la validación recién hecha a la lista para que las gráficas se vean al instante
+    setAllValidationsForStats((prev: any[]) => [
+      {
+        id: `temp-${Date.now()}`,
+        rfc: options?.rfc || "",
+        is_valid: isValid,
+        created_at: new Date().toISOString(),
+        response_time: 0,
+      },
+      ...prev,
+    ]);
+
+    // Refrescar desde BD; loadData no pisa contador ni gráficas con 0
     setTimeout(() => refreshData(), 800);
   };
 
