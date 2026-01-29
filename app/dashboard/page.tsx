@@ -61,7 +61,12 @@ export default function DashboardPage() {
           .single();
 
         if (userDataResult) {
-          setUserData(userDataResult);
+          // Al refrescar: mantener el contador como el máximo (actual vs BD) para no pisar 1/5000 con 0
+          setUserData((prev: any) => {
+            const fromDb = userDataResult.rfc_queries_this_month ?? 0;
+            const current = prev?.rfc_queries_this_month ?? 0;
+            return { ...userDataResult, rfc_queries_this_month: Math.max(fromDb, current) };
+          });
         } else {
           // Crear usuario si no existe
           const { data: newUser } = await supabase
@@ -217,7 +222,8 @@ export default function DashboardPage() {
       invalid: prev.invalid + (isValid ? 0 : 1),
     }));
 
-    // No refrescar aquí: recargar pisaba el contador con 0. El usuario puede recargar la página para sincronizar.
+    // Refrescar listas y gráficas; loadData usa el máximo(BD, actual) para el contador y no lo pisa con 0
+    setTimeout(() => refreshData(), 800);
   };
 
   if (loading) {
