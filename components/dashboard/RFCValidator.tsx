@@ -12,6 +12,7 @@ interface RFCValidatorProps {
     isDemo?: boolean;
     valid?: boolean;
     rfc?: string;
+    queriesThisMonth?: number;
   }) => void;
 }
 
@@ -210,13 +211,17 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
         }
       }
 
-      // Actualizar datos sin recargar la página
+      // Pasar contador de la API (1/5000, 2/5000...) para que el dashboard lo muestre al instante
       if (onValidationComplete) {
         setTimeout(() => {
           onValidationComplete({
             isDemo: data.source === "demo",
             valid: data.valid,
             rfc: data.rfc,
+            queriesThisMonth:
+              typeof (data as { queriesThisMonth?: number }).queriesThisMonth === "number"
+                ? (data as { queriesThisMonth: number }).queriesThisMonth
+                : undefined,
           });
         }, 200);
       }

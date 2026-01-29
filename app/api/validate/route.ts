@@ -330,14 +330,40 @@ export async function POST(request: NextRequest) {
 
       const planAfter = (updatedUserData?.subscription_status || "free") as PlanId;
       const planLimitAfter = getPlanValidationLimit(planAfter);
+      const newQueriesThisMonth = updatedUserData?.rfc_queries_this_month ?? newCount;
       remaining =
         planLimitAfter === -1
           ? -1
-          : planLimitAfter - (updatedUserData?.rfc_queries_this_month || 0);
-    } else {
-      // En modo diseño, simular límite restante
-      remaining = planLimit === -1 ? -1 : Math.max(0, planLimit - queriesThisMonth);
+          : planLimitAfter - newQueriesThisMonth;
+
+      // Incluir contador actualizado para que el dashboard muestre 1/5000, 2/5000, etc.
+      return NextResponse.json(
+        {
+          success: satResult.success,
+          valid: satResult.valid,
+          rfc: formattedRFC,
+          remaining: Math.max(0, remaining),
+          queriesThisMonth: newQueriesThisMonth,
+          message: satResult.message,
+          source: satResult.source,
+          responseTime: satResult.responseTime,
+          cached: satResult.cached,
+          name: satResult.name,
+          regime: satResult.regime,
+          startDate: satResult.startDate,
+        },
+        {
+          status: satResult.success ? 200 : 502,
+          headers: {
+            "X-RateLimit-Limit": RATE_LIMIT.toString(),
+            "X-RateLimit-Remaining": Math.max(rate.remaining, 0).toString(),
+          },
+        }
+      );
     }
+
+    // Sin usuario (no debería llegar aquí por el 401 arriba)
+    remaining = planLimit === -1 ? -1 : Math.max(0, planLimit - queriesThisMonth);
 
     return NextResponse.json(
       {

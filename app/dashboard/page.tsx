@@ -184,37 +184,40 @@ export default function DashboardPage() {
     isDemo?: boolean;
     valid?: boolean;
     rfc?: string;
+    queriesThisMonth?: number;
   }) => {
-    // Para cualquier validación (demo o real): limpiar demo validations locales y actualizar inmediatamente
     if (typeof window !== "undefined") {
       try {
-        // Limpiar demo validations locales (ya no se usan)
         localStorage.removeItem("maflipp_demo_validations_count");
         localStorage.removeItem("maflipp_demo_validations");
       } catch (e) {
         // Ignore
       }
     }
-    
-    // Actualizar inmediatamente el contador y luego refrescar datos
+
+    // Usar contador de la API si viene (1/5000, 2/5000, etc.); si no, sumar 1
+    const newCount =
+      typeof options?.queriesThisMonth === "number"
+        ? options.queriesThisMonth
+        : undefined;
+
     setUserData((prev: any) => {
       if (!prev) return prev;
       return {
         ...prev,
-        rfc_queries_this_month: (prev.rfc_queries_this_month || 0) + 1,
+        rfc_queries_this_month:
+          newCount ?? (prev.rfc_queries_this_month || 0) + 1,
       };
     });
-    
-    // También actualizar stats inmediatamente
+
     const isValid = options?.valid ?? true;
     setStats((prev) => ({
-      total: prev.total + 1,
+      total: newCount ?? prev.total + 1,
       valid: prev.valid + (isValid ? 1 : 0),
       invalid: prev.invalid + (isValid ? 0 : 1),
-    }));
-    
-    // Refrescar datos completos desde la BD para asegurar sincronización
-    refreshData();
+    })); // total se sincroniza con refreshData()
+
+    setTimeout(() => refreshData(), 600);
   };
 
   if (loading) {
