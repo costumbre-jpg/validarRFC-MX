@@ -217,11 +217,7 @@ export default function DashboardPage() {
       invalid: prev.invalid + (isValid ? 0 : 1),
     }));
 
-    // Solo refrescar desde BD cuando NO tenemos el contador de la API.
-    // Si tenemos queriesThisMonth, la API ya guardó y no recargar para no pisar el 1/5000 con un 0.
-    if (newCount === undefined) {
-      setTimeout(() => refreshData(), 600);
-    }
+    // No refrescar aquí: recargar pisaba el contador con 0. El usuario puede recargar la página para sincronizar.
   };
 
   if (loading) {

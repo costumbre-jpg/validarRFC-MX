@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 import { validateRFC, normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { rateLimit } from "@/lib/rate-limit";
+import { createClient as createServerSupabase } from "@/lib/supabase/server";
 
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 10; // 10 requests por minuto
@@ -48,6 +49,19 @@ export async function POST(request: NextRequest) {
         extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
         extractJwtFromCookie(request.cookies.get("sb:token")?.value);
       jwt = cookieToken || undefined;
+      // Intentar también cookies con prefijo del proyecto (sb-<project>-auth-token)
+      if (!jwt && typeof request.cookies.getAll === "function") {
+        const all = request.cookies.getAll();
+        for (const c of all) {
+          if (c.name?.includes("auth-token") && c.value) {
+            const tok = extractJwtFromCookie(c.value);
+            if (tok) {
+              jwt = tok;
+              break;
+            }
+          }
+        }
+      }
     }
 
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
@@ -61,6 +75,19 @@ export async function POST(request: NextRequest) {
       if (!error && data?.user) {
         user = { id: data.user.id, email: data.user.email };
         userEmail = data.user.email;
+      }
+    }
+    // Fallback: obtener usuario desde cookies con createServerClient (Next.js)
+    if (!user) {
+      try {
+        const supabaseServer = await createServerSupabase();
+        const { data: { user: serverUser } } = await supabaseServer.auth.getUser();
+        if (serverUser) {
+          user = { id: serverUser.id, email: serverUser.email };
+          userEmail = serverUser.email;
+        }
+      } catch (_) {
+        // ignore
       }
     }
     if (!user) {
