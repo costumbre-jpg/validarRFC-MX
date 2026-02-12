@@ -1,14 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { checkBlacklist } from "@/lib/blacklist";
 import { validateRFC } from "@/lib/rfc";
 import * as XLSX from 'xlsx';
 
-// Admin client for writing to DB securely
-const supabaseAdmin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+
 
 export async function POST(request: NextRequest) {
     try {

@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { planHasFeature, type PlanId } from "@/lib/plans";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import RFCValidator from "@/components/dashboard/RFCValidator";
 import DashboardStats from "@/components/dashboard/DashboardStats";
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     try {
@@ -60,6 +62,8 @@ export default function DashboardPage() {
           .eq("id", session.user.id)
           .single();
 
+        let currentPlanId: PlanId = "free";
+
         if (userDataResult) {
           // Al refrescar: mantener el contador como el máximo (actual vs BD) para no pisar 1/5000 con 0
           setUserData((prev: any) => {
@@ -67,6 +71,7 @@ export default function DashboardPage() {
             const current = prev?.rfc_queries_this_month ?? 0;
             return { ...userDataResult, rfc_queries_this_month: Math.max(fromDb, current) };
           });
+          currentPlanId = userDataResult.subscription_status as PlanId;
         } else {
           // Crear usuario si no existe
           const { data: newUser } = await supabase
@@ -88,6 +93,9 @@ export default function DashboardPage() {
             rfc_queries_this_month: 0
           });
         }
+
+        // Determinar si mostrar analytics basado en el plan
+        setShowAnalytics(planHasFeature(currentPlanId, "analytics"));
 
         // Obtener últimas validaciones para estadísticas y gráfico (limitado a 100 para no sobrecargar)
         // Ya no filtramos estrictamente por inicio de mes para asegurar que se vean datos recientes
@@ -338,8 +346,8 @@ export default function DashboardPage() {
             validations={allValidationsForStats}
           />
 
-          {/* Dashboard Avanzado - Solo para Pro y Business */}
-          {(userData?.subscription_status === "pro" || userData?.subscription_status === "business") && (
+          {/* Dashboard Avanzado - Basado en feature 'analytics' */}
+          {showAnalytics && (
             <AdvancedDashboard
               key={refreshKey} // Forzar re-render cuando cambian los datos
               userData={userData}
@@ -582,5 +590,3 @@ export default function DashboardPage() {
     </Suspense>
   );
 }
-
-

@@ -310,7 +310,8 @@ export async function POST(request: NextRequest) {
         const { error: updateError } = await supabaseAdmin
           .from("users")
           .update({ rfc_queries_this_month: newCount })
-          .eq("id", user.id);
+          .eq("id", user.id)
+          .select(); // Asegurar que el update se procese y retorne
 
         if (updateError) {
           console.error("Error updating user count (non-fatal):", updateError);
@@ -418,4 +419,3 @@ export async function GET() {
     { status: 200 }
   );
 }
-

@@ -23,6 +23,7 @@ export interface PlanConfig {
     export: boolean;
     exportFormats?: string[]; // ["CSV", "Excel", "PDF"]
     api: boolean | string; // false, "Básica", "Completa", "Ilimitada"
+    analytics: boolean; // Gráficas y métricas avanzadas
     apiCallsPerMonth?: number;
     apiKeys?: number; // -1 = ilimitado
     users: number; // -1 = ilimitado
@@ -54,6 +55,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       history: true,
       export: false,
       api: false,
+      analytics: false,
       apiKeys: 0,
       users: 1,
       support: "FAQs",
@@ -82,6 +84,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       export: true,
       exportFormats: ["CSV", "Excel"],
       api: "Básica",
+      analytics: true, // Activado para PRO
       apiCallsPerMonth: 2000,
       apiKeys: 5,
       users: 3,
@@ -112,6 +115,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       export: true,
       exportFormats: ["CSV", "Excel", "PDF"],
       api: "Completa",
+      analytics: true, // Activado para BUSINESS
       apiCallsPerMonth: 10000,
       apiKeys: 20,
       users: -1, // Ilimitado
@@ -146,6 +150,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       export: true,
       exportFormats: ["CSV"],
       api: "Básica",
+      analytics: false,
       apiCallsPerMonth: 100,
       apiKeys: 1,
       users: 1,
@@ -171,6 +176,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       export: true,
       exportFormats: ["CSV", "Excel", "PDF"],
       api: "Ilimitada",
+      analytics: true,
       apiCallsPerMonth: -1, // Ilimitado
       apiKeys: -1,
       users: -1,
@@ -201,6 +207,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
       history: true,
       export: true,
       api: "Ilimitada",
+      analytics: true,
       apiCallsPerMonth: -1,
       apiKeys: -1,
       users: -1,
@@ -295,4 +302,3 @@ export function planHasFeature(planId: PlanId, feature: keyof PlanConfig["featur
 export function getPlanDisplayName(planId: PlanId): string {
   return PLANS[planId]?.displayName || planId;
 }
-

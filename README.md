@@ -4,22 +4,15 @@ Sistema de validación de RFC construido con Next.js 14, TypeScript, Tailwind CS
 
 > Última actualización: Diseño responsive completo y optimizaciones móvil - Enero 2025
 
-## ✅ Checklist para venta (estado actual)
+## 🚧 Estado del Proyecto: En Desarrollo Activo
 
 - Core funcional: validaciones RFC, dashboard, white label, onboarding, API, Stripe.
 - Integraciones listas: Supabase, Stripe, Resend (email).
 - **✅ Google Analytics 4** integrado (opcional, requiere `NEXT_PUBLIC_GA_MEASUREMENT_ID`).
 - **✅ Sentry** para monitoreo de errores (opcional, requiere `NEXT_PUBLIC_SENTRY_DSN`).
 - **✅ Health check endpoint** (`/api/health`) y página de status (`/status`).
-- **✅ SEO mejorado** (sitemap dinámico, robots.txt).
-- **✅ Documentación API completa** (`API_DOCUMENTATION.md`).
-- **✅ Suite de tests** (unitarios e integración).
-- **✅ Rate limiting robusto** con Redis (Upstash) y fallback en memoria.
-- Falta solo afinar despliegue y documentación técnica para terceros.
-- CFDI requiere integración con proveedor PAC/SAT (no incluido).
-- Recarga de API Keys y test-upgrade deshabilitados por defecto (flags en env).
-
-**Si vendes el código hoy, el comprador solo necesita configurar credenciales y producción.**
+- **✅ SEO mejorado**.
+- **🔜 Próximos pasos:** Activar recarga de API Keys, Habilitar upgrades automáticos, Integración final CFDI.
 
 ## 🚀 Inicio Rápido
 
@@ -291,19 +284,6 @@ Todas las tablas tienen RLS habilitado con políticas que permiten:
 - `UPSTASH_REDIS_REST_TOKEN`: Redis (rate limit/cache, opcional)
 - `NODE_ENV`: Entorno (development/production)
 
-## 🧾 Handoff rápido (para vender)
-
-1. Crear buckets en Supabase Storage:
-   - `avatars` (público)
-   - `branding` (público)
-2. Configurar Resend (emails):
-   - `RESEND_API_KEY`
-   - `RESEND_FROM_EMAIL`
-3. Configurar Stripe Webhooks:
-   - `/api/stripe/webhook`
-4. Opcional: programar cron para alertas
-   - Endpoint: `/api/alerts/send`
-   - Header: `x-cron-secret: <CRON_SECRET>`
 
 ## 🔧 Configuración de Supabase para Producción
 
@@ -365,9 +345,8 @@ npm install
 
 ## 📝 Licencia
 
-Este proyecto es privado y propietario.
+Copyright © 2025 Maflipp. Todos los derechos reservados.
 
 ## 🤝 Soporte
 
 Para soporte, contacta: hola@validarfcmx.mx
-
