@@ -32,6 +32,9 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: "El archivo Excel no es válido o está vacío." }, { status: 400 });
             }
             const sheet = workbook.Sheets[sheetName];
+            if (!sheet) {
+                return NextResponse.json({ error: "No se pudo encontrar la hoja en el archivo Excel." }, { status: 400 });
+            }
             const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
             rfcs = jsonData.flat().map(cell => String(cell).trim()).filter(cell => cell && cell.length >= 10);
         }
