@@ -248,15 +248,13 @@ export async function POST(request: NextRequest) {
         .from("users")
         .select("id")
         .eq("id", user.id)
-        .maybeSingle(); // Changed from single() to maybeSingle() to prevent error if not found
+        .maybeSingle();
 
       if (userCheckError || !userExists) {
         console.error("User not found in users table:", user.id, userCheckError);
         // Intentar crear el usuario si no existe
-        // Si no tenemos el email, intentar obtenerlo de la tabla auth.users usando admin
         let finalEmail = userEmail || user.email || "";
         if (!finalEmail) {
-          // Como último recurso, usar el ID como email temporal (se actualizará después)
           finalEmail = `${user.id}@temp.maflipp.com`;
         }
         const { error: createUserError } = await supabaseAdmin
@@ -270,10 +268,10 @@ export async function POST(request: NextRequest) {
 
         if (createUserError) {
           console.error("Error creating user (non-fatal):", createUserError);
-          // Continue anyway, maybe the DB is read-only or having issues
         }
       }
 
+      // INSERT VALIDATION with select to verify
       const { error: insertError } = await supabaseAdmin
         .from("validations")
         .insert({
@@ -281,12 +279,15 @@ export async function POST(request: NextRequest) {
           rfc: formattedRFC,
           is_valid: satResult.valid === true,
           response_time: satResult.responseTime ?? 0,
-        });
+        })
+        .select()
+        .single();
 
       if (insertError) {
-        console.error("Error saving validation (non-fatal):", insertError);
-        // No retornamos 500 para no bloquear al usuario si la BD falla
-        // Simplemente continuamos sin guardar el historial/uso
+        console.error("Error saving validation to DB:", insertError);
+        // We will still return success to the user (since SAT validated), but log the DB error
+      } else {
+        // console.log("Validation saved successfully:", insertedValidation);
       }
 
       // Actualizar contador del usuario

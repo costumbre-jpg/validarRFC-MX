@@ -5,9 +5,7 @@ export const dynamic = "force-dynamic";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import Link from "next/link";
 import ValidationHistory from "@/components/dashboard/ValidationHistory";
-import { planHasFeature, type PlanId } from "@/lib/plans";
 
 function HistorialPage() {
   const [userData, setUserData] = useState<any>(null);
@@ -111,7 +109,7 @@ function HistorialPage() {
           .select("*")
           .eq("id", user.id)
           .single();
-        
+
         setUserData(dbUser);
       } catch (error) {
         console.error("Error loading user data:", error);
@@ -131,8 +129,8 @@ function HistorialPage() {
 
   // Recargar cuando cambia la página: ahora lo maneja handlePageChange
 
-  const planId = (userData?.subscription_status || "free") as PlanId;
-  
+  // planId removed as it was unused
+
   // Get brand colors from CSS variables or use defaults
   const getBrandColor = (varName: string, defaultValue: string) => {
     if (typeof window === 'undefined') return defaultValue;
@@ -143,46 +141,7 @@ function HistorialPage() {
   const brandPrimary = getBrandColor('--brand-primary', '#2F7E7A');
   const brandSecondary = getBrandColor('--brand-secondary', '#1F5D59');
 
-  // Solo mostrar el mensaje de plan Free si ya terminó de cargar Y realmente es plan Free
-  if (!loading && userData && !planHasFeature(planId, "history")) {
-    return (
-      <div className="space-y-8 max-md:space-y-4">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap mb-4 max-md:mb-3">
-            <span
-              className="inline-flex items-center px-4 max-md:px-3 py-2 max-md:py-1.5 rounded-full text-lg max-md:text-base font-bold"
-              style={{ backgroundColor: `${brandPrimary}15`, color: brandSecondary }}
-            >
-              Historial de Validaciones
-            </span>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8 max-md:p-4">
-          <div className="text-center py-12 max-md:py-8">
-            <div className="inline-flex items-center justify-center w-20 max-md:w-16 h-20 max-md:h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-6 max-md:mb-4">
-              <svg className="w-10 h-10 max-md:w-8 max-md:h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl max-md:text-lg font-semibold text-gray-900 mb-3 max-md:mb-2">Historial Completo Disponible</h3>
-            <p className="text-gray-600 max-md:text-sm mb-6 max-md:mb-4 max-w-md mx-auto">
-              El historial completo de validaciones está disponible en los planes Pro y Business.
-            </p>
-            <Link
-              href="/dashboard/billing"
-              className="inline-flex items-center gap-2 max-md:gap-1.5 px-6 max-md:px-4 py-3 max-md:py-2 text-white rounded-xl max-md:rounded-lg transition-all font-medium text-base max-md:text-sm shadow-md hover:shadow-lg"
-              style={{ backgroundColor: brandPrimary }}
-            >
-              <svg className="w-5 h-5 max-md:w-4 max-md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-              Mejorar Plan
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Check removed to allow history access for all users
 
   if (loading) {
     return (
