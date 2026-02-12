@@ -31,7 +31,15 @@ export default function BulkUploadPage() {
             } else {
                 const workbook = XLSX.read(data, { type: 'binary' });
                 const sheetName = workbook.SheetNames[0];
+                if (!sheetName) {
+                    setError("El archivo Excel no tiene hojas.");
+                    return;
+                }
                 const sheet = workbook.Sheets[sheetName];
+                if (!sheet) {
+                    setError("No se pudo leer la hoja del Excel.");
+                    return;
+                }
                 const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][];
                 const rfcs = jsonData.flat().map(cell => String(cell).trim()).filter(cell => cell && cell.length >= 10);
                 setPreview(rfcs.slice(0, 5));
@@ -54,6 +62,14 @@ export default function BulkUploadPage() {
         },
         maxFiles: 1
     });
+
+    const handleDownload = () => {
+        if (!results) return;
+        const ws = XLSX.utils.json_to_sheet(results);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Resultados");
+        XLSX.writeFile(wb, "resultados_validacion.xlsx");
+    };
 
     const handleUpload = async () => {
         if (!file) return;
@@ -200,6 +216,7 @@ export default function BulkUploadPage() {
                                     Validar otro archivo
                                 </button>
                                 <button
+                                    onClick={handleDownload}
                                     className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors flex items-center gap-2"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
