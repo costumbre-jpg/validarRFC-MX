@@ -39,7 +39,7 @@ export default function ValidationHistory({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const currentPage = externalCurrentPage ?? localCurrentPage;
   const itemsPerPage = externalItemsPerPage ?? 10;
-  
+
   const handlePageChange = (page: number) => {
     if (onPageChange) {
       onPageChange(page);
@@ -85,14 +85,14 @@ export default function ValidationHistory({
   const brandPrimary = getBrandColor("--brand-primary", "#2F7E7A");
   const brandSecondary = getBrandColor("--brand-secondary", "#1F5D59");
   const { name: brandName, hide: hideMaflipp } = getBrandMeta();
-  
+
   const displayedValidations = showFullTable
-    ? (isServerPagination 
-        ? validations
-        : validations.slice(
-            (currentPage - 1) * itemsPerPage,
-            currentPage * itemsPerPage
-          ))
+    ? (isServerPagination
+      ? validations
+      : validations.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      ))
     : validations.slice(0, 5);
 
   // Calcular total de páginas
@@ -111,7 +111,7 @@ export default function ValidationHistory({
     const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) return [];
 
     const { data: allValidations } = await supabase
@@ -245,8 +245,8 @@ export default function ValidationHistory({
       `;
 
       // Crear blob con formato Excel (application/vnd.ms-excel)
-      const blob = new Blob([htmlContent], { 
-        type: "application/vnd.ms-excel" 
+      const blob = new Blob([htmlContent], {
+        type: "application/vnd.ms-excel"
       });
       const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
@@ -287,7 +287,7 @@ export default function ValidationHistory({
       const brandRgb = hexToRgb(brandPrimary);
       // Crear nuevo documento PDF
       const doc = new jsPDF();
-      
+
       // Configuración
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -316,7 +316,7 @@ export default function ValidationHistory({
       doc.setTextColor(255, 255, 255);
       doc.setFillColor(brandRgb.r, brandRgb.g, brandRgb.b);
       doc.rect(margin, currentY, pageWidth - (margin * 2), rowHeight, "F");
-      
+
       doc.text("RFC", margin + 2, currentY + 5);
       doc.text("Resultado", margin + 60, currentY + 5);
       doc.text("Fecha", margin + 110, currentY + 5);
@@ -325,13 +325,13 @@ export default function ValidationHistory({
       // Datos de la tabla
       doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
-      
+
       allValidations.forEach((validation, index) => {
         // Verificar si necesitamos una nueva página
         if (currentY + rowHeight > maxY) {
           doc.addPage();
           currentY = margin;
-          
+
           // Reimprimir encabezados en nueva página
           doc.setFontSize(11);
           doc.setTextColor(255, 255, 255);
@@ -354,16 +354,16 @@ export default function ValidationHistory({
         // Datos de la fila
         doc.setTextColor(0, 0, 0);
         doc.text(formatRFCForDisplay(validation.rfc), margin + 2, currentY + 5);
-        
+
         // Resultado con color
         const resultText = validation.is_valid ? "Válido" : "Inválido";
         const resultColor: [number, number, number] = validation.is_valid ? [34, 197, 94] : [239, 68, 68]; // Verde o rojo    
         doc.setTextColor(resultColor[0], resultColor[1], resultColor[2]);
         doc.text(resultText, margin + 60, currentY + 5);
-        
+
         doc.setTextColor(0, 0, 0);
         doc.text(formatDate(validation.created_at), margin + 110, currentY + 5);
-        
+
         currentY += rowHeight;
       });
 
@@ -406,7 +406,7 @@ export default function ValidationHistory({
           </div>
           <h3 className="text-base font-semibold text-gray-900 mb-2">No hay validaciones aún</h3>
           <p className="text-xs text-gray-600 mb-4 max-w-md mx-auto">
-            {showFullTable 
+            {showFullTable
               ? "Tu historial de validaciones aparecerá aquí una vez que comiences a validar RFCs. Todas tus validaciones se guardarán automáticamente para que puedas consultarlas y exportarlas cuando lo necesites."
               : "Comienza validando tu primer RFC arriba para ver tu historial aquí."
             }
@@ -454,12 +454,12 @@ export default function ValidationHistory({
           <p className="text-xs font-medium text-red-800">{errorMessage}</p>
         </div>
       )}
-      
+
       <div className="flex items-center justify-between mb-4">
         <div>
-          <div 
+          <div
             className="inline-flex items-center px-3 py-1.5 rounded-full text-white text-xs font-semibold shadow-sm mb-2"
-            style={{ 
+            style={{
               background: `linear-gradient(to right, ${brandPrimary}, ${brandSecondary})`
             }}
           >
@@ -561,7 +561,10 @@ export default function ValidationHistory({
                 RFC
               </th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                Resultado
+                Resultado Estructura
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                Estatus SAT (Listas)
               </th>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                 Fecha
@@ -575,29 +578,74 @@ export default function ValidationHistory({
                   {formatRFCForDisplay(validation.rfc)}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                    <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                          validation.is_valid
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {validation.is_valid ? (
-                          <>
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${validation.is_valid
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                      }`}
+                  >
+                    {validation.is_valid ? (
+                      <>
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Válido
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        Inválido
+                      </>
+                    )}
+                  </span>
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {/* Blacklist Status Badge */}
+                  {(() => {
+                    const status = (validation as any).blacklist_status || 'CLEAN';
+                    switch (status) {
+                      case 'CLEAN':
+                        return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+                            <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
-                            Válido
-                          </>
-                        ) : (
-                          <>
-                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            Limpio
+                          </span>
+                        );
+                      case 'EFO':
+                        return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-800 border border-red-200">
+                            <svg className="w-3 h-3 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
-                            Inválido
-                          </>
-                        )}
-                      </span>
+                            ALERTA: EFO
+                          </span>
+                        );
+                      case 'EDO':
+                        return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                            <svg className="w-3 h-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            ALERTA: EDO
+                          </span>
+                        );
+                      case 'NO_LOCALIZADO':
+                        return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-800 border border-yellow-200">
+                            <svg className="w-3 h-3 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            No Localizado
+                          </span>
+                        );
+                      default:
+                        return <span className="text-gray-400">-</span>;
+                    }
+                  })()}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                   {formatDate(validation.created_at, { includeTime: true })}

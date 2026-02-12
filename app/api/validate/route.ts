@@ -1,5 +1,6 @@
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { checkBlacklist } from "@/lib/blacklist";
 import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 import { validateRFC, normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { rateLimit } from "@/lib/rate-limit";
@@ -271,6 +272,9 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Check blacklist
+      const blacklistResult = await checkBlacklist(formattedRFC);
+
       // INSERT VALIDATION with select to verify
       const { error: insertError } = await supabaseAdmin
         .from("validations")
@@ -279,6 +283,7 @@ export async function POST(request: NextRequest) {
           rfc: formattedRFC,
           is_valid: satResult.valid === true,
           response_time: satResult.responseTime ?? 0,
+          blacklist_status: blacklistResult.status // New column
         })
         .select()
         .single();
