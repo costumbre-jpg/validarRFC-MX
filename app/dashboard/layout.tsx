@@ -17,6 +17,15 @@ function DashboardLayoutContent({
   const [userData, setUserData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [branding, setBranding] = useState<any>(null);
+  const [showTimeoutError, setShowTimeoutError] = useState(false);
+
+  // Timeout de seguridad: Si carga por más de 5 segundos, mostrar error
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) setShowTimeoutError(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   // Guardar el plan actual en localStorage para que otras páginas (developers) puedan leerlo
   useEffect(() => {
@@ -97,7 +106,10 @@ function DashboardLayoutContent({
       }
     };
 
-    checkAuth();
+    checkAuth().catch((err) => {
+      console.error("Error crítico de autenticación:", err);
+      setShowTimeoutError(true); // Mostrar error inmediatamente si falla la red
+    });
   }, [router]);
 
   const primary = branding?.primary_color || "#2F7E7A";
@@ -119,8 +131,26 @@ function DashboardLayoutContent({
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
+          {showTimeoutError ? (
+            <div className="max-w-md mx-auto px-6">
+              <div className="text-red-500 text-5xl mb-4">⚠️</div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Conexión lenta o interrumpida</h2>
+              <p className="text-gray-600 mb-6">
+                No pudimos conectar con la base de datos. Es posible que el servidor esté despertando de una pausa o en mantenimiento.
+              </p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="bg-brand-primary text-white px-6 py-2 rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              >
+                Reintentar conexión
+              </button>
+            </div>
+          ) : (
+            <>
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary mx-auto"></div>
           <p className="mt-4 text-gray-500">Cargando...</p>
+            </>
+          )}
         </div>
       </div>
     );
@@ -158,5 +188,3 @@ export default function DashboardLayout(props: { children: React.ReactNode }) {
     </Suspense>
   );
 }
-
-

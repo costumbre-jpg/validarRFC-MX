@@ -25,6 +25,7 @@ export default function DashboardPage() {
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showTimeoutError, setShowTimeoutError] = useState(false);
 
   useEffect(() => {
     try {
@@ -37,6 +38,14 @@ export default function DashboardPage() {
       // ignore
     }
   }, []);
+
+  // Timeout de seguridad para el contenido del dashboard
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) setShowTimeoutError(true);
+    }, 5000); // 5 segundos
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -256,7 +265,19 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
+        {showTimeoutError ? (
+          <div className="text-center">
+            <p className="text-gray-600 mb-2 text-sm">La carga está demorando más de lo normal.</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="text-brand-primary font-medium text-sm hover:underline"
+            >
+              Recargar página
+            </button>
+          </div>
+        ) : (
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
+        )}
       </div>
     );
   }
