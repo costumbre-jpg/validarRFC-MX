@@ -51,7 +51,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
     annualPrice: 0,
     validationsPerMonth: 10, // Aumentado de 5 a 10 para mejor conversión
     features: {
-      history: false,
+      history: true,
       export: false,
       api: false,
       apiKeys: 0,
@@ -62,6 +62,7 @@ export const PLANS: Record<PlanId, PlanConfig> = {
         "Resultados básicos (válido/inválido)",
         "Estadísticas básicas de uso",
         "Límite: 10 validaciones/mes",
+        "Historial de validaciones (nuevo)",
       ],
     },
     target: "Usuarios individuales, prueba del servicio",
@@ -264,7 +265,7 @@ export function getPlanApiLimit(planId: PlanId): number {
 export function planHasFeature(planId: PlanId, feature: keyof PlanConfig["features"]): boolean {
   const plan = PLANS[planId];
   const featureValue = plan.features[feature];
-  
+
   if (typeof featureValue === "boolean") {
     return featureValue;
   }

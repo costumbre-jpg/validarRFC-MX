@@ -153,7 +153,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
         const rawMessage = data.message || "Error al validar el RFC";
         const friendlyMessage =
           typeof rawMessage === "string" &&
-          rawMessage.toLowerCase().includes("fetch failed")
+            rawMessage.toLowerCase().includes("fetch failed")
             ? "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos."
             : rawMessage;
         if (response.status === 403) {
@@ -172,7 +172,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
         const rawMessage = data.message || "Error al validar el RFC";
         const friendlyMessage =
           typeof rawMessage === "string" &&
-          rawMessage.toLowerCase().includes("fetch failed")
+            rawMessage.toLowerCase().includes("fetch failed")
             ? "No se pudo conectar con el SAT. Intenta nuevamente en unos minutos."
             : rawMessage;
         if (response.status === 403) {
@@ -288,8 +288,21 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
             >
               {loading ? "Validando..." : "Validar RFC"}
             </button>
+            <button
+              onClick={() => {
+                setRfc("");
+                setResult(null);
+                setError(null);
+              }}
+              title="Limpiar"
+              className="px-3 py-3 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
           </div>
-          
+
           {/* Ejemplos rápidos de RFCs */}
           <div className="mt-3 max-md:mt-2">
             <p className="text-xs max-md:text-[11px] text-gray-500 mb-2 max-md:mb-1.5">Prueba con ejemplos:</p>
@@ -325,16 +338,14 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
 
         {result && (
           <div
-            className={`rounded-lg p-6 max-md:p-4 border-2 shadow-sm ${
-              result.isValid
+            className={`rounded-lg p-6 max-md:p-4 border-2 shadow-sm ${result.isValid
                 ? "bg-green-50 border-green-300"
                 : "bg-red-50 border-red-300"
-            }`}
+              }`}
           >
             <div className="flex items-start gap-4 max-md:gap-3">
-              <div className={`flex-shrink-0 w-12 h-12 max-md:w-10 max-md:h-10 rounded-full flex items-center justify-center ${
-                result.isValid ? "bg-green-100" : "bg-red-100"
-              }`}>
+              <div className={`flex-shrink-0 w-12 h-12 max-md:w-10 max-md:h-10 rounded-full flex items-center justify-center ${result.isValid ? "bg-green-100" : "bg-red-100"
+                }`}>
                 {result.isValid ? (
                   <svg className="w-6 h-6 max-md:w-5 max-md:h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -347,9 +358,8 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
               </div>
               <div className="flex-1">
                 <p
-                  className={`text-lg max-md:text-base font-bold mb-1 ${
-                    result.isValid ? "text-green-900" : "text-red-900"
-                  }`}
+                  className={`text-lg max-md:text-base font-bold mb-1 ${result.isValid ? "text-green-900" : "text-red-900"
+                    }`}
                 >
                   {result.message}
                 </p>
@@ -386,8 +396,8 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
                       {result.isDemo
                         ? "Modo demo: SAT sin respuesta"
                         : result.cached
-                        ? "Respuesta desde caché"
-                        : "Consulta al SAT"}{" "}
+                          ? "Respuesta desde caché"
+                          : "Consulta al SAT"}{" "}
                       · {result.responseTime ?? 0} ms
                     </span>
                   </div>
@@ -425,15 +435,14 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
               </p>
             </div>
             <div className="text-right">
-              <p className={`text-2xl max-md:text-xl font-bold ${
-                planLimit === -1 
+              <p className={`text-2xl max-md:text-xl font-bold ${planLimit === -1
                   ? "text-brand-primary"
                   : planLimit - queriesThisMonth <= 3
-                  ? "text-orange-600"
-                  : "text-brand-primary"
-              }`}>
-                {planLimit === -1 
-                  ? "∞" 
+                    ? "text-orange-600"
+                    : "text-brand-primary"
+                }`}>
+                {planLimit === -1
+                  ? "∞"
                   : Math.max(0, planLimit - queriesThisMonth).toLocaleString()}
               </p>
               {planLimit !== -1 && (

@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
         .from("users")
         .select("id")
         .eq("id", user.id)
-        .single();
+        .maybeSingle(); // Changed from single() to maybeSingle() to prevent error if not found
 
       if (userCheckError || !userExists) {
         console.error("User not found in users table:", user.id, userCheckError);
@@ -269,17 +269,8 @@ export async function POST(request: NextRequest) {
           });
 
         if (createUserError) {
-          console.error("Error creating user:", createUserError);
-          return NextResponse.json(
-            {
-              success: false,
-              valid: false,
-              rfc: formattedRFC,
-              remaining: Math.max(0, remaining),
-              message: `Error al verificar usuario: ${createUserError.message}`,
-            },
-            { status: 500 }
-          );
+          console.error("Error creating user (non-fatal):", createUserError);
+          // Continue anyway, maybe the DB is read-only or having issues
         }
       }
 
@@ -293,17 +284,9 @@ export async function POST(request: NextRequest) {
         });
 
       if (insertError) {
-        console.error("Error saving validation:", insertError);
-        return NextResponse.json(
-          {
-            success: false,
-            valid: false,
-            rfc: formattedRFC,
-            remaining: Math.max(0, remaining),
-            message: `Error al guardar validación: ${insertError.message}`,
-          },
-          { status: 500 }
-        );
+        console.error("Error saving validation (non-fatal):", insertError);
+        // No retornamos 500 para no bloquear al usuario si la BD falla
+        // Simplemente continuamos sin guardar el historial/uso
       }
 
       // Actualizar contador del usuario
@@ -313,39 +296,19 @@ export async function POST(request: NextRequest) {
         .eq("id", user.id)
         .single();
 
+      let newCount = 0;
       if (selectError) {
-        console.error("Error fetching user data for count update:", selectError);
-        return NextResponse.json(
-          {
-            success: false,
-            valid: false,
-            rfc: formattedRFC,
-            remaining: Math.max(0, remaining),
-            message: `Error al obtener datos del usuario: ${selectError.message}`,
-          },
-          { status: 500 }
-        );
-      }
+        console.error("Error fetching user data for count update (non-fatal):", selectError);
+      } else {
+        newCount = (currentUserData?.rfc_queries_this_month || 0) + 1;
+        const { error: updateError } = await supabaseAdmin
+          .from("users")
+          .update({ rfc_queries_this_month: newCount })
+          .eq("id", user.id);
 
-      const newCount = (currentUserData?.rfc_queries_this_month || 0) + 1;
-
-      const { error: updateError } = await supabaseAdmin
-        .from("users")
-        .update({ rfc_queries_this_month: newCount })
-        .eq("id", user.id);
-
-      if (updateError) {
-        console.error("Error updating user count:", updateError);
-        return NextResponse.json(
-          {
-            success: false,
-            valid: false,
-            rfc: formattedRFC,
-            remaining: Math.max(0, remaining),
-            message: `Error al actualizar contador: ${updateError.message}`,
-          },
-          { status: 500 }
-        );
+        if (updateError) {
+          console.error("Error updating user count (non-fatal):", updateError);
+        }
       }
 
       // Obtener límite restante
