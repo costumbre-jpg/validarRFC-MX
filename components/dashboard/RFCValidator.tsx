@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
@@ -33,14 +33,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
   const [error, setError] = useState<string | null>(null);
   const [limitReached, setLimitReached] = useState(false);
 
-  useEffect(() => {
-    if (!result && !error) return;
-    const timer = setTimeout(() => {
-      setResult(null);
-      setError(null);
-    }, 7000);
-    return () => clearTimeout(timer);
-  }, [result, error]);
+  // Timer removed to keep result visible as requested by user
 
   const planId = (userData?.subscription_status || "free") as PlanId;
   const queriesThisMonth = userData?.rfc_queries_this_month || 0;
@@ -255,7 +248,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
           </div>
           {planLimit !== -1 && (
             <div className="text-xs max-md:text-[11px] text-gray-500">
-              Restantes: {Math.max(planLimit - queriesThisMonth, 0).toLocaleString()}
+              {queriesThisMonth.toLocaleString()} / {planLimit.toLocaleString()}
             </div>
           )}
         </div>
@@ -339,8 +332,8 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
         {result && (
           <div
             className={`rounded-lg p-6 max-md:p-4 border-2 shadow-sm ${result.isValid
-                ? "bg-green-50 border-green-300"
-                : "bg-red-50 border-red-300"
+              ? "bg-green-50 border-green-300"
+              : "bg-red-50 border-red-300"
               }`}
           >
             <div className="flex items-start gap-4 max-md:gap-3">
@@ -436,10 +429,10 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
             </div>
             <div className="text-right">
               <p className={`text-2xl max-md:text-xl font-bold ${planLimit === -1
-                  ? "text-brand-primary"
-                  : planLimit - queriesThisMonth <= 3
-                    ? "text-orange-600"
-                    : "text-brand-primary"
+                ? "text-brand-primary"
+                : planLimit - queriesThisMonth <= 3
+                  ? "text-orange-600"
+                  : "text-brand-primary"
                 }`}>
                 {planLimit === -1
                   ? "∞"
@@ -454,7 +447,7 @@ export default function RFCValidator({ userData, onValidationComplete }: RFCVali
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
 

@@ -18,64 +18,7 @@ export default function DashboardStats({
   const invalidPercentage =
     totalValidations > 0 ? (invalidCount / totalValidations) * 100 : 0;
 
-  // Estado vacío mejorado
-  if (totalValidations === 0) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Estado vacío - Total Validaciones */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <div className="text-center py-4">
-            <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-50 rounded-full mb-3">
-              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-1.5">
-              Total Validaciones
-            </h3>
-            <p className="text-2xl font-bold text-gray-900 mb-2">0</p>
-            <p className="text-xs text-gray-600">
-              Comienza validando tu primer RFC arriba
-            </p>
-          </div>
-        </div>
-
-        {/* Estado vacío - RFCs Válidos vs Inválidos */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">
-            RFCs Válidos vs Inválidos
-          </h3>
-          <div className="text-center py-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-full mb-3">
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <p className="text-xs text-gray-600 font-medium">
-              Los resultados aparecerán aquí después de tu primera validación
-            </p>
-          </div>
-        </div>
-
-        {/* Estado vacío - Uso Mensual */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-4">
-            Uso Mensual
-          </h3>
-          <div className="text-center py-6">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-full mb-3">
-              <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <p className="text-xs text-gray-600 font-medium">
-              El gráfico se actualizará conforme uses el servicio
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Empty state logic removed to always show graphs as requested by user
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-md:gap-3">
@@ -144,18 +87,18 @@ export default function DashboardStats({
               weekStart.setDate(1 + (week - 1) * 7);
               const weekEnd = new Date(weekStart);
               weekEnd.setDate(weekStart.getDate() + 6);
-            
+
               // Contar validaciones en esta semana
               const count = validations.filter((v) => {
                 const validationDate = new Date(v.created_at);
                 return validationDate >= weekStart && validationDate <= weekEnd;
               }).length;
-            
+
               return { week, count };
             });
-            
+
             const maxUsage = Math.max(...weeklyUsage.map(w => w.count), 1);
-            
+
             return weeklyUsage.map(({ week, count }) => {
               const percentage = maxUsage > 0 ? (count / maxUsage) * 100 : 0;
               return (
