@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import * as XLSX from 'xlsx';
-import { useRouter } from 'next/navigation';
 
 export default function BulkUploadPage() {
     const [file, setFile] = useState<File | null>(null);
