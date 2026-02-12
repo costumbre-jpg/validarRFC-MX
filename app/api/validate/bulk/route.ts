@@ -28,6 +28,9 @@ export async function POST(request: NextRequest) {
             const buffer = await file.arrayBuffer();
             const workbook = XLSX.read(buffer, { type: 'binary' });
             const sheetName = workbook.SheetNames[0];
+            if (!sheetName) {
+                return NextResponse.json({ error: "El archivo Excel no es válido o está vacío." }, { status: 400 });
+            }
             const sheet = workbook.Sheets[sheetName];
             const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
             rfcs = jsonData.flat().map(cell => String(cell).trim()).filter(cell => cell && cell.length >= 10);
