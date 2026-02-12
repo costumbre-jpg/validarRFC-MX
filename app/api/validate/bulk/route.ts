@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Basic authentication check (simplified for now)
-        const authHeader = request.headers.get("Authorization");
+        // const authHeader = request.headers.get("Authorization");
         // In a real scenario, we would verify the session using Supabase Auth
 
         let rfcs: string[] = [];
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         // In production, this should be a background job (Queue) for large files
         for (const rfc of rfcs) {
             // 1. Structure Check
-            const satResult = validateRFC(rfc);
+            const satResult = await validateRFC(rfc);
 
             // 2. Blacklist Check
             const blacklistResult = await checkBlacklist(rfc);
