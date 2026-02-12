@@ -41,3 +41,5 @@ coverage
 .nyc_output
 *.test.js.snap
 
+# sensitive
+CREDENCIALES_ACTUALES.md

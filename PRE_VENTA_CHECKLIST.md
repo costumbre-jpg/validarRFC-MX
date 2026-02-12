@@ -1,6 +1,6 @@
 # Checklist Pre-Venta - Maflipp
 
-## ✅ Lo que YA tienes listo
+## ✅ Lo que YA se tiene listo
 
 - [x] Código fuente completo y funcional
 - [x] Documentación técnica (`README.md`, `ARCHITECTURE.md`, `API_DOCUMENTATION.md`)
