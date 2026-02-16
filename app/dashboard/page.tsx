@@ -276,7 +276,10 @@ export default function DashboardPage() {
             </button>
           </div>
         ) : (
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary"></div>
+            <p className="text-sm text-gray-500 font-medium animate-pulse">Cargando tu panel...</p>
+          </div>
         )}
       </div>
     );

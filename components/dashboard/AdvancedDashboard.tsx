@@ -370,15 +370,16 @@ export default function AdvancedDashboard({
         });
         setDailyUsage(mockDaily);
         setMonthlyTrends(mockMonthly);
+        setLoading(false); // Aún así terminar el loading
       } finally {
         setLoading(false);
       }
     };
 
-    if (userData) {
+    if (userData && (dailyUsage.length === 0 || monthlyTrends.length === 0)) {
       loadAdvancedData();
     }
-  }, [userData, isBusiness, queriesThisMonth, validations]); // Re-ejecutar cuando cambien las validaciones
+  }, [userData, isBusiness, queriesThisMonth]); // NO incluir validations en dependencias para evitar reloads frecuentes
 
   // Calcular máximos para escalar las barras
   const dailyToShow = dailyUsage;
@@ -748,9 +749,12 @@ export default function AdvancedDashboard({
         </p>
       </div>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-6">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand-primary"></div>
+      {loading && dailyUsage.length === 0 ? (
+        <div className="flex items-center justify-center py-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-primary mx-auto mb-2"></div>
+            <p className="text-xs text-gray-500">Cargando gráficas...</p>
+          </div>
         </div>
       ) : (
         <>

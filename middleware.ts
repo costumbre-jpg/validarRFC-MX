@@ -1,61 +1,36 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getAuthTokenFromRequest } from "@/lib/jwt-utils";
 
-const AUTH_COOKIE_NAMES = ["sb-access-token", "supabase-auth-token", "sb:token"];
-
-const extractJwtFromCookie = (raw?: string) => {
-  if (!raw) return undefined;
-  if (raw.trim().startsWith("[")) {
-    try {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr[0]) {
-        return arr[0] as string;
-      }
-    } catch {
-      // ignore parse error
-    }
-  }
-  return raw;
-};
-
-const getAuthToken = (request: NextRequest) => {
-  // 1) Buscar cookies estándar conocidas
-  for (const name of AUTH_COOKIE_NAMES) {
-    const value = request.cookies.get(name)?.value;
-    const token = extractJwtFromCookie(value);
-    if (token) return token;
-  }
-
-  // 2) Buscar cookie de sesión de Supabase generada por set-cookie (`sb-<projectRef>-auth-token`)
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (supabaseUrl) {
-    const projectRef = supabaseUrl.replace("https://", "").replace(".supabase.co", "");
-    const baseName = `sb-${projectRef}-auth-token`;
-
-    // Cookie sin fragmentar
-    const direct = request.cookies.get(baseName)?.value;
-    if (direct) return direct;
-
-    // Cookies fragmentadas: sb-<ref>-auth-token.0, .1, ...
-    const chunks = request.cookies
-      .getAll()
-      .filter((c) => c.name === baseName || c.name.startsWith(`${baseName}.`))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    if (chunks.length > 0) {
-      const combined = chunks.map((c) => c.value).join("");
-      return combined || undefined;
-    }
-  }
-
-  return undefined;
-};
+// Rutas que requieren autenticación
+const PROTECTED_ROUTES = [
+  "/dashboard",
+  "/api/validate",
+  "/api/validations",
+  "/api/branding",
+  "/api/team",
+  "/api/profile",
+  "/api/subscription",
+  "/api/alerts",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  if (pathname.startsWith("/dashboard")) {
-    const token = getAuthToken(request);
+  // Check if this is a protected route
+  const isProtected = PROTECTED_ROUTES.some(route => pathname.startsWith(route));
+
+  if (isProtected) {
+    const token = getAuthTokenFromRequest(request);
     if (!token) {
+      // For API routes, return 401
+      if (pathname.startsWith("/api/")) {
+        return NextResponse.json(
+          { success: false, error: "No autenticado" },
+          { status: 401 }
+        );
+      }
+      
+      // For pages, redirect to login
       const redirectUrl = new URL("/auth/login", request.url);
       redirectUrl.searchParams.set(
         "redirect",

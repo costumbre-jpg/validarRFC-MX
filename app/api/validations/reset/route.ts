@@ -1,22 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { getAuthTokenFromRequest } from "@/lib/jwt-utils";
 
 export const runtime = "nodejs";
-
-const extractJwtFromCookie = (raw?: string) => {
-  if (!raw) return undefined;
-  if (raw.trim().startsWith("[")) {
-    try {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr[0]) {
-        return arr[0] as string;
-      }
-    } catch {
-      // ignore parse error
-    }
-  }
-  return raw;
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,18 +16,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const authHeader = request.headers.get("authorization") || "";
-    let jwt = authHeader.startsWith("Bearer ")
-      ? authHeader.replace("Bearer ", "")
-      : undefined;
-
-    if (!jwt) {
-      const cookieToken =
-        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
-        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
-        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
-      jwt = cookieToken || undefined;
-    }
+    const jwt = getAuthTokenFromRequest(request);
 
     if (!jwt) {
       return NextResponse.json(

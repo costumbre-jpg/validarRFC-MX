@@ -18,6 +18,7 @@ function HistorialPage() {
 
   const loadValidations = useCallback(async (page: number) => {
     try {
+      setLoading(true);
       const supabase = createClient();
       const {
         data: { user },
@@ -29,29 +30,29 @@ function HistorialPage() {
         return;
       }
 
-      // Paginación del servidor: solo cargar 10 registros de la página actual
+      // Paginación del servidor: cargar 20 registros de la página actual
       const from = (page - 1) * itemsPerPage;
       const to = from + itemsPerPage - 1;
 
+      // Obtener las validaciones de la página actual
       const { data: dbValidations, error } = await supabase
         .from("validations")
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .order("id", { ascending: false })
         .range(from, to);
 
       if (error) {
         console.error("Error loading validations:", error);
+        setLoading(false);
         return;
       }
 
+      // Obtener el total de validaciones
       const { count } = await supabase
         .from("validations")
         .select("id", { count: "exact", head: true })
         .eq("user_id", user.id);
-
-      const hasDbValidations = (dbValidations?.length || 0) > 0;
 
       // Limpiar datos antiguos de localStorage siempre
       if (typeof window !== "undefined") {
@@ -64,22 +65,13 @@ function HistorialPage() {
         }
       }
 
-      // Usar SOLO datos de Supabase (sin fallback a localStorage)
-      if (hasDbValidations) {
-        const total = count ?? (dbValidations?.length || 0);
-        const remaining = Math.max(0, total - (page - 1) * itemsPerPage);
-        const expectedCount = Math.min(itemsPerPage, remaining);
-        const pageRows =
-          expectedCount > 0 ? (dbValidations || []).slice(0, expectedCount) : [];
-        setValidations(pageRows);
-        setTotalCount(total);
-      } else {
-        // No hay datos en BD: mostrar vacío
-        setValidations([]);
-        setTotalCount(0);
-      }
+      // Establecer validaciones y total
+      setValidations(dbValidations || []);
+      setTotalCount(count ?? 0);
     } catch (error) {
       console.error("Error loading validations:", error);
+      setValidations([]);
+      setTotalCount(0);
     } finally {
       setLoading(false);
     }

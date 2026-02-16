@@ -338,6 +338,11 @@ npm install
 - Asegúrate de que el proyecto de Supabase esté activo
 - Verifica que las políticas RLS estén configuradas correctamente
 
+### Error: "522 Connection Timed Out" (Supabase)
+
+- Esto ocurre cuando el proyecto de Supabase está "pausado" por inactividad (Plan Free).
+- **Solución:** Ve al dashboard de Supabase, entra a tu proyecto y dale al botón **"Restore"** o **"Restart"** en Settings > General.
+
 ### Error: "Stripe webhook verification failed"
 
 - Verifica que `STRIPE_WEBHOOK_SECRET` sea correcto

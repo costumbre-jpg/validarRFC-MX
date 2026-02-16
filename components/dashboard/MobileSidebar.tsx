@@ -28,8 +28,14 @@ export default function MobileSidebar({ userData, branding }: MobileSidebarProps
   const supabase = createClient();
 
   const handleSignOut = async () => {
+    try {
+      // Set logout flag in sessionStorage before signing out
+      sessionStorage.setItem("auth-logout-success", "true");
+    } catch {
+      // sessionStorage might not be available
+    }
     await supabase.auth.signOut();
-    router.push("/?loggedOut=1");
+    router.push("/");
     router.refresh();
   };
 

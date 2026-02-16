@@ -5,25 +5,11 @@ import { getPlanValidationLimit, type PlanId } from "@/lib/plans";
 import { validateRFC, normalizeRFC, isValidRFCFormatStrict } from "@/lib/rfc";
 import { rateLimit } from "@/lib/rate-limit";
 import { createClient as createServerSupabase } from "@/lib/supabase/server";
+import { getAuthTokenFromRequest } from "@/lib/jwt-utils";
 
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 10; // 10 requests por minuto
 const RATE_LIMIT_WINDOW_SECONDS = 60;
-
-const extractJwtFromCookie = (raw?: string) => {
-  if (!raw) return undefined;
-  if (raw.trim().startsWith("[")) {
-    try {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr) && arr[0]) {
-        return arr[0] as string;
-      }
-    } catch {
-      // ignore parse error
-    }
-  }
-  return raw;
-};
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,31 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const authHeader = request.headers.get("authorization") || "";
-    let jwt = authHeader.startsWith("Bearer ")
-      ? authHeader.replace("Bearer ", "")
-      : undefined;
-
-    if (!jwt) {
-      const cookieToken =
-        extractJwtFromCookie(request.cookies.get("sb-access-token")?.value) ||
-        extractJwtFromCookie(request.cookies.get("supabase-auth-token")?.value) ||
-        extractJwtFromCookie(request.cookies.get("sb:token")?.value);
-      jwt = cookieToken || undefined;
-      // Intentar también cookies con prefijo del proyecto (sb-<project>-auth-token)
-      if (!jwt && typeof request.cookies.getAll === "function") {
-        const all = request.cookies.getAll();
-        for (const c of all) {
-          if (c.name?.includes("auth-token") && c.value) {
-            const tok = extractJwtFromCookie(c.value);
-            if (tok) {
-              jwt = tok;
-              break;
-            }
-          }
-        }
-      }
-    }
+    const jwt = getAuthTokenFromRequest(request);
 
     const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },

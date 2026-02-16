@@ -199,18 +199,25 @@ function HomeContent() {
 
   // Detectar logout exitoso
   useEffect(() => {
-    if (searchParams.get("loggedOut") === "1") {
-      setShowLogoutMessage(true);
-      // Limpiar el parámetro de la URL sin recargar
-      const url = new URL(window.location.href);
-      url.searchParams.delete("loggedOut");
-      window.history.replaceState({}, "", url.toString());
-      // Ocultar el mensaje después de 5 segundos
-      setTimeout(() => {
-        setShowLogoutMessage(false);
-      }, 5000);
-    }
-  }, [searchParams]);
+    // Verificar si hay un evento de logout en sessionStorage (más seguro que query params)
+    const checkLogout = () => {
+      try {
+        const logoutFlag = sessionStorage.getItem("auth-logout-success");
+        if (logoutFlag === "true") {
+          setShowLogoutMessage(true);
+          sessionStorage.removeItem("auth-logout-success");
+          // Ocultar el mensaje después de 5 segundos
+          setTimeout(() => {
+            setShowLogoutMessage(false);
+          }, 5000);
+        }
+      } catch {
+        // sessionStorage might not be available in some contexts
+      }
+    };
+    
+    checkLogout();
+  }, []);
 
   // Si es PWA y está verificando autenticación, mostrar loading
   if (checkingAuth && isPWA) {
