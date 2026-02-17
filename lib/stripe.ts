@@ -10,9 +10,7 @@ export function getStripe() {
     throw new Error("STRIPE_SECRET_KEY no está configurada");
   }
 
-  stripeClient = new Stripe(apiKey, {
-    apiVersion: "2024-11-20",
-  });
+  stripeClient = new Stripe(apiKey);
 
   return stripeClient;
 }

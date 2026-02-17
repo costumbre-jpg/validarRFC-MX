@@ -379,7 +379,8 @@ export default function AdvancedDashboard({
     if (userData && (dailyUsage.length === 0 || monthlyTrends.length === 0)) {
       loadAdvancedData();
     }
-  }, [userData, isBusiness, queriesThisMonth]); // NO incluir validations en dependencias para evitar reloads frecuentes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userData, isBusiness, queriesThisMonth]); // NO incluir validations, dailyUsage, monthlyTrends para evitar reloads frecuentes
 
   // Calcular máximos para escalar las barras
   const dailyToShow = dailyUsage;
