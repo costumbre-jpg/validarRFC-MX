@@ -43,3 +43,5 @@ coverage
 
 # sensitive
 CREDENCIALES_ACTUALES.md
+
+secrets/
