@@ -1,0 +1,43 @@
+name: Build & Push to GCR
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'services/**'
+      - 'Dockerfile'
+      - '.github/workflows/build-and-push.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - fastapi
+          - next-js
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker to use gcloud
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/validarfc/${{ matrix.service }}:${{ github.sha }} \
+            -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/validarfc/${{ matrix.service }}:latest \
+            -f services/${{ matrix.service }}/Dockerfile \
+            .
+
+      - name: Push to Artifact Registry
+        run: |
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/validarfc/${{ matrix.service }}:${{ github.sha }}
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/validarfc/${{ matrix.service }}:latest

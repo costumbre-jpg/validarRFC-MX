@@ -1,0 +1,43 @@
+replicaCount: 2
+
+image:
+  repository: placeholder
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+  hosts:
+    - host: api.maflipp.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+postgresql:
+  enabled: false
+
+env:
+  DATABASE_URL: "postgresql://validarfc_user:changeme@postgres-db:5432/validarfc"
+  LOG_LEVEL: "info"
+  ENVIRONMENT: "production"

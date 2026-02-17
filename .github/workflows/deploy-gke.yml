@@ -1,0 +1,40 @@
+name: Deploy to GKE
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/deploy-gke.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Install gke-gcloud-auth-plugin
+        run: |
+          gcloud components install gke-gcloud-auth-plugin
+
+      - name: Get GKE cluster credentials
+        run: |
+          gcloud container clusters get-credentials validarfc-gke \
+            --zone us-central1 \
+            --project ${{ secrets.GCP_PROJECT }}
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+
+      - name: Deploy with Helm
+        run: |
+          helm upgrade --install validarfc ./k8s/helm \
+            --set image.repository=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT }}/validarfc/fastapi \
+            --set image.tag=${{ github.sha }} \
+            --namespace production \
+            --create-namespace
